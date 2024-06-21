@@ -15,12 +15,27 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 
-from sqlalchemy import String, Date, Integer
-from sqlalchemy.orm import mapped_column, validates
+from datetime import date
+from typing import List
+from sqlalchemy import String, Date, Integer, Index
+from sqlalchemy.orm import (mapped_column, validates, relationship,
+                            Mapped)
 from carereport import Base
 
 class EmptyNameError(ValueError):
     """ A patient must have a name """
+
+    pass
+
+
+class BirthdateMustBeInPastError(ValueError):
+    """ A birth day cannot be in the future """
+
+    pass
+
+
+class SexInvalidError(ValueError):
+    """ A sex must be in the valid sex dictionary """
 
     pass
 
@@ -33,7 +48,16 @@ class Patient(Base):
     surname = mapped_column(String(45), nullable=False)
     initials = mapped_column(String(10), nullable=False)
     birthdate = mapped_column(Date)
-    sexe = mapped_column(String(1), nullable=True, server_default='')
+    sex = mapped_column(String(1), nullable=True, server_default='')
+    medication:Mapped[List["Medication"]] = relationship(back_populates="patient")
+
+    __table_args__= (Index("byname", "surname"),
+                     Index("bybirthdate", "birthdate"))
+
+    valid_sex = {"F" : "female",
+                 "M" : "male",
+                 "X" : "non-binary",
+                 " " : "unknown"}
 
     @validates("surname")
     def validate_name(self, key, surname):
@@ -44,3 +68,19 @@ class Patient(Base):
         if surname == "":
             raise EmptyNameError("Name cannot be empty")
         return surname
+
+    @validates("birthdate")
+    def validate_birthdate(self, key, birthdate):
+        """ A birthdate must be in the past  """
+
+        if birthdate > date.today():
+            raise BirthdateMustBeInPastError(f"{birthdate} is not in the past")
+        return birthdate
+
+    @validates("sex")
+    def validate_sex(self, key, sex):
+        """ A birthdate must be in the past  """
+
+        if sex not in self.valid_sex:
+            raise SexInvalidError(f"{sex} is not in a valid sex")
+        return sex
