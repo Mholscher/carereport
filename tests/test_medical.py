@@ -135,6 +135,14 @@ class TestSetMedication(unittest.TestCase):
                                     start_date=date(2024, 7, 3),
                                     patient=self.patient)
 
+    def test_frequency_is_number(self):
+        """ The frequency must be an unsigned number """
+
+        with self.assertRaises(ValueError):
+            medication = Medication(medication="Asparosa 12 mg",
+                                    frequency="2l",
+                                    start_date=date(2024, 3, 12))
+
 
 class TestMedicationLists(unittest.TestCase):
 

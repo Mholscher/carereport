@@ -19,7 +19,7 @@ from datetime import date
 from sqlalchemy import (String, Date, Integer, text, ForeignKey, Index,
                         select)
 from sqlalchemy.orm import (mapped_column, validates, relationship)
-from carereport import Base, session
+from carereport import (Base, session, validate_field_existance)
 from carereport import Patient
 
 
@@ -31,6 +31,12 @@ class EndDateBeforeStartError(ValueError):
 
 class MedicationIsMandatoryError(ValueError):
     """ A medication cannot be empty """
+
+    pass
+
+
+class FrequencyMustBeANumber(ValueError):
+    """ The frequency must be a positive number """
 
     pass
 
@@ -99,10 +105,45 @@ class Medication(Base):
             raise MedicationIsMandatoryError("A medication must be supplied")
         return medication
 
+    @validates("frequency")
+    def validate_frequency(self, key, frequency):
+        """ Frequency must be an unsigned integer """
+
+        if (not isinstance(frequency, int)
+            or frequency < 1):
+            raise FrequencyMustBeANumber("Frequency must be a positive number")
+        return frequency
+
     @validates("frequency_type")
     def validate_frequncy_type(self, key, frequency_type):
         """ Frequency type must be filled """
 
-        if frequency_type is None or frequency_type == "":
-            raise FrequencyMustHaveTypeError("No type supplied for frequency")
-        return frequency_type
+        # if frequency_type is None or frequency_type == "":
+        #     raise FrequencyMustHaveTypeError("No type supplied for frequency")
+        return validate_field_existance(self, key, frequency_type,
+                                        FrequencyMustHaveTypeError)
+
+
+class ExaminationRequest(Base):
+    """ An examination that has been requested for a patient.
+
+    The request will have a description and a department to execute
+    the request. The department will execute the request and create the
+    examination result.
+
+    If the department refuses the request, the reason for the refusal will
+    be added to the request.
+    """
+
+    __tablename__ = "examrequest"
+
+    id = mapped_column(Integer, primary_key=True)
+    date_request = mapped_column(Date, default=date.today)
+    examination_kind = mapped_column(String(128), nullable=False)
+    examaning_department = mapped_column(String(56), nullable=False)
+    requester_name = mapped_column(String(56), nullable=False)
+    requester_department = mapped_column(String(56))
+    date_execution = mapped_column(Date, nullable=True)
+    request_refused = mapped_column(String(128))
+    patient_id = mapped_column(ForeignKey("patients.id"), index=True)
+    patient = relationship("Patient", back_populates="exam_requests")

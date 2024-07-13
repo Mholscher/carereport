@@ -15,10 +15,13 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 
+from datetime import datetime
+import getpass 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase
 from configparser import ConfigParser
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import (String, DateTime, text)
+from sqlalchemy.orm import sessionmaker, mapped_column
 
 config = ConfigParser()
 success = config.read('localcarereport.cfg')
@@ -32,7 +35,19 @@ else:
 
 class Base(DeclarativeBase):
 
-    pass
+    user = mapped_column(String(25), default=getpass.getuser, 
+                               onupdate=getpass.getuser)
+    updated_at = mapped_column(DateTime, default=datetime.now, 
+                               onupdate=datetime.now)
+
+
+def validate_field_existance(instance, key, field, raise_on_empty):
+    """ Validate a field has a value in it, not none or empty string """
+
+    if field is None or field == "":
+        raise raise_on_empty(f"{key} cannot be empty")
+    return field
+
 
 from carereport.models.patient import Patient
 from carereport.models.medical import Medication

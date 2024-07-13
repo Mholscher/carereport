@@ -20,7 +20,7 @@ from typing import List
 from sqlalchemy import String, Date, Integer, Index
 from sqlalchemy.orm import (mapped_column, validates, relationship,
                             Mapped)
-from carereport import Base
+from carereport import Base, validate_field_existance
 
 class EmptyNameError(ValueError):
     """ A patient must have a name """
@@ -50,6 +50,8 @@ class Patient(Base):
     birthdate = mapped_column(Date)
     sex = mapped_column(String(1), nullable=True, server_default='')
     medication:Mapped[List["Medication"]] = relationship(back_populates="patient")
+    exam_requests:Mapped[List["ExaminationRequest"]] =\
+        relationship(back_populates="patient")
 
     __table_args__= (Index("byname", "surname"),
                      Index("bybirthdate", "birthdate"))
@@ -63,11 +65,7 @@ class Patient(Base):
     def validate_name(self, key, surname):
         """ A name cannot be empty """
 
-        if surname is None:
-            raise EmptyNameError("Name cannot be empty")
-        if surname == "":
-            raise EmptyNameError("Name cannot be empty")
-        return surname
+        return validate_field_existance(self, key, surname, EmptyNameError)
 
     @validates("birthdate")
     def validate_birthdate(self, key, birthdate):
