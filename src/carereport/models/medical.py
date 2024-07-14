@@ -47,6 +47,30 @@ class FrequencyMustHaveTypeError(ValueError):
     pass
 
 
+class ExaminationKindIsMandatoryError(ValueError):
+    """ The examination kind must be present """
+
+    pass
+
+
+class ExamaningDepartmentIsMandatoryError(ValueError):
+    """ There must be a department to execute the request """
+
+    pass
+
+
+class ExecutionBeforeRequestError(ValueError):
+    """ Execution cannot be before request """
+
+    pass
+
+
+class RequesterIsMandatoryError(ValueError):
+    """ Every request must have a requester """
+
+    pass
+
+
 class Medication(Base):
     """ Medication is one medication a patient is or was using.
 
@@ -118,8 +142,6 @@ class Medication(Base):
     def validate_frequncy_type(self, key, frequency_type):
         """ Frequency type must be filled """
 
-        # if frequency_type is None or frequency_type == "":
-        #     raise FrequencyMustHaveTypeError("No type supplied for frequency")
         return validate_field_existance(self, key, frequency_type,
                                         FrequencyMustHaveTypeError)
 
@@ -147,3 +169,36 @@ class ExaminationRequest(Base):
     request_refused = mapped_column(String(128))
     patient_id = mapped_column(ForeignKey("patients.id"), index=True)
     patient = relationship("Patient", back_populates="exam_requests")
+
+    @validates("examination_kind")
+    def validate_examination_kind(self, key, examination_kind):
+        """ Examination kind must have a value """
+
+        return validate_field_existance(self, key, examination_kind,
+                                        ExaminationKindIsMandatoryError)
+
+    @validates("examaning_department")
+    def validate_examaning_department(self, key, department):
+        """ Examination kind must have a value """
+
+        return validate_field_existance(self, key, department,
+                                        ExamaningDepartmentIsMandatoryError)
+
+    @validates("requester_name")
+    def validate_requester_name(self, key, requester_name):
+        """ Examination kind must have a value """
+
+        return validate_field_existance(self, key, requester_name,
+                                        RequesterIsMandatoryError)
+
+    @validates("date_execution")
+    def validate_date_execution(self, key, date_execution):
+        """ Date of execution must be empty or after date of request """
+
+        if date_execution is None:
+            return date_execution
+        if date_execution < self.date_request:
+            raise ExecutionBeforeRequestError("execution cannot"
+                                             "be before request")
+        return date_execution
+

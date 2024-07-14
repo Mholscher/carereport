@@ -21,7 +21,7 @@ from sqlalchemy import select
 import carereport as cr
 from carereport import session
 from carereport.models.patient import Patient
-from carereport.models.medical import Medication
+from carereport.models.medical import (Medication, ExaminationRequest)
 
 
 class TestSetMedication(unittest.TestCase):
@@ -206,3 +206,84 @@ class TestMedicationLists(unittest.TestCase):
                                       end_date=date(2022, 7, 22),
                                       patient=self.patient1)
             medication.start_date = date(2022, 8, 5)
+
+
+class TestExaminationRequest(unittest.TestCase):
+
+    def setUp(self):
+
+        self.patient1 = Patient(surname="Medtest", initials="B.T.",
+                               birthdate=date(1991, 3, 12), sex="F")
+        self.patient2 = Patient(surname="NoList", initials="V.",
+                               birthdate=date(1983, 11, 12), sex="M")
+        self.request1 = ExaminationRequest(date_request=date.today(),
+                                           examination_kind="Scan",
+                                           examaning_department="Radiology",
+                                           requester_name="A.J. Jansen",
+                                           requester_department="Cardiology",
+                                           patient=self.patient1)
+
+        session.add_all([self.patient1, self.patient2])
+        session.flush()
+
+    def tearDown(self):
+
+        session.reset()
+        cr.Base.metadata.drop_all(cr.engine)
+        cr.Base.metadata.create_all(cr.engine)
+
+    def test_can_create_request(self):
+        """ We can create an examination request """
+
+        self.assertEqual(self.patient1.exam_requests[0], self.request1,
+                         "Request cannot be seen from patient")
+
+    def test_examination_kind_required(self):
+        """ The examination kind is required """
+
+        with self.assertRaises(ValueError):
+            request = ExaminationRequest(date_request=date.today(),
+                                         examination_kind= "",
+                                         examaning_department="Internal",
+                                         requester_name="F.J. Gansehuid",
+                                         requester_department="Entomology",
+                                         patient=self.patient1)
+
+    def test_examining_department_required(self):
+        """ The department executing the request is required """
+
+        with self.assertRaises(ValueError):
+            request = ExaminationRequest(date_request=date.today(),
+                                         examination_kind= "Skin sample",
+                                         examaning_department="",
+                                         requester_name="H. Fodder",
+                                         requester_department="Pathology",
+                                         patient=self.patient1)
+
+    def test_requester_name_required(self):
+        """ The name of the requester is required """
+
+        with self.assertRaises(ValueError):
+            request = ExaminationRequest(date_request=date.today(),
+                                         examination_kind= "Bacterial analysis",
+                                         examaning_department="Urology",
+                                         requester_name="",
+                                         requester_department="Cardiology",
+                                         patient=self.patient1)
+
+    def test_execution_after_request(self):
+        """ The execution date must be after the request date """
+
+        request2 = ExaminationRequest(date_request=date.today(),
+                                      examination_kind= "Bacterial analysis",
+                                      examaning_department="Urology",
+                                      requester_name="G. Vanvelders",
+                                      requester_department="Cardiology",
+                                      date_execution=date.today() +
+                                      timedelta(days=2),
+                                      patient=self.patient1)
+        self.assertTrue(request2.date_execution > request2.date_request,
+                        "Date not correctly updated")
+        with self.assertRaises(ValueError):
+            self.request1.date_execution = (date.today() + 
+                                            timedelta(days=-2))
