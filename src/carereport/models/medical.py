@@ -71,6 +71,12 @@ class RequesterIsMandatoryError(ValueError):
     pass
 
 
+class ExecutedCannotBeRefusedError(ValueError):
+    """ An executed request cannot be refused """
+
+    pass
+
+
 class Medication(Base):
     """ Medication is one medication a patient is or was using.
 
@@ -83,7 +89,7 @@ class Medication(Base):
     id = mapped_column(Integer, primary_key=True)
     medication = mapped_column(String(128))
     frequency = mapped_column(Integer, server_default="1")
-    frequency_type = mapped_column(String(17), server_default="daily",
+    frequency_type = mapped_column(String(17), server_default="per dag",
                                    nullable=False)
     start_date = mapped_column(Date, server_default=text('CURRENT_DATE()'))
     end_date = mapped_column(Date, nullable=True)
@@ -199,6 +205,37 @@ class ExaminationRequest(Base):
             return date_execution
         if date_execution < self.date_request:
             raise ExecutionBeforeRequestError("execution cannot"
-                                             "be before request")
+                                             " be before request")
         return date_execution
 
+    @validates("request_refused")
+    def validate_request_refused(self, key, request_refused):
+        """ A request can only be refused if it is not executed """
+
+        if request_refused and self.date_execution:
+            raise ExecutedCannotBeRefusedError("You cannot refuse" 
+                                                " an executed request")
+        return request_refused
+
+    @staticmethod
+    def open_requests_for_patient(patient):
+        """ List open examination requests for a patient """
+
+        current_date = date.today()
+        return [request for request in patient.exam_requests
+                if (not request.date_execution
+                or request.date_execution >= current_date)
+                and not request.request_refused]
+
+    @staticmethod
+    def requests_for_department(department):
+        """ List outstanding requests per department. 
+
+        The department variable may be part of a department
+        name.
+        """
+
+        selection = select(ExaminationRequest).where(
+            ExaminationRequest.examaning_department.like(
+            "%" + department + "%"))
+        return list(session.execute(selection))

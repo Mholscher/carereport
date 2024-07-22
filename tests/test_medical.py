@@ -222,9 +222,17 @@ class TestExaminationRequest(unittest.TestCase):
                                            requester_name="A.J. Jansen",
                                            requester_department="Cardiology",
                                            patient=self.patient1)
+        self.request2 = ExaminationRequest(date_request=date.today(),
+                                           examination_kind= "brain analysis",
+                                           examaning_department="Psychology",
+                                           requester_name="F.H. Snugsy",
+                                           requester_department="Cardiology",
+                                           patient=self.patient1)
 
         session.add_all([self.patient1, self.patient2])
         session.flush()
+        self.request1_id = self.request1.id
+        self.request2_id = self.request2.id
 
     def tearDown(self):
 
@@ -287,3 +295,48 @@ class TestExaminationRequest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.request1.date_execution = (date.today() + 
                                             timedelta(days=-2))
+
+    def test_cannot_refuse_executed(self):
+        """ If an examination is executed, it cannot be refused """
+
+        self.request1.date_execution = date.today()
+        session.flush()
+        with self.assertRaises(ValueError):
+            self.request1.request_refused = "No time"
+            print(self.request1.date_execution, self.request1.request_refused)
+
+    def test_open_requests_per_patient(self):
+        """ List all outstanding examinations for a patient """
+
+        open_requests = ExaminationRequest.open_requests_for_patient(
+                            self.patient1)
+        self.assertEqual(len(open_requests), 2, "No of requests incorrect")
+        no_requests = ExaminationRequest.open_requests_for_patient(
+                          self.patient2)
+
+    def test_refused_not_listed(self):
+        """ Refused examinations should not be listed """
+        self.request2.request_refused = "Not appropriate"
+        open_requests = ExaminationRequest.open_requests_for_patient(
+                            self.patient1)
+        self.assertNotIn(self.request2, list(open_requests),
+                      "Refused request in open requests")
+
+    def test_examination_in_past_omitted(self):
+        """ An examination in the past should not be reported """
+
+        self.request2.date_request = date.today() + timedelta(days=-10)
+        self.request2.date_execution = date.today() + timedelta(days=-5)
+        open_requests = ExaminationRequest.open_requests_for_patient(
+                            self.patient1)
+        self.assertNotIn(self.request2, list(open_requests),
+                      "Past request in open requests")
+        
+    def test_requests_per_department(self):
+        """ Report outstanding requests per department """
+
+        request_list = ExaminationRequest.requests_for_department("diology")
+        self.assertEqual(self.request1_id, request_list[0][0].id,
+                      "Request that should appear not in list")
+        self.assertEqual(len(request_list[0]), 1,
+                         "More than the 1 entry expected")
