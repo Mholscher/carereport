@@ -176,6 +176,9 @@ class ExaminationRequest(Base):
     patient_id = mapped_column(ForeignKey("patients.id"), index=True)
     patient = relationship("Patient", back_populates="exam_requests")
 
+    __table_args__ = (Index("bydepdate", "examaning_department",
+          "date_request"),)
+
     @validates("examination_kind")
     def validate_examination_kind(self, key, examination_kind):
         """ Examination kind must have a value """
@@ -231,11 +234,12 @@ class ExaminationRequest(Base):
     def requests_for_department(department):
         """ List outstanding requests per department. 
 
-        The department variable may be part of a department
+        The department variable may be part (substring) of a department
         name.
         """
 
         selection = select(ExaminationRequest).where(
             ExaminationRequest.examaning_department.like(
-            "%" + department + "%"))
+            "%" + department + "%")).order_by(
+                ExaminationRequest.date_request.asc())
         return list(session.execute(selection))

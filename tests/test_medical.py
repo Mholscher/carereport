@@ -17,6 +17,7 @@
 
 import unittest
 from datetime import date, timedelta
+from itertools import pairwise
 from sqlalchemy import select
 import carereport as cr
 from carereport import session
@@ -340,3 +341,38 @@ class TestExaminationRequest(unittest.TestCase):
                       "Request that should appear not in list")
         self.assertEqual(len(request_list[0]), 1,
                          "More than the 1 entry expected")
+
+    def test_font_case_no_difference(self):
+        """ Upper- or lower case don't matter """
+
+        request_list = ExaminationRequest.requests_for_department("radio")
+        self.assertEqual(len(request_list[0]), 1,
+                         "1 entry expected, more/less found")
+
+    def test_exam_request_order(self):
+        """ For one department, the requests should be in date order """
+
+        request3 = ExaminationRequest(date_request=date.today()
+                                      + timedelta(days=-2),
+                                      examination_kind= "Thorax",
+                                      examaning_department="Radiology",
+                                      requester_name="G. Swiffers",
+                                      requester_department="Lungs",
+                                      date_execution=date.today() +
+                                      timedelta(days=2),
+                                      patient=self.patient2)
+        request4 = ExaminationRequest(date_request=date.today()
+                                      + timedelta(days=-4),
+                                      examination_kind= "Bacterial analysis",
+                                      examaning_department="Radiology",
+                                      requester_name="G. Vanvelders",
+                                      requester_department="Cardiology",
+                                      date_execution=date.today() +
+                                      timedelta(days=5),
+                                      patient=self.patient1)
+        session.add_all((request3, request4))
+        session.flush()
+        request_list = ExaminationRequest.requests_for_department("Radiology")
+        for older, newer in pairwise(request_list):
+            self.assertTrue(older[0].date_request <= newer[0].date_request,
+                            "Found older younger than newer")
