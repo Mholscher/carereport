@@ -17,7 +17,7 @@
 
 from datetime import date
 from sqlalchemy import (String, Date, Integer, text, ForeignKey, Index,
-                        select)
+                        select, event)
 from sqlalchemy.orm import (mapped_column, validates, relationship)
 from carereport import (Base, session, validate_field_existance)
 from carereport import Patient
@@ -76,6 +76,17 @@ class ExecutedCannotBeRefusedError(ValueError):
 
     pass
 
+
+class ExecutorMandatoryInResultError(ValueError):
+    """ Executor is mandatory in examination result """
+
+    pass
+
+
+class ResultMustBeForRequestError(ValueError):
+    """ Executor is mandatory in examination result """
+
+    pass
 
 class Medication(Base):
     """ Medication is one medication a patient is or was using.
@@ -175,6 +186,7 @@ class ExaminationRequest(Base):
     request_refused = mapped_column(String(128))
     patient_id = mapped_column(ForeignKey("patients.id"), index=True)
     patient = relationship("Patient", back_populates="exam_requests")
+    result = relationship("ExaminationResult", back_populates="request")
 
     __table_args__ = (Index("bydepdate", "examaning_department",
           "date_request"),)
@@ -243,3 +255,43 @@ class ExaminationRequest(Base):
             "%" + department + "%")).order_by(
                 ExaminationRequest.date_request.asc())
         return list(session.execute(selection))
+
+
+class ExaminationResult(Base):
+    """ The result of an examination
+
+    This is the result of an examination requested by a 
+    different department. There will be a request for it, and the 
+    result will link to this request.
+    """
+
+    __tablename__ = "examresult"
+
+    id = mapped_column(Integer, primary_key=True)
+    examination_executor = mapped_column(String(56), nullable=False)
+    examination_result = mapped_column(String(256))
+    request_id = mapped_column(ForeignKey("examrequest.id"), index=True)
+    request = relationship("ExaminationRequest", back_populates="result")
+
+    @validates("examination_executor")
+    def validate_executor(self, key, executor):
+        """ The executor is mandatory for a result """
+
+        return validate_field_existance(self, key, executor,
+                                        ExecutorMandatoryInResultError)
+
+    def is_request_set(self, session):
+        """ A result must have a request """
+
+        if not self.request:
+            raise ResultMustBeForRequestError(
+                "Examination result must have request")
+ 
+ 
+@event.listens_for(session, "before_flush")
+def before_flush(session, flush_context, instances):
+    """ Execute entity level checks before saving """
+
+    for instance in session.dirty | session.new:
+        if isinstance(instance, ExaminationResult):
+            instance.is_request_set(session)

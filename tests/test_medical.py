@@ -22,7 +22,8 @@ from sqlalchemy import select
 import carereport as cr
 from carereport import session
 from carereport.models.patient import Patient
-from carereport.models.medical import (Medication, ExaminationRequest)
+from carereport.models.medical import (Medication, ExaminationRequest,
+                                       ExaminationResult)
 
 
 class TestSetMedication(unittest.TestCase):
@@ -376,3 +377,56 @@ class TestExaminationRequest(unittest.TestCase):
         for older, newer in pairwise(request_list):
             self.assertTrue(older[0].date_request <= newer[0].date_request,
                             "Found older younger than newer")
+
+
+class TestExaminationResult(unittest.TestCase):
+
+    def setUp(self):
+
+        self.patient1 = Patient(surname="Medres", initials="B.G.",
+                               birthdate=date(1982, 3, 17), sex="F")
+        self.patient2 = Patient(surname="Extra", initials="V.",
+                               birthdate=date(1943, 11, 28), sex="M")
+        self.request1 = ExaminationRequest(date_request=date.today(),
+                                           examination_kind="Scan",
+                                           examaning_department="Radiology",
+                                           requester_name="A.J. Jansen",
+                                           requester_department="Cardiology",
+                                           patient=self.patient1)
+        self.request2 = ExaminationRequest(date_request=date.today(),
+                                           examination_kind= "Tissue histology",
+                                           examaning_department="Pathology",
+                                           requester_name="C. Kalenberg",
+                                           requester_department="Chirurgy",
+                                           patient=self.patient1)
+        self.result1 = ExaminationResult(examination_executor="T. Frank",
+                                         examination_result= "Interesting "
+                                         "changes in the tissue. \n"
+                                         "No old specs were met (good).",
+                                         request = self.request1)
+
+        session.add_all([self.patient1, self.patient2])
+        session.flush()
+
+    def tearDown(self):
+
+        session.reset()
+        cr.Base.metadata.drop_all(cr.engine)
+        cr.Base.metadata.create_all(cr.engine)
+
+    def test_no_executor(self):
+        """ The executor is a mandatory field """
+
+        with self.assertRaises(ValueError):
+            result2 = ExaminationResult(examination_executor=None,
+                                        examination_result= "Nothing special",
+                                        request = self.request1)
+
+    def test_request_is_mandatory(self):
+        """ A result must have a request """
+
+        with self.assertRaises(ValueError):
+            result2 = ExaminationResult(examination_executor="J. Hangar",
+                                        examination_result= "Nothing special")
+            session.add(result2)
+            session.flush()
