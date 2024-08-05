@@ -15,6 +15,22 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 
+""" This module holds the definitions for the medical data.
+
+The medical data is what the diagnose and the treatment are and how the
+medicals come to a decision what treatment to apply. It is e.g. concerned
+with
+
+    #. medication
+    #. requested examinations
+    #. results from said examinations
+    #. the diagnose which was made
+    #. the treatment selected for the diagnose
+
+Things related to non-medical care (ward, diet) are not defined 
+in this module.
+"""
+
 from datetime import date
 from sqlalchemy import (String, Date, Integer, text, ForeignKey, Index,
                         select, event)
@@ -84,9 +100,10 @@ class ExecutorMandatoryInResultError(ValueError):
 
 
 class ResultMustBeForRequestError(ValueError):
-    """ Executor is mandatory in examination result """
+    """ An examination result must be in response to a request """
 
     pass
+
 
 class Medication(Base):
     """ Medication is one medication a patient is or was using.

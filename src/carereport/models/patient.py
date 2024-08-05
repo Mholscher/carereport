@@ -15,6 +15,10 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 
+"""  This module has the basic partient data, like surname, birth date
+and the like. It does not have medical data nor hospitalization info
+"""
+
 from datetime import date
 from typing import List
 from sqlalchemy import String, Date, Integer, Index
