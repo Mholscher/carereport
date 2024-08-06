@@ -7,6 +7,7 @@ Welcome to Care report's documentation!
    :maxdepth: 2
    
    patient.rst
+   medical.rst
    api.rst
 
 Indices and tables
