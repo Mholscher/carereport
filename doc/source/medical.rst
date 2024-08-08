@@ -28,4 +28,25 @@ Medication holds records for each medication the patient uses. This is not a pre
     :Start date: First date the medicine is to be taken
     :End date: If applicable: end date of the medication
     
+Examination request
+-------------------
+
+To be able to set a diagnosis, patients have to have examinations. These may entail taling an analysing blood samples, x-rays and/or scans. Specialist departments will be executing these examinations, so there has to be a way to request these. This item documents such a request. 
+
+    :Date of  request: Date the request was made
+    :Kind of examination: The sort of examination requested
+    :Department: The department that will execute the examination
+    :Requester: The department and official requesting the examination
+    :Date of execution: The date the request was taken on
+    :Request refusal: The request was refused, the reason will be in this field
+    
+Examination result
+------------------
+
+This is the result of the examination. It links to a request, unrequested examinations cannot exist.
+
+    :Examination  request: The request that was fulfilled to get this result
+    :Examination results: The result of the examination, in descriptive text form.
+    :Examination executor: The person to be contacted for inquiries on this result.
+    
     
