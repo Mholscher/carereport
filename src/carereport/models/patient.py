@@ -56,6 +56,9 @@ class Patient(Base):
     medication:Mapped[List["Medication"]] = relationship(back_populates="patient")
     exam_requests:Mapped[List["ExaminationRequest"]] =\
         relationship(back_populates="patient")
+    diets:Mapped[List["DietHeader"]] =\
+        relationship(back_populates="patient")
+
 
     __table_args__= (Index("byname", "surname"),
                      Index("bybirthdate", "birthdate"))

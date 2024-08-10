@@ -23,7 +23,7 @@ import carereport as cr
 from carereport import session
 from carereport.models.patient import Patient
 from carereport.models.medical import (Medication, ExaminationRequest,
-                                       ExaminationResult)
+                                       ExaminationResult, DietHeader)
 
 
 class TestSetMedication(unittest.TestCase):
@@ -429,4 +429,51 @@ class TestExaminationResult(unittest.TestCase):
             result2 = ExaminationResult(examination_executor="J. Hangar",
                                         examination_result= "Nothing special")
             session.add(result2)
+            session.flush()
+
+
+class TestDietHeader(unittest.TestCase):
+
+    def setUp(self):
+
+        self.patient1 = Patient(surname="Franka", initials="K.G.",
+                               birthdate=date(1982, 5, 17), sex="F")
+        self.patient2 = Patient(surname="Kilbar", initials="S.",
+                               birthdate=date(1953, 2, 18), sex="M")
+        self.diethead1 = DietHeader(diet_name="sugarless",
+                                    permanent_diet = True)
+        self.diethead2 = DietHeader(diet_name="Easy on salt",
+                                    start_date = date(2024, 8, 17),
+                                    end_date=None)
+        self.diethead3 = DietHeader(diet_name="Lean (less fat)",
+                                    start_date = date(2024, 7, 18),
+                                    end_date=date(2024, 12, 17))
+
+    def tearDown(self):
+
+
+        session.reset()
+        cr.Base.metadata.drop_all(cr.engine)
+        cr.Base.metadata.create_all(cr.engine)
+
+    def test_permanent_no_dates(self):
+        """ Permanent does not go with start and end date """
+
+        with self.assertRaises(ValueError):
+            self.diethead1.start_date = date(2024, 8, 13)
+            session.flush()
+        with self.assertRaises(ValueError):
+            self.diethead1.end_date = date(2024, 8, 21)
+            session.flush()
+
+        self.diethead1.end_date = None
+        session.flush()
+        self.assertEqual(self.diethead1.end_date, None,
+                         "None not accepted for date")
+
+    def test_set_permanent_when_dates(self):
+        """ We cannot set a diet to permanent when start/end is set """
+
+        with self.assertRaises(ValueError):
+            self.diethead2.permanent_diet = True
             session.flush()

@@ -33,7 +33,7 @@ in this module.
 
 from datetime import date
 from sqlalchemy import (String, Date, Integer, text, ForeignKey, Index,
-                        select, event)
+                        select, event, Boolean)
 from sqlalchemy.orm import (mapped_column, validates, relationship)
 from carereport import (Base, session, validate_field_existance)
 from carereport import Patient
@@ -101,6 +101,12 @@ class ExecutorMandatoryInResultError(ValueError):
 
 class ResultMustBeForRequestError(ValueError):
     """ An examination result must be in response to a request """
+
+    pass
+
+
+class PermanentDietWithStartDateError(ValueError):
+    """ A permanent error cannot have start date """
 
     pass
 
@@ -303,8 +309,57 @@ class ExaminationResult(Base):
         if not self.request:
             raise ResultMustBeForRequestError(
                 "Examination result must have request")
+
+
+class DietHeader(Base):
+    """ The general data belonging to a diet
+
+    Diets consist of a general header (this object) and a list
+    of "prescriptions" that form the rules of the diet.
+
+    Diet is an atypical item in the system. It may be a medical item 
+    (this patient should have a sugar limited diet for diabetes) or
+    a lifestyle/care item (I am vegan). We make no difference.
+    """
+
+    __tablename__ = "dietheader"
+
+    id = mapped_column(Integer, primary_key=True)
+    diet_name = mapped_column(String(56), nullable=False)
+    permanent_diet = mapped_column(Boolean, default=False)
+    start_date = mapped_column(Date, nullable=True)
+    end_date = mapped_column(Date, nullable=True)
+    patient_id = mapped_column(ForeignKey("patients.id"), index=True)
+    patient = relationship("Patient", back_populates="diets")
  
- 
+    @validates("start_date")
+    def validate_start_date(self, key, start_date):
+        """ A start date is only permitted on a temporary diet """
+
+        if start_date and self.permanent_diet:
+            raise PermanentDietWithStartDateError("Start date not valid on"
+                                                  " permanent diet")
+        return start_date
+
+    @validates("end_date")
+    def validate_end_date(self, key, end_date):
+        """ A start date is only permitted on a temporary diet """
+
+        if end_date and self.permanent_diet:
+            raise PermanentDietWithStartDateError("End date not valid on"
+                                                  " permanent diet")
+        return end_date
+
+    @validates("permanent_diet")
+    def validate_diet_is_permanent(self, key, permanent_diet):
+        """ No permanent diet can have start/end date """
+        if permanent_diet and (self.start_date or self.end_date):
+            raise PermanentDietWithStartDateError("Cannot make diet"
+                                                  " permanent with start or"
+                                                  " end date")
+        return permanent_diet
+
+
 @event.listens_for(session, "before_flush")
 def before_flush(session, flush_context, instances):
     """ Execute entity level checks before saving """

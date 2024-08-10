@@ -50,4 +50,5 @@ def validate_field_existance(instance, key, field, raise_on_empty):
 
 
 from carereport.models.patient import Patient
-from carereport.models.medical import Medication
+from carereport.models.medical import (Medication, ExaminationRequest,
+                                       ExaminationResult, DietHeader)
