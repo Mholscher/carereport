@@ -110,6 +110,29 @@ class PermanentDietWithStartDateError(ValueError):
 
     pass
 
+class DietLinesFoodNameMissingError(ValueError):
+    """ A name for a diet line is mandatory """
+
+    pass
+
+
+class DietLineNeedsHeaderError(ValueError):
+    """ A dietline can only exist coupled to a header """
+
+    pass
+
+
+class DietLinesApplicationMissingError(ValueError):
+    """ A diet line must have a way to apply it """
+
+    pass
+
+
+class DietHeaderMustHaveLinesError(AttributeError):
+    """ A diet must contain rules """
+
+    pass
+
 
 class Medication(Base):
     """ Medication is one medication a patient is or was using.
@@ -329,6 +352,7 @@ class DietHeader(Base):
     permanent_diet = mapped_column(Boolean, default=False)
     start_date = mapped_column(Date, nullable=True)
     end_date = mapped_column(Date, nullable=True)
+    diet_lines = relationship("DietLines", back_populates="diet")
     patient_id = mapped_column(ForeignKey("patients.id"), index=True)
     patient = relationship("Patient", back_populates="diets")
  
@@ -359,6 +383,53 @@ class DietHeader(Base):
                                                   " end date")
         return permanent_diet
 
+    def has_lines(self):
+        """ Check if this header has at least one line attached """
+
+        if len(self.diet_lines) == 0:
+            raise DietHeaderMustHaveLinesError(f"Diet {self.diet_name}" 
+                                               f"must have lines")
+        return True
+
+class DietLines(Base):
+    """ Instructions for individual elements of a diet 
+
+    Each line contains a rule to be considered for a diet.
+    Think of "Patient should not have any sugar"
+    The ensemble of lines plus a DietHeader make up the diet
+    """
+
+    __tablename__ = "dietline"
+
+    id = mapped_column(Integer, primary_key=True)
+    food_name = mapped_column(String(56), nullable=False)
+    application_type = mapped_column(String(56), nullable=False)
+    description = mapped_column(String(256))
+    diet_id = mapped_column(ForeignKey("dietheader.id"), index=True)
+    diet = relationship("DietHeader", back_populates="diet_lines")
+
+    @validates("food_name")
+    def validate_food_name(self, key, food_name):
+        """ A food name is mandatory """
+
+        return validate_field_existance(self, key, food_name,
+                                        DietLinesFoodNameMissingError)
+
+    @validates("application_type")
+    def validate_application(self, key, application_type):
+        """ The application type is mandatory """
+
+        return validate_field_existance(self, key, application_type,
+                                        DietLinesApplicationMissingError)
+
+    @validates("diet")
+    def validate_diet(self, key, diet):
+        """ A food name is mandatory """
+
+        return validate_field_existance(self, key, diet,
+                                        DietLineNeedsHeaderError)
+
+
 
 @event.listens_for(session, "before_flush")
 def before_flush(session, flush_context, instances):
@@ -367,3 +438,5 @@ def before_flush(session, flush_context, instances):
     for instance in session.dirty | session.new:
         if isinstance(instance, ExaminationResult):
             instance.is_request_set(session)
+        if isinstance(instance, DietHeader):
+            instance.has_lines()

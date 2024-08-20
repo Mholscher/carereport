@@ -34,6 +34,7 @@ else:
     raise FileNotFoundError('Configuration file not found!')
 
 class Base(DeclarativeBase):
+    """ Add mutation fields to each table """
 
     user = mapped_column(String(25), default=getpass.getuser, 
                                onupdate=getpass.getuser)
@@ -51,4 +52,5 @@ def validate_field_existance(instance, key, field, raise_on_empty):
 
 from carereport.models.patient import Patient
 from carereport.models.medical import (Medication, ExaminationRequest,
-                                       ExaminationResult, DietHeader)
+                                       ExaminationResult, DietHeader,
+                                       DietLines)

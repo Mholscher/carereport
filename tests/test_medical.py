@@ -23,7 +23,8 @@ import carereport as cr
 from carereport import session
 from carereport.models.patient import Patient
 from carereport.models.medical import (Medication, ExaminationRequest,
-                                       ExaminationResult, DietHeader)
+                                       ExaminationResult, DietHeader,
+                                       DietLines)
 
 
 class TestSetMedication(unittest.TestCase):
@@ -448,6 +449,20 @@ class TestDietHeader(unittest.TestCase):
         self.diethead3 = DietHeader(diet_name="Lean (less fat)",
                                     start_date = date(2024, 7, 18),
                                     end_date=date(2024, 12, 17))
+        self.dietline1 = DietLines(food_name="Water",
+                                   application_type="One liter a day",
+                                   description="Drink at least 1 liter"
+                                               " of water a day",
+                                    diet=self.diethead2)
+        self.dietline2 = DietLines(food_name="Protein",
+                                   application_type="50 grams a day",
+                                   description="Should eat at least 50"
+                                               " grams of proteins daily",
+                                    diet=self.diethead1)
+        self.dietline1 = DietLines(food_name="Cookies",
+                                   application_type="Don't eat",
+                                   description="Not now, not ever, never",
+                                    diet=self.diethead3)
 
     def tearDown(self):
 
@@ -476,4 +491,85 @@ class TestDietHeader(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.diethead2.permanent_diet = True
+            session.flush()
+
+    def test_diet_lines_mandatory(self):
+        """ A diet head should have lines attached """
+
+        with self.assertRaises(AttributeError):
+            diethead3 = DietHeader(diet_name="Easy on yourself",
+                                    start_date = date(2024, 8, 22),
+                                    end_date=None)
+            session.add(diethead3)
+            session.flush()
+
+
+
+class TestDietLine(unittest.TestCase):
+
+    def setUp(self):
+
+        self.patient1 = Patient(surname="Scanda", initials="K.U.",
+                               birthdate=date(1982, 10, 8), sex="F")
+        self.patient2 = Patient(surname="Bandala", initials="W.",
+                               birthdate=date(1953, 1, 28), sex="M")
+        self.diethead1 = DietHeader(diet_name="Vega",
+                                    permanent_diet = True)
+        self.diethead2 = DietHeader(diet_name="Drink much",
+                                    start_date = date(2024, 8, 7),
+                                    end_date=None)
+        self.diethead3 = DietHeader(diet_name="Carbo hydrate",
+                                    start_date = date(2024, 7, 12),
+                                    end_date=date(2025, 2, 17))
+        self.dietline1 = DietLines(food_name="Water",
+                                   application_type="One liter a day",
+                                   description="Drink at least 1 liter"
+                                               " of water a day",
+                                    diet=self.diethead2)
+        self.dietline2 = DietLines(food_name="Protein",
+                                   application_type="50 grams a day",
+                                   description="Should eat at least 50"
+                                               " grams of proteins daily",
+                                    diet=self.diethead1)
+        self.dietline1 = DietLines(food_name="Cookies",
+                                   application_type="Don't eat",
+                                   description="Not now, not ever, never",
+                                    diet=self.diethead3)
+
+
+    def tearDown(self):
+
+
+        session.reset()
+        cr.Base.metadata.drop_all(cr.engine)
+        cr.Base.metadata.create_all(cr.engine)
+
+    def test_diet_line_name_mandatory(self):
+        """ The name of a diet line is mandatory """
+
+        with self.assertRaises(ValueError):
+            dietline2 = DietLines(food_name=None,
+                                  application_type="Each hour a sandwich",
+                                  description="Eat 1 sandwich",
+                                  diet=self.diethead2)
+            session.flush()
+
+    def test_diet_line_has_header(self):
+        """ A diet line must have an associated header """
+
+        with self.assertRaises(ValueError):
+            dietline2 = DietLines(food_name="Beans required",
+                                  application_type="Everyday eat some beans",
+                                  description="Eat some beans every day",
+                                  diet=None)
+            session.flush()
+
+    def test_appliacation_type_mandatory(self):
+        """ A diet line should have an application type """
+
+        with self.assertRaises(ValueError):
+            dietline2 = DietLines(food_name="Lettuce required",
+                                application_type="",
+                                description="Eat some lettuce every day",
+                                diet=self.diethead2)
             session.flush()
