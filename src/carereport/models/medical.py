@@ -36,7 +36,6 @@ from sqlalchemy import (String, Date, Integer, text, ForeignKey, Index,
                         select, event, Boolean)
 from sqlalchemy.orm import (mapped_column, validates, relationship)
 from carereport import (Base, session, validate_field_existance)
-from carereport import Patient
 
 
 class EndDateBeforeStartError(ValueError):
@@ -390,6 +389,29 @@ class DietHeader(Base):
             raise DietHeaderMustHaveLinesError(f"Diet {self.diet_name}" 
                                                f"must have lines")
         return True
+
+    @staticmethod
+    def _current_diet(patient, for_date):
+        """ Return current diets for patient as a list
+
+        TODO: replace with a generator
+        """
+        return [diet_header for diet_header in patient.diets
+                if diet_header.permanent_diet
+                or (diet_header.start_date <= for_date
+                and (diet_header.end_date is None
+                     or diet_header.end_date > for_date))]
+
+    @staticmethod
+    def get_diets(patient, for_date):
+        """ Return the diet lines for patient for the date for_date """
+
+        diet_list = []
+        for diet in DietHeader._current_diet(patient, for_date):
+            for line in diet.diet_lines:
+                diet_list.append(line)
+        return diet_list
+
 
 class DietLines(Base):
     """ Instructions for individual elements of a diet 
