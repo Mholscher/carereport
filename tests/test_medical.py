@@ -459,7 +459,7 @@ class TestDietHeader(unittest.TestCase):
                                    description="Should eat at least 50"
                                                " grams of proteins daily",
                                     diet=self.diethead1)
-        self.dietline1 = DietLines(food_name="Cookies",
+        self.dietline3 = DietLines(food_name="Cookies",
                                    application_type="Don't eat",
                                    description="Not now, not ever, never",
                                     diet=self.diethead3)
@@ -502,6 +502,54 @@ class TestDietHeader(unittest.TestCase):
                                     end_date=None)
             session.add(diethead3)
             session.flush()
+
+    def test_diets_list(self):
+        """ We can get the diets for a patient """
+
+        self.diethead2.patient = self.patient1
+        session.flush()
+        diet_list = self.patient1.get_diets()
+        self.assertIn(self.dietline1, diet_list,
+                      f"{self.dietline1} not in list")
+
+    def test_only_current_diet_in_list(self):
+        """ Only current diets should appear in the list """
+
+        self.diethead2.patient = self.patient1
+        self.diethead3.patient = self.patient1
+        session.flush()
+        diet_list = self.patient1.get_diets(date(2025, 1, 12))
+        self.assertIn(self.dietline1, diet_list,
+                      f"{self.dietline1} not in list")
+        self.assertNotIn(self.dietline3, diet_list,
+                         f"Not current diet line in list")
+
+    def test_empty_diet_list(self):
+        """ A patient may have an empty diet list """
+
+        self.diethead2.patient = self.patient1
+        session.flush()
+        diet_list = self.patient1.get_diets(for_date=date(2024, 5, 12))
+        self.assertEqual(len(diet_list), 0,
+                      "List not empty")
+
+    def test_no_diet_returns_empty_list(self):
+        """ No diet ==> empty diet list """
+
+        diet_list = self.patient1.get_diets(date(2025, 1, 12))
+        self.assertEqual(len(diet_list), 0,
+                      "List not empty")
+
+
+    def test_permanent_diet_in_list(self):
+        """ Permanent diets must be in list """
+
+        self.diethead1.patient = self.patient1
+        self.diethead3.patient = self.patient1
+        session.flush()
+        diet_list = self.patient1.get_diets(date(2025, 1, 12))
+        self.assertIn(self.dietline2, diet_list,
+                      f"{self.dietline2} not in list")
 
 
 

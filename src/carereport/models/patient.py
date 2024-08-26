@@ -89,3 +89,23 @@ class Patient(Base):
         if sex not in self.valid_sex:
             raise SexInvalidError(f"{sex} is not in a valid sex")
         return sex
+
+    def _current_diet(self, for_date):
+        """ Return current diets as a list
+
+        TODO: replace with a generator
+        """
+        return [diet_header for diet_header in self.diets
+                if diet_header.permanent_diet
+                or (diet_header.start_date <= for_date
+                and (diet_header.end_date is None
+                     or diet_header.end_date > for_date))]
+
+    def get_diets(self, for_date=date.today()):
+        """ Return the diet lines for the date for_date """
+
+        diet_list = []
+        for diet in self._current_diet(for_date):
+            for line in diet.diet_lines:
+                diet_list.append(line)
+        return diet_list
