@@ -20,7 +20,8 @@ from datetime import date, timedelta
 from sqlalchemy import select
 import carereport as cr
 from carereport import session
-from carereport.models.patient import Patient
+from carereport.models.patient import (Patient, Intake, IntakeResult)
+from carereport.models.medical import (DietHeader, DietLines, Medication)
 
 class TestCreatePatient(unittest.TestCase):
 
@@ -120,3 +121,62 @@ class TestCreatePatient(unittest.TestCase):
             patient.initials = "U."
             patient.birthdate = date.today()
             patient.sex = "U"
+
+
+class TestIntake(unittest.TestCase):
+
+    def setUp(self):
+
+        self.patient1 = Patient(surname="Scanda", initials="K.U.",
+                               birthdate=date(1982, 10, 8), sex="F")
+        self.patient2 = Patient(surname="Bandala", initials="W.",
+                               birthdate=date(1953, 1, 28), sex="M")
+        self.diethead1 = DietHeader(diet_name="Vega",
+                                    permanent_diet = True)
+        self.diethead2 = DietHeader(diet_name="Drink much",
+                                    start_date = date(2024, 8, 7),
+                                    end_date=None)
+        self.diethead3 = DietHeader(diet_name="Carbo hydrate",
+                                    start_date = date(2024, 7, 12),
+                                    end_date=date(2025, 2, 17))
+        self.dietline1 = DietLines(food_name="Water",
+                                   application_type="One liter a day",
+                                   description="Drink at least 1 liter"
+                                               " of water a day",
+                                    diet=self.diethead2)
+        self.dietline2 = DietLines(food_name="Protein",
+                                   application_type="50 grams a day",
+                                   description="Should eat at least 50"
+                                               " grams of proteins daily",
+                                    diet=self.diethead1)
+        self.dietline1 = DietLines(food_name="Cookies",
+                                   application_type="Don't eat",
+                                   description="Not now, not ever, never",
+                                    diet=self.diethead3)
+        self.intake1 = Intake(date_intake=date(2024, 8, 22),
+                              result="Patient admitted",
+                              patient=self.patient1)
+
+
+    def tearDown(self):
+
+
+        session.reset()
+        cr.Base.metadata.drop_all(cr.engine)
+        cr.Base.metadata.create_all(cr.engine)
+
+    def test_intake_result_mandatory(self):
+        """ An intake result is mandatory """
+
+        with self.assertRaises(ValueError):
+            self.intake1.result = ''
+            session.flush()
+
+    def test_intake_cannot_be_in_future(self):
+        """ An intake cannot be in the future """
+
+        with self.assertRaises(ValueError):
+            intake2 = Intake(date_intake=date.today() + timedelta(days=1),
+                             result="Flunks!")
+            session.flush()
+        

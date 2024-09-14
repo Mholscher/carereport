@@ -366,7 +366,7 @@ class DietHeader(Base):
 
     @validates("end_date")
     def validate_end_date(self, key, end_date):
-        """ A start date is only permitted on a temporary diet """
+        """ A end date is only permitted on a temporary diet """
 
         if end_date and self.permanent_diet:
             raise PermanentDietWithStartDateError("End date not valid on"

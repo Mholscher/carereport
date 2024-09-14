@@ -21,7 +21,7 @@ and the like. It does not have medical data nor hospitalization info
 
 from datetime import date
 from typing import List
-from sqlalchemy import String, Date, Integer, Index
+from sqlalchemy import (String, Date, Integer, Index, ForeignKey)
 from sqlalchemy.orm import (mapped_column, validates, relationship,
                             Mapped)
 from carereport import (Base, validate_field_existance)
@@ -45,6 +45,18 @@ class SexInvalidError(ValueError):
     pass
 
 
+class IntakeResultIsMandatoryError(ValueError):
+    """ An intake must have a result """
+
+    pass
+
+
+class IntakeCannotBeInFutureError(ValueError):
+    """ An intake cannot be in the future """
+
+    pass
+
+
 class Patient(Base):
 
     __tablename__ = "patients"
@@ -58,6 +70,8 @@ class Patient(Base):
     exam_requests:Mapped[List["ExaminationRequest"]] =\
         relationship(back_populates="patient")
     diets:Mapped[List["DietHeader"]] =\
+        relationship(back_populates="patient")
+    intakes:Mapped[List["Intake"]] =\
         relationship(back_populates="patient")
 
 
@@ -95,3 +109,41 @@ class Patient(Base):
         """ Return the diet lines for the date for_date """
 
         return DietHeader.get_diets(self, for_date)
+
+
+class Intake(Base):
+
+    __tablename__ = "intakes"
+
+    id = mapped_column(Integer, primary_key=True)
+    date_intake = mapped_column(Date)
+    result = mapped_column(String(256))
+    results = relationship("IntakeResult", back_populates="intake")
+    patient_id = mapped_column(ForeignKey("patients.id"), index=True)
+    patient = relationship("Patient", back_populates="intakes")
+
+    @validates("result")
+    def validate_intake_result(self, key, result):
+        """ Result of the intake is mandatory """
+
+        return validate_field_existance(self, key, result,
+                                        IntakeResultIsMandatoryError)
+
+    @validates("date_intake")
+    def validate_date_intake(self, key, date_intake):
+        """ The date of an intake must be in the past """
+
+        if date_intake > date.today():
+            raise IntakeCannotBeInFutureError(f"{date_intake} is in future")
+        return date_intake
+
+
+class IntakeResult(Base):
+
+    __tablename__ = "intakeresults"
+
+    id = mapped_column(Integer, primary_key=True)
+    link_type = mapped_column(String(10), nullable=False)
+    link_key = mapped_column(Integer)
+    intake_id = mapped_column(ForeignKey("intakes.id"), index=True)
+    intake = relationship("Intake", back_populates="results")

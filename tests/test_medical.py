@@ -612,7 +612,7 @@ class TestDietLine(unittest.TestCase):
                                   diet=None)
             session.flush()
 
-    def test_appliacation_type_mandatory(self):
+    def test_application_type_mandatory(self):
         """ A diet line should have an application type """
 
         with self.assertRaises(ValueError):
