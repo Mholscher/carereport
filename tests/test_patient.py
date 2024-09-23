@@ -21,7 +21,8 @@ from sqlalchemy import select
 import carereport as cr
 from carereport import session
 from carereport.models.patient import (Patient, Intake, IntakeResult)
-from carereport.models.medical import (DietHeader, DietLines, Medication)
+from carereport.models.medical import (DietHeader, DietLines, Medication,
+                                       ExaminationRequest)
 
 class TestCreatePatient(unittest.TestCase):
 
@@ -179,4 +180,106 @@ class TestIntake(unittest.TestCase):
             intake2 = Intake(date_intake=date.today() + timedelta(days=1),
                              result="Flunks!")
             session.flush()
-        
+
+    def test_intake_can_be_today(self):
+        """ An intake can take place today """
+
+        intake2 = Intake(date_intake=date.today(),
+                         result="succeeds",
+                         patient=self.patient1)
+        session.flush()
+        self.assertEqual(intake2.date_intake, date.today(),
+                         "Today changed or refused as date intake")
+
+
+class TestIntakeResults(unittest.TestCase):
+
+    def setUp(self):
+
+        self.patient1 = Patient(surname="Scanda", initials="K.U.",
+                               birthdate=date(1982, 10, 8), sex="F")
+        self.patient2 = Patient(surname="Bandala", initials="W.",
+                               birthdate=date(1953, 1, 28), sex="M")
+        self.diethead1 = DietHeader(diet_name="Vega",
+                                    permanent_diet = True)
+        self.diethead2 = DietHeader(diet_name="Drink much",
+                                    start_date = date(2024, 8, 7),
+                                    end_date=None)
+        self.diethead3 = DietHeader(diet_name="Carbo hydrate",
+                                    start_date = date(2024, 7, 12),
+                                    end_date=date(2025, 2, 17))
+        self.dietline1 = DietLines(food_name="Water",
+                                   application_type="One liter a day",
+                                   description="Drink at least 1 liter"
+                                               " of water a day",
+                                    diet=self.diethead2)
+        self.dietline2 = DietLines(food_name="Protein",
+                                   application_type="50 grams a day",
+                                   description="Should eat at least 50"
+                                               " grams of proteins daily",
+                                    diet=self.diethead1)
+        self.dietline1 = DietLines(food_name="Cookies",
+                                   application_type="Don't eat",
+                                   description="Not now, not ever, never",
+                                    diet=self.diethead3)
+        self.intake1 = Intake(date_intake=date(2024, 8, 22),
+                              result="Patient admitted",
+                              patient=self.patient1)
+        self.medication1 = Medication(medication="Asphacron 70mg",
+                                 patient=self.patient1)
+        self.exam_request = ExaminationRequest(examination_kind="Röntgen"
+                                               " scan",
+                                               examaning_department= "Radio",
+                                               requester_name="Guillaume",
+                                               patient=self.patient1)
+        self.diethead1 = DietHeader(diet_name="Only fluid",
+                                    start_date=date.today())
+        session.flush()
+
+
+
+    def tearDown(self):
+
+
+        session.reset()
+        cr.Base.metadata.drop_all(cr.engine)
+        cr.Base.metadata.create_all(cr.engine)
+
+    def test_can_link_intake_medication(self):
+        """ We can create a link to medication """
+
+        link_type, link_key = self.medication1.add_to_intake()
+        self.intake1.add_result_for(link_type, link_key)
+        session.flush()
+        found = 0
+        for intakeresult in self.intake1.results:
+            if (intakeresult.link_type == "medi0001"
+                and intakeresult.link_key == self.medication1.id):
+                    found += 1
+        self.assertTrue(found > 0, "No link found")
+
+    def test_can_link_intake_examination(self):
+        """ We can create a link to examination request from an intake """
+
+        link_type, link_key = self.exam_request.add_to_intake()
+        self.intake1.add_result_for(link_type, link_key)
+        session.flush()
+        found = 0
+        for intakeresult in self.intake1.results:
+            if (intakeresult.link_type == "exam0001"
+                and intakeresult.link_key == self.exam_request.id):
+                    found += 1
+        self.assertTrue(found > 0, "No link found")
+
+    def test_can_link_intake_diet(self):
+        """ We can create a link to diet from an intake """
+
+        link_type, link_key = self.diethead1.add_to_intake()
+        self.intake1.add_result_for(link_type, link_key)
+        session.flush()
+        found = 0
+        for intakeresult in self.intake1.results:
+            if (intakeresult.link_type == "diet0001"
+                and intakeresult.link_key == self.diethead1.id):
+                    found += 1
+        self.assertTrue(found > 0, "No link found")

@@ -21,7 +21,8 @@ and the like. It does not have medical data nor hospitalization info
 
 from datetime import date
 from typing import List
-from sqlalchemy import (String, Date, Integer, Index, ForeignKey)
+from sqlalchemy import (String, Date, Integer, Index, ForeignKey,
+                        Index)
 from sqlalchemy.orm import (mapped_column, validates, relationship,
                             Mapped)
 from carereport import (Base, validate_field_existance)
@@ -58,6 +59,19 @@ class IntakeCannotBeInFutureError(ValueError):
 
 
 class Patient(Base):
+    """ The class representing a pati4ent in care
+
+    The patient is a class linked to be any medical entity in the system.
+    It has but the least of conceivable attributes
+
+    the attributes are:
+
+        :surname: The surname of the patient
+        :initials: The initials of the patient
+        :birthdate: The day the patient was born
+        :sex: An optional field to hold the sex of the patient
+
+    """
 
     __tablename__ = "patients"
 
@@ -112,6 +126,16 @@ class Patient(Base):
 
 
 class Intake(Base):
+    """ An intake has taken place. This is the result. 
+
+    The intake is simply a human readable text. It is meant to tellwhat the end result was for the intake (think admitted, sent home, gave medication).
+
+    Fields are
+
+        :date_intake: The date the intake was done or completed
+        :result: The human readable result of this intake
+
+    """
 
     __tablename__ = "intakes"
 
@@ -137,8 +161,21 @@ class Intake(Base):
             raise IntakeCannotBeInFutureError(f"{date_intake} is in future")
         return date_intake
 
+    def add_result_for(self, link_type, link_key):
+        """ Add a intake result for the type and key """
+
+        intake_result = IntakeResult(link_type=link_type,
+                                     link_key=link_key)
+        self.results.append(intake_result)
+        return
+
 
 class IntakeResult(Base):
+    """ Links to items created as a result of the intake.
+
+    These links answer questions like "what medication was prescribed
+    as a result of this intake?"
+    """
 
     __tablename__ = "intakeresults"
 
@@ -147,3 +184,6 @@ class IntakeResult(Base):
     link_key = mapped_column(Integer)
     intake_id = mapped_column(ForeignKey("intakes.id"), index=True)
     intake = relationship("Intake", back_populates="results")
+
+    __table_args__=(Index("by_link", "link_type",
+                          "link_key"),)

@@ -36,6 +36,7 @@ from sqlalchemy import (String, Date, Integer, text, ForeignKey, Index,
                         select, event, Boolean)
 from sqlalchemy.orm import (mapped_column, validates, relationship)
 from carereport import (Base, session, validate_field_existance)
+from carereport.models import patient
 
 
 class EndDateBeforeStartError(ValueError):
@@ -207,6 +208,11 @@ class Medication(Base):
         return validate_field_existance(self, key, frequency_type,
                                         FrequencyMustHaveTypeError)
 
+    def add_to_intake(self):
+        """ Return self key to the caller to couple to intake """
+
+        return ("medi0001", self.id)
+
 
 class ExaminationRequest(Base):
     """ An examination that has been requested for a patient.
@@ -276,6 +282,11 @@ class ExaminationRequest(Base):
             raise ExecutedCannotBeRefusedError("You cannot refuse" 
                                                 " an executed request")
         return request_refused
+
+    def add_to_intake(self):
+        """ Return key to couple this request to the intake """
+
+        return "exam0001", self.id
 
     @staticmethod
     def open_requests_for_patient(patient):
@@ -389,6 +400,11 @@ class DietHeader(Base):
             raise DietHeaderMustHaveLinesError(f"Diet {self.diet_name}" 
                                                f"must have lines")
         return True
+
+    def add_to_intake(self):
+        """ Return key to couple this request to the intake """
+
+        return "diet0001", self.id
 
     @staticmethod
     def _current_diet(patient, for_date):
