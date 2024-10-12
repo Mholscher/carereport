@@ -134,6 +134,18 @@ class DietHeaderMustHaveLinesError(AttributeError):
     pass
 
 
+class DescriptionIsMandatoryError(ValueError):
+    """ A diagnose must have a description """
+
+    pass
+
+
+class DiagnoseAndExaminationNotSamePatientError(ValueError):
+    """ An examination for a different patient does not support diagnose """
+
+    pass
+
+
 class Medication(Base):
     """ Medication is one medication a patient is or was using.
 
@@ -213,6 +225,13 @@ class Medication(Base):
 
         return ("medi0001", self.id)
 
+    def __str__(self):
+        """ User readable string representation """
+
+        freq_type = (f" per {self.frequency_type}" if self.frequency_type
+                    else "")
+        return (f"{self.medication} {self.frequency}" + freq_type)
+
 
 class ExaminationRequest(Base):
     """ An examination that has been requested for a patient.
@@ -238,6 +257,9 @@ class ExaminationRequest(Base):
     patient_id = mapped_column(ForeignKey("patients.id"), index=True)
     patient = relationship("Patient", back_populates="exam_requests")
     result = relationship("ExaminationResult", back_populates="request")
+    diagnoses = relationship("Diagnose",
+                             secondary="diagnose_examination",
+                             back_populates="examinations")
 
     __table_args__ = (Index("bydepdate", "examaning_department",
           "date_request"),)
@@ -287,6 +309,13 @@ class ExaminationRequest(Base):
         """ Return key to couple this request to the intake """
 
         return "exam0001", self.id
+
+    def patients_match(self):
+
+        for diagnose in self.diagnoses:
+            if self.patient != diagnose.patient:
+                raise DiagnoseAndExaminationNotSamePatientError(
+                    "Diagnose and examination must be for same patient")
 
     @staticmethod
     def open_requests_for_patient(patient):
@@ -468,6 +497,58 @@ class DietLines(Base):
                                         DietLineNeedsHeaderError)
 
 
+class Diagnose(Base):
+    """ The diagnose is the result of examinations and the gateway to
+    treatment. The diagnose is a human readable description of the diagnose,
+    backed by the examinations performed to come to the diagnose.
+
+    It links to the examinations to show the backing.
+    """
+
+    __tablename__ = "diagnose"
+
+    id = mapped_column(Integer, primary_key=True)
+    description = mapped_column(String(256), nullable=False)
+    executor = mapped_column(String(56), nullable=False)
+    examinations = relationship("ExaminationRequest",
+                                secondary="diagnose_examination",
+                                back_populates="diagnoses")
+    patient_id = mapped_column(ForeignKey("patients.id"), index=True)
+    patient = relationship("Patient", back_populates="diagnoses")
+
+    @validates("description")
+    def validate_description(self, key, description):
+        """ A description cannot be empty """
+
+        return validate_field_existance(self, key, description,
+                                        DescriptionIsMandatoryError)
+
+    def patients_match(self):
+        """ Patients for diagnose and examination the same?
+
+        the examination must be for the same patient as the diagnose.
+        """
+
+        for examination in self.examinations:
+            if self.patient != examination.patient:
+                raise DiagnoseAndExaminationNotSamePatientError("Diagnose "
+                    "and examination must be for same patient")
+
+
+class DiagnoseExaminations(Base):
+    """ A diagnose is based on the outcome of examinations. 
+
+    This table links diagnoses to examinations. A diagnose will
+    _usually_ be based on more examinations. In some cases, the examination
+    will be part of the list of examinations of more than one diagnose.
+    """
+
+    __tablename__ = "diagnose_examination"
+
+    diagnose_id = mapped_column(ForeignKey("diagnose.id"),primary_key=True)
+    examination_id = mapped_column(ForeignKey("examrequest.id"),
+                                   primary_key=True)
+
 
 @event.listens_for(session, "before_flush")
 def before_flush(session, flush_context, instances):
@@ -478,3 +559,5 @@ def before_flush(session, flush_context, instances):
             instance.is_request_set(session)
         if isinstance(instance, DietHeader):
             instance.has_lines()
+        if isinstance(instance, ExaminationRequest):
+            instance.patients_match()

@@ -87,6 +87,9 @@ class Patient(Base):
         relationship(back_populates="patient")
     intakes:Mapped[List["Intake"]] =\
         relationship(back_populates="patient")
+    diagnoses:Mapped[List["Diagnose"]] =\
+        relationship(back_populates="patient")
+
 
 
     __table_args__= (Index("byname", "surname"),

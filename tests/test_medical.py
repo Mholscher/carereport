@@ -24,7 +24,7 @@ from carereport import session
 from carereport.models.patient import Patient
 from carereport.models.medical import (Medication, ExaminationRequest,
                                        ExaminationResult, DietHeader,
-                                       DietLines)
+                                       DietLines, Diagnose)
 
 
 class TestSetMedication(unittest.TestCase):
@@ -620,4 +620,118 @@ class TestDietLine(unittest.TestCase):
                                 application_type="",
                                 description="Eat some lettuce every day",
                                 diet=self.diethead2)
+            session.flush()
+
+class TestDiagnose(unittest.TestCase):
+
+    def setUp(self):
+
+        self.patient1 = Patient(surname="Scanda", initials="K.U.",
+                               birthdate=date(1982, 10, 8), sex="F")
+        self.patient2 = Patient(surname="Bandala", initials="W.",
+                               birthdate=date(1953, 1, 28), sex="M")
+        self.diethead1 = DietHeader(diet_name="Vega",
+                                    permanent_diet = True)
+        self.diethead2 = DietHeader(diet_name="Drink much",
+                                    start_date = date(2024, 8, 7),
+                                    end_date=None)
+        self.diethead3 = DietHeader(diet_name="Carbo hydrate",
+                                    start_date = date(2024, 7, 12),
+                                    end_date=date(2025, 2, 17))
+        self.dietline1 = DietLines(food_name="Water",
+                                   application_type="One liter a day",
+                                   description="Drink at least 1 liter"
+                                               " of water a day",
+                                    diet=self.diethead2)
+        self.dietline2 = DietLines(food_name="Protein",
+                                   application_type="50 grams a day",
+                                   description="Should eat at least 50"
+                                               " grams of proteins daily",
+                                    diet=self.diethead1)
+        self.dietline1 = DietLines(food_name="Cookies",
+                                   application_type="Don't eat",
+                                   description="Not now, not ever, never",
+                                    diet=self.diethead3)
+        self.diagnose1 = Diagnose(description="Broken underarm",
+                                  executor="J. Dulber")
+
+
+    def tearDown(self):
+
+
+        session.reset()
+        cr.Base.metadata.drop_all(cr.engine)
+        cr.Base.metadata.create_all(cr.engine)
+
+    def test_description_mandatory(self):
+        """ A diagnose must have a descriptor """
+
+        with self.assertRaises(ValueError):
+            diagnose2 = Diagnose(description="",
+                                  executor="S. Pandice")
+            session.flush()
+
+
+class TestDiagnoseExamination(unittest.TestCase):
+
+    def setUp(self):
+
+        self.patient1 = Patient(surname="Scanda", initials="K.U.",
+                               birthdate=date(1982, 10, 8), sex="F")
+        self.patient2 = Patient(surname="Bandala", initials="W.",
+                               birthdate=date(1953, 1, 28), sex="M")
+        self.diethead1 = DietHeader(diet_name="Vega",
+                                    permanent_diet = True)
+        self.diethead2 = DietHeader(diet_name="Drink much",
+                                    start_date = date(2024, 8, 7),
+                                    end_date=None)
+        self.diethead3 = DietHeader(diet_name="Carbo hydrate",
+                                    start_date = date(2024, 7, 12),
+                                    end_date=date(2025, 2, 17))
+        self.dietline1 = DietLines(food_name="Water",
+                                   application_type="One liter a day",
+                                   description="Drink at least 1 liter"
+                                               " of water a day",
+                                    diet=self.diethead2)
+        self.dietline2 = DietLines(food_name="Protein",
+                                   application_type="50 grams a day",
+                                   description="Should eat at least 50"
+                                               " grams of proteins daily",
+                                    diet=self.diethead1)
+        self.dietline1 = DietLines(food_name="Cookies",
+                                   application_type="Don't eat",
+                                   description="Not now, not ever, never",
+                                    diet=self.diethead3)
+        self.request1 = ExaminationRequest(date_request=date.today(),
+                                           examination_kind="Scan",
+                                           examaning_department="Radiology",
+                                           requester_name="A.J. Jansen",
+                                           requester_department="Cardiology",
+                                           patient=self.patient1)
+        self.request2 = ExaminationRequest(date_request=date.today(),
+                                           examination_kind= "brain analysis",
+                                           examaning_department="Psychology",
+                                           requester_name="F.H. Snugsy",
+                                           requester_department="Cardiology",
+                                           patient=self.patient1)
+        self.diagnose1 = Diagnose(description="Broken underarm",
+                                  executor="J. Dulber")
+        session.flush()
+
+    def tearDown(self):
+
+
+        session.reset()
+        cr.Base.metadata.drop_all(cr.engine)
+        cr.Base.metadata.create_all(cr.engine)
+
+    def test_examination_diagnose_same_patient(self):
+        """ A diagnose and examination must be for the same patient """
+
+        diagnose2 = Diagnose(description="A disease",
+                             executor="F. Thedoctor",
+                             patient=self.patient2)
+        session.add(diagnose2)
+        with self.assertRaises(ValueError):
+            diagnose2.examinations.append(self.request1)
             session.flush()

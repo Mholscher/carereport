@@ -31,7 +31,7 @@ if success:
     Session = sessionmaker(bind=engine)
     session=Session()
 else:
-    raise FileNotFoundError('Configuration file not found!')
+    raise FileNotFoundError('Configuration file not loaded!')
 
 class Base(DeclarativeBase):
     """ Add mutation fields to each table """
