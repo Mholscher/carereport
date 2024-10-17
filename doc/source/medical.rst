@@ -50,3 +50,15 @@ This is the result of the examination. It links to a request, unrequested examin
     :Examination executor: The person to be contacted for inquiries on this result.
     
     
+Diagnose
+--------
+
+A diagnose is the result of the search for the kind of disease or damage. Based on the diagnose a treatment is selected, it is not a treatment itself.
+The diagnose is a description of the disorder/disease found. It will be based on the outcome of the examination(s) the patient has had. The diagnose can link to examinations that have contributed to the diagnose.
+
+    :Description: A human readable description of the diagnose
+    :Executor: The medical officer (doctor) who set the diagnose
+
+.. note::
+    Not only can a diagnose be linked to more examinations, also can an examination be linked to more diagnoses. An esoteric case, but possible.
+

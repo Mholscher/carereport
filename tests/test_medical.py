@@ -715,7 +715,8 @@ class TestDiagnoseExamination(unittest.TestCase):
                                            requester_department="Cardiology",
                                            patient=self.patient1)
         self.diagnose1 = Diagnose(description="Broken underarm",
-                                  executor="J. Dulber")
+                                  executor="J. Dulber",
+                                  patient=self.patient1)
         session.flush()
 
     def tearDown(self):
@@ -734,4 +735,21 @@ class TestDiagnoseExamination(unittest.TestCase):
         session.add(diagnose2)
         with self.assertRaises(ValueError):
             diagnose2.examinations.append(self.request1)
+            session.flush()
+
+    def test_examination_needs_result(self):
+        """ You can only base diagnose on examination with result """
+
+        with self.assertRaises(ValueError):
+            self.diagnose1.examinations.append(self.request1)
+            session.flush()
+
+    def test_diagnose_can_only_accept_examination_with_result(self):
+        """ You can only base diagnose on examination with result 
+
+            This test is probably redundant at this time. 
+        """
+
+        with self.assertRaises(ValueError):
+            self.request1.diagnoses.append(self.diagnose1)
             session.flush()

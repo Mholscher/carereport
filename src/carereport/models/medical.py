@@ -146,6 +146,12 @@ class DiagnoseAndExaminationNotSamePatientError(ValueError):
     pass
 
 
+class ExaminationWithoutResultError(ValueError):
+    """ An examination must have a result to be in a diagnose """
+
+    pass
+
+
 class Medication(Base):
     """ Medication is one medication a patient is or was using.
 
@@ -522,6 +528,15 @@ class Diagnose(Base):
 
         return validate_field_existance(self, key, description,
                                         DescriptionIsMandatoryError)
+
+    @validates("examinations")
+    def validate_examination(self, key, examination):
+        """ A examination must have a result for a diagnose """
+
+        if not examination.result:
+            raise ExaminationWithoutResultError(
+                "An examination must have a result for a diagnose")
+        return examination
 
     def patients_match(self):
         """ Patients for diagnose and examination the same?
