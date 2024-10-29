@@ -20,7 +20,7 @@ import getpass
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase
 from configparser import ConfigParser
-from sqlalchemy import (String, DateTime, text)
+from sqlalchemy import (String, DateTime)
 from sqlalchemy.orm import sessionmaker, mapped_column
 
 config = ConfigParser()
@@ -50,7 +50,7 @@ def validate_field_existance(instance, key, field, raise_on_empty):
     return field
 
 
-from carereport.models.patient import Patient
+from carereport.models.patient import Patient, Intake
 from carereport.models.medical import (Medication, ExaminationRequest,
                                        ExaminationResult, DietHeader,
-                                       DietLines)
+                                       DietLines, Diagnose)

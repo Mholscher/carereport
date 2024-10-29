@@ -36,8 +36,8 @@ from sqlalchemy import (String, Date, Integer, text, ForeignKey, Index,
                         select, event, Boolean)
 from sqlalchemy.orm import (mapped_column, validates, relationship)
 from carereport import (Base, session, validate_field_existance)
-from carereport.models import patient
-
+# from carereport.models import patient
+from ..models import patient
 
 class EndDateBeforeStartError(ValueError):
     """ The end date is before the start date """
@@ -148,6 +148,23 @@ class DiagnoseAndExaminationNotSamePatientError(ValueError):
 
 class ExaminationWithoutResultError(ValueError):
     """ An examination must have a result to be in a diagnose """
+
+    pass
+
+
+class ManagerIsMandatoryError(ValueError):
+    """ A treatment must have a manager """
+
+    pass
+
+class NameIsMandatoryError(ValueError):
+    """ A treatment must have a name """
+
+    pass
+
+
+class DescriptionIsTooShortError(ValueError):
+    """ A treatment description has a minimum length """
 
     pass
 
@@ -519,6 +536,7 @@ class Diagnose(Base):
     examinations = relationship("ExaminationRequest",
                                 secondary="diagnose_examination",
                                 back_populates="diagnoses")
+    treatments = relationship("Treatment", back_populates="diagnoses")
     patient_id = mapped_column(ForeignKey("patients.id"), index=True)
     patient = relationship("Patient", back_populates="diagnoses")
 
@@ -531,7 +549,7 @@ class Diagnose(Base):
 
     @validates("examinations")
     def validate_examination(self, key, examination):
-        """ A examination must have a result for a diagnose """
+        """ An examination must have a result to support a diagnose """
 
         if not examination.result:
             raise ExaminationWithoutResultError(
@@ -563,6 +581,71 @@ class DiagnoseExaminations(Base):
     diagnose_id = mapped_column(ForeignKey("diagnose.id"),primary_key=True)
     examination_id = mapped_column(ForeignKey("examrequest.id"),
                                    primary_key=True)
+
+
+class Treatment(Base):
+    """ A treatment is the combination of all actions taken 
+
+    Based on the diagnose the treating medical chooses actions: 
+
+        * prescribe medication
+        * do an operations
+        * do nothing
+        * send the patient to another medic 
+
+    Some actions (like e.g. medication) will consist of a link to
+    another entity, most wil just have a description.
+    """
+
+    __tablename__ = "treatment"
+
+    id = mapped_column(Integer, primary_key=True)
+    manager = mapped_column(String(56), nullable=False)
+    name = mapped_column(String(56), nullable=False)
+    description = mapped_column(String(256), nullable=False)
+    diagnose_id = mapped_column(ForeignKey("diagnose.id"))
+    diagnoses = relationship("Diagnose", back_populates="treatments")
+    results = relationship("TreatmentResult", back_populates="treatment")
+
+    @validates("manager")
+    def validate_manager(self, key, manager):
+        """ A manager is required for a treatment """
+
+        return validate_field_existance(self, key, manager,
+                                        ManagerIsMandatoryError)
+    @validates("name")
+    def validate_name(self, key, name):
+        """ A manager is required for a treatment """
+    
+        return validate_field_existance(self, key, name,
+                                        NameIsMandatoryError)
+
+    @validates("description")
+    def validate_description(self, key, description):
+        """ A description of a certain length is required for a treatment """
+
+        validate_field_existance(self, key, description,
+                                 DescriptionIsMandatoryError)
+        if len(description) < 25:
+            raise DescriptionIsTooShortError("Description must be longer")
+        return description
+
+
+class TreatmentResult(Base):
+    """ Treatments should have results. 
+
+    In so far as the results are known, these are noted in these results.
+    The results are coupled to the treatment itself.
+    """
+
+    __tablename__ = "treatmentresult"
+
+    id = mapped_column(Integer, primary_key=True)
+    author = mapped_column(String(56), nullable=False)
+    result_date = mapped_column(Date, default=date.today)
+    description = description = mapped_column(String(256), nullable=False)
+    treatment_id = mapped_column(ForeignKey("treatment.id"))
+    treatment = relationship("Treatment", back_populates="results")
 
 
 @event.listens_for(session, "before_flush")

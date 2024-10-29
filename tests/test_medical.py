@@ -24,7 +24,8 @@ from carereport import session
 from carereport.models.patient import Patient
 from carereport.models.medical import (Medication, ExaminationRequest,
                                        ExaminationResult, DietHeader,
-                                       DietLines, Diagnose)
+                                       DietLines, Diagnose, Treatment,
+                                       TreatmentResult)
 
 
 class TestSetMedication(unittest.TestCase):
@@ -753,3 +754,92 @@ class TestDiagnoseExamination(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.request1.diagnoses.append(self.diagnose1)
             session.flush()
+
+
+class TestTreatment(unittest.TestCase):
+
+    def setUp(self):
+
+        self.patient1 = Patient(surname="Scanda", initials="K.U.",
+                               birthdate=date(1982, 10, 8), sex="F")
+        self.patient2 = Patient(surname="Bandala", initials="W.",
+                               birthdate=date(1953, 1, 28), sex="M")
+        self.diethead1 = DietHeader(diet_name="Vega",
+                                    permanent_diet = True)
+        self.diethead2 = DietHeader(diet_name="Drink much",
+                                    start_date = date(2024, 8, 7),
+                                    end_date=None)
+        self.diethead3 = DietHeader(diet_name="Carbo hydrate",
+                                    start_date = date(2024, 7, 12),
+                                    end_date=date(2025, 2, 17))
+        self.dietline1 = DietLines(food_name="Water",
+                                   application_type="One liter a day",
+                                   description="Drink at least 1 liter"
+                                               " of water a day",
+                                    diet=self.diethead2)
+        self.dietline2 = DietLines(food_name="Protein",
+                                   application_type="50 grams a day",
+                                   description="Should eat at least 50"
+                                               " grams of proteins daily",
+                                    diet=self.diethead1)
+        self.dietline1 = DietLines(food_name="Cookies",
+                                   application_type="Don't eat",
+                                   description="Not now, not ever, never",
+                                    diet=self.diethead3)
+        self.request1 = ExaminationRequest(date_request=date.today(),
+                                           examination_kind="Scan",
+                                           examaning_department="Radiology",
+                                           requester_name="A.J. Jansen",
+                                           requester_department="Cardiology",
+                                           patient=self.patient1)
+        self.request2 = ExaminationRequest(date_request=date.today(),
+                                           examination_kind= "brain analysis",
+                                           examaning_department="Psychology",
+                                           requester_name="F.H. Snugsy",
+                                           requester_department="Cardiology",
+                                           patient=self.patient1)
+        self.diagnose1 = Diagnose(description="Broken underarm",
+                                  executor="J. Dulber",
+                                  patient=self.patient1)
+        self.diagnose2 = Diagnose(description="Severe pneumonia",
+                                  executor="F. Gannestein",
+                                  patient=self.patient2)
+        self.treatment1 = Treatment(manager="C. IsRuff",
+                                  name="Medication atibotica",
+                                  description="Heavy infection with virus",
+                                  diagnoses=self.diagnose2)
+        session.flush()
+
+    def tearDown(self):
+
+
+        session.reset()
+        cr.Base.metadata.drop_all(cr.engine)
+        cr.Base.metadata.create_all(cr.engine)
+
+    def test_manager_mandatory(self):
+        """ Each treatment is the responsibility of someone """
+
+        with self.assertRaises(ValueError):
+            self.treatment1.manager = None
+            session.add(self.treatment1)
+            session.flush()
+
+    def test_name_mandatory(self):
+        """ Each treatment must be named """
+
+        with self.assertRaises(ValueError):
+            self.treatment1.name = None
+            session.flush()
+
+    def test_description_mandatory(self):
+        """ The description must be filled """
+
+        with self.assertRaises(ValueError):
+            self.treatment1.description = None
+            session.flush()
+        with self.assertRaises(ValueError):
+            self.treatment1.description = "Short"
+            session.flush()
+
+ 

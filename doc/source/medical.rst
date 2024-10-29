@@ -62,3 +62,16 @@ The diagnose is a description of the disorder/disease found. It will be based on
 .. note::
     Not only can a diagnose be linked to more examinations, also can an examination be linked to more diagnoses. An esoteric case, but possible.
 
+
+Treatment
+---------
+
+A treatment is the actions that will be taken. It may be medication, operation, psychiatric/psychological therapy or other therapy. Medication is a separate item in our data model, so it will not be present here.
+A diagnose may result in more than one treatment.
+
+For therapy which is not supplied by this organisation the patient will get a document with the diagnose and can find (with or without assistance) a therapist or doctor to  apply it.
+
+    :treatment: The name or short description of the treatment
+    :manager: The medical professional overall responsible for this treatment
+    :diagnose: The diagnose that lead to this treatment being chosen
+    :description: What the treatment aims to achieve and a more precise description than available in the name

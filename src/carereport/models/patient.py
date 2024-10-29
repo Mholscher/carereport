@@ -26,7 +26,7 @@ from sqlalchemy import (String, Date, Integer, Index, ForeignKey,
 from sqlalchemy.orm import (mapped_column, validates, relationship,
                             Mapped)
 from carereport import (Base, validate_field_existance)
-from carereport.models.medical import DietHeader
+from .medical import DietHeader
 
 class EmptyNameError(ValueError):
     """ A patient must have a name """
