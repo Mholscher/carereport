@@ -135,7 +135,7 @@ class DietHeaderMustHaveLinesError(AttributeError):
 
 
 class DescriptionIsMandatoryError(ValueError):
-    """ A diagnose must have a description """
+    """ A description is necessary for this item """
 
     pass
 
@@ -159,6 +159,12 @@ class ManagerIsMandatoryError(ValueError):
 
 class NameIsMandatoryError(ValueError):
     """ A treatment must have a name """
+
+    pass
+
+
+class AuthorIsMandatoryError(ValueError):
+    """ A treatment result must have an author """
 
     pass
 
@@ -616,7 +622,7 @@ class Treatment(Base):
     @validates("name")
     def validate_name(self, key, name):
         """ A manager is required for a treatment """
-    
+
         return validate_field_existance(self, key, name,
                                         NameIsMandatoryError)
 
@@ -646,6 +652,20 @@ class TreatmentResult(Base):
     description = description = mapped_column(String(256), nullable=False)
     treatment_id = mapped_column(ForeignKey("treatment.id"))
     treatment = relationship("Treatment", back_populates="results")
+
+    @validates("author")
+    def validate_author(self, key, author):
+        """ An author is required for a treatment result """
+
+        return validate_field_existance(self, key, author,
+                                        AuthorIsMandatoryError)
+
+    @validates("description")
+    def validate_description(self, key, description):
+        """ A complete description is required for a treatment result """
+
+        return validate_field_existance(self, key, description,
+                                        DescriptionIsMandatoryError)
 
 
 @event.listens_for(session, "before_flush")
