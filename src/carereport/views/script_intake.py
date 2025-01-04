@@ -17,8 +17,8 @@
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional
-# from carereport import (Patient, Medication, ExaminationRequest)
-from ..views.patient_views import PatientView
+from carereport import (Patient, Medication, ExaminationRequest)
+from .patient_views import PatientView
 
 @dataclass
 class NewIntake():
