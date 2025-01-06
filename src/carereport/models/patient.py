@@ -59,7 +59,7 @@ class IntakeCannotBeInFutureError(ValueError):
 
 
 class Patient(Base):
-    """ The class representing a pati4ent in care
+    """ The class representing a patient in care
 
     The patient is a class linked to be any medical entity in the system.
     It has but the least of conceivable attributes

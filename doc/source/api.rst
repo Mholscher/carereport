@@ -18,3 +18,9 @@ Care report module views.script_intake
 
 .. automodule:: carereport.views.script_intake
    :members:
+
+Care report module views.scripts_patient
+----------------------------------------
+
+.. automodule:: carereport.views.scripts_patient
+   :members:
