@@ -31,6 +31,8 @@ from PyQt6.QtWidgets import (QApplication, QDialog, QListWidget,
                              QPushButton, 
                              QLineEdit, QTextEdit, QListWidgetItem,
                              QTreeWidgetItem)
+from PyQt6.QtGui import QValidator
+from .helpers import not_empty
 from .patientdialog  import Ui_inputPatient
 from .patient_views import PatientView
 
@@ -55,6 +57,10 @@ class PatientChanges(QDialog, Ui_inputPatient):
         self.date_edit.setDate(QDate(patient_view.birthdate.year,
                                      patient_view.birthdate.month,
                                      patient_view.birthdate.day))
+        self.date_edit.setMaximumDate(QDate.currentDate())
+        self.buttonBox.accepted.connect(self.accept) # type: ignore
+        self.patient_name_edit.focusInEvent = self.focusOnName
+        self.initials_edit.focusInEvent = self.focusOnInitials
         self.patient_view = patient_view
 
     def update_patient_view(self):
@@ -77,9 +83,28 @@ class PatientChanges(QDialog, Ui_inputPatient):
     def accept(self):
         """ The input was OK-ed by the user """
 
-        self.update_patient_view()
-        super().accept()
+        filled_name = not_empty(self.patient_name_edit)
+        filled_initials = not_empty(self.initials_edit)
+        if filled_name and filled_initials:
+            self.update_patient_view()
+            return super().accept()
+        if not filled_name:
+            self.nameerrorlabel.setText("*")
+        if not filled_initials:
+            self.initialserrorlabel.setText("*")
+        return
 
+    def focusOnName(self, event):
+        """ Reset error label """
+
+        self.nameerrorlabel.setText("")
+        return self.focusInEvent(event)
+
+    def focusOnInitials(self, event):
+        """ Reset error label """
+
+        self.initialserrorlabel.setText("")
+        return self.focusInEvent(event)
 
 # Code for testing purposes
 if __name__ == "__main__":

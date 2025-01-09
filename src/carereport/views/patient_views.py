@@ -33,7 +33,7 @@ class PatientView():
     id : Optional[int]  = None
     surname : str = ""
     initials : str = ""
-    birthdate : date = date.today()
+    birthdate : date = date(1990, 1, 1)
     sex : str = " "
 
     def to_patient(self):

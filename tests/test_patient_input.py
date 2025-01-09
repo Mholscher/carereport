@@ -80,14 +80,23 @@ class TestStandardInput(unittest.TestCase):
                                          sex="M")
         self.patient_form = PatientChanges(self.patient_view)
 
+    def rollback(self):
+
+        session.reset()
+        self.app.quit()
+
     def test_accept_input(self):
         """ Accepting input updates the view """
 
         self.patient_form.patient_name_edit.setText("Vanitatis")
+        self.patient_form.initials_edit.setText("P.W.")
         self.patient_form.accept()
         self.assertEqual(self.patient_view.surname,
                          "Vanitatis",
                          "Name not set to view")
+        self.assertEqual(self.patient_view.initials,
+                         "P.W.",
+                         "Initials not set to view")
 
     def test_ignore_input(self):
         """ Ignoring input updates the view """
@@ -97,3 +106,22 @@ class TestStandardInput(unittest.TestCase):
         self.assertNotEqual(self.patient_view.surname,
                          "Vanitatis",
                          "Name set to view")
+
+    # @unittest.skip
+    def test_empty_name_fails(self):
+        """ Empty surname does not update """
+
+        self.patient_form.patient_name_edit.setText("")
+        self.patient_form.accept()
+        self.assertEqual(self.patient_view.surname,
+                         "Vanitator",
+                         "Name changed")
+        
+    def test_empty_initials_fails(self):
+        """ Empty initials does not update """
+
+        self.patient_form.initials_edit.setText("")
+        self.patient_form.accept()
+        self.assertEqual(self.patient_view.initials,
+                         "O.M.",
+                         "Initials changed")
