@@ -4,15 +4,17 @@ The patient
 Patient identification
 ----------------------
 
-This object serves a dual purpose. On the one hand it holds and maintains the data for a patient, like address and birthdate, on the other hand it is identifying the patient for the objects that are linked to one patient.
+This object serves a dual purpose. On the one hand it holds and maintains the data for a patient, like surname, initials and birthdate, on the other hand it is identifying the patient for the objects that are linked to one patient.
 Strictly also the items as address and birthdate should be objects, but these are considered not specific for medical purposes. If this turns out to be an incorrect premise, we will add these to the candidate list.
 Patients will generally not need all of the dependent objects listed here. For some (like medication) it is possible to have more than one applicable object.
 Not specific objects:
-    
+
     :Patient name: The surname of the patient
     :Patient initials: Initials of the patient
     :Birth date: Birth date of the patient
     :Sex: Patient sex, not required
+
+Name, initials and birthdate are used by the system to identify a patient and are therefore mandatory.
 
 Intake
 ------

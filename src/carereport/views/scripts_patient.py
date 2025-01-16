@@ -34,6 +34,7 @@ from PyQt6.QtWidgets import (QApplication, QDialog, QListWidget,
 from PyQt6.QtGui import QValidator
 from .helpers import not_empty
 from .patientdialog  import Ui_inputPatient
+from .patientsearch import Ui_PatientSearchDialog
 from .patient_views import PatientView
 
 
@@ -106,9 +107,60 @@ class PatientChanges(QDialog, Ui_inputPatient):
         self.initialserrorlabel.setText("")
         return self.focusInEvent(event)
 
+
+class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
+
+    def __init__(self):
+
+        super().__init__()
+
+        self.setupUi(self)
+        self.search_params = tuple()
+        self.startSearchButton.clicked.connect(
+            self.search_for_patients)
+
+    def search_for_patients(self, event):
+        """ The parameters are entered, cast of the search
+
+        The search is parametrized by the search_params, a tuple containing:
+
+            :birthdate: the birthdate of thepatient to search for
+            :surname: (part of) the surname of the patient
+            :initials: (part of) the initials of the patient
+    
+        Not all of the items are required. One of them is enough 
+        to start the search. Of course, the more fields are filled,
+        the more precise the search, i.e. less results.
+        """
+
+        birthdate_text = self.birthdateEdit.text()
+        birthdate_list = birthdate_text.split("-")
+        if len(birthdate_list) != 3:
+            self.statusLabel.setText(f"Datum {birthdate_text} ongeldig")
+            return
+        if any(birthdate_list):
+            for seqno, datepart in enumerate(birthdate_list):
+                try:
+                    birthdate_list[seqno] = int(datepart)
+                except ValueError:
+                    self.statusLabel.setText(f"Datum {birthdate_text} ongeldig")
+                    return
+            birthdate = date(birthdate_list[2], birthdate_list[1],
+                                birthdate_list[0])
+        else:
+            birthdate = None
+        name_part = self.SearchNameEdit.text()
+        initials_part = self.searchInitialsEdit.text()
+        self.search_params = (birthdate, name_part, initials_part)
+        if any(self.search_params):
+            self.stackedWidget.setCurrentIndex(1)
+        else:
+            self.statusLabel.setText("Vul minstens één veld!")
+
+
 # Code for testing purposes
 if __name__ == "__main__":
     app = QApplication([])
-    main_window = PatientChanges(PatientView())
+    main_window = FindCreatePatient()
     main_window.show()
     sys.exit(app.exec())

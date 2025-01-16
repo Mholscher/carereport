@@ -20,7 +20,8 @@ from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import QDate
 from carereport import session
 from carereport.views.patient_views import PatientView
-from carereport.views.scripts_patient import PatientChanges
+from carereport.views.scripts_patient import (PatientChanges,
+                                              FindCreatePatient)
 
 class TestCreatePatientInput(unittest.TestCase):
 
@@ -125,3 +126,103 @@ class TestStandardInput(unittest.TestCase):
         self.assertEqual(self.patient_view.initials,
                          "O.M.",
                          "Initials changed")
+
+class TestSearchCriterionsPatient(unittest.TestCase):
+
+    def setUp(self):
+
+        self.application = QApplication([])
+        self.search_dialog = FindCreatePatient()
+
+    def rollback(self):
+
+        self.app.quit()
+
+    def test_create_search_criterions(self):
+        """ Create criteria for a search of patient """
+
+        self.search_dialog.birthdateEdit.setText("17-01-1976")
+        self.search_dialog.SearchNameEdit.setText("Sanoussin")
+        self.search_dialog.searchInitialsEdit.setText("Y.")
+        self.search_dialog.startSearchButton.clicked.emit()
+        self.assertEqual(self.search_dialog.search_params,
+                         (date(1976, 1, 17), 
+                          "Sanoussin",
+                          "Y."),
+                         "Incorrect search_parameters")
+
+    def test_part_search_criterion(self):
+        """ Create a search criterion with empty field(s) """
+
+        self.search_dialog.birthdateEdit.setText("17-01-1976")
+        self.search_dialog.startSearchButton.clicked.emit()
+        self.assertEqual(self.search_dialog.search_params,
+                         (date(1976, 1, 17), 
+                          "",
+                          ""),
+                         "Incorrect search_parameters")
+
+    def test_after_search_goto_results(self):
+        """ After searching go to the result page """
+
+        self.search_dialog.birthdateEdit.setText("19-11-1978")
+        self.search_dialog.startSearchButton.clicked.emit()
+        self.assertEqual(self.search_dialog.stackedWidget.currentIndex(),
+                         1, "No page switch")
+
+    def test_if_no_criteria_no_switch(self):
+        """ Don't go to result page if wrong criteria """
+
+        self.search_dialog.startSearchButton.clicked.emit()
+        self.assertEqual(self.search_dialog.stackedWidget.currentIndex(),
+                         0, "Page switched")
+        self.assertIn("één", self.search_dialog.statusLabel.text(),
+                      "Status niet aangepast")
+
+
+class TestDateInput(unittest.TestCase):
+
+    def setUp(self):
+
+        self.application = QApplication([])
+        self.search_dialog = FindCreatePatient()
+
+    def rollback(self):
+
+        self.app.quit()
+
+    def test_full_date(self):
+        """ Test that a date with all digits work """
+
+        self.search_dialog.birthdateEdit.setText("12-11-1966")
+        self.search_dialog.startSearchButton.clicked.emit()
+        self.assertEqual(self.search_dialog.search_params[0].day,
+                         12, "day not converted correctly")
+        self.assertEqual(self.search_dialog.search_params[0].month,
+                         11, "month not converted correctly")
+        self.assertEqual(self.search_dialog.search_params[0].year,
+                         1966, "year not converted correctly")
+
+    def test_date_one_digit_day(self):
+        """ A date with single digit day is converted  """
+
+        self.search_dialog.birthdateEdit.setText("2-10-1998")
+        self.search_dialog.startSearchButton.clicked.emit()
+        self.assertEqual(self.search_dialog.search_params[0].day,
+                         2, "day not converted correctly")
+        self.assertEqual(self.search_dialog.search_params[0].month,
+                         10, "month not converted correctly")
+        self.assertEqual(self.search_dialog.search_params[0].year,
+                         1998, "year not converted correctly")
+
+    def test_date_one_digit_month(self):
+        """ A date with single digit month is converted  """
+
+        self.search_dialog.birthdateEdit.setText("12-3-1948")
+        self.search_dialog.startSearchButton.clicked.emit()
+        self.assertEqual(self.search_dialog.search_params[0].day,
+                         12, "day not converted correctly")
+        self.assertEqual(self.search_dialog.search_params[0].month,
+                         3, "month not converted correctly")
+        self.assertEqual(self.search_dialog.search_params[0].year,
+                         1948, "year not converted correctly")
