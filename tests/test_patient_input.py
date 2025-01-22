@@ -173,6 +173,7 @@ class TestSearchCriterionsPatient(unittest.TestCase):
     def test_if_no_criteria_no_switch(self):
         """ Don't go to result page if wrong criteria """
 
+        self.search_dialog.stackedWidget.setCurrentIndex(0)
         self.search_dialog.startSearchButton.clicked.emit()
         self.assertEqual(self.search_dialog.stackedWidget.currentIndex(),
                          0, "Page switched")
@@ -226,3 +227,52 @@ class TestDateInput(unittest.TestCase):
                          3, "month not converted correctly")
         self.assertEqual(self.search_dialog.search_params[0].year,
                          1948, "year not converted correctly")
+
+    # @unittest.skip
+    def test_convert_invalid_date_fails(self):
+        """ An invalid date inoputted fails """
+
+        self.search_dialog.birthdateEdit.setText("12-31-1965")
+        self.search_dialog.startSearchButton.clicked.emit()
+        self.assertEqual(self.search_dialog.stackedWidget.currentIndex(),
+                        0, "Page switched")
+
+class TestPatientSelection(unittest.TestCase):
+
+    def setUp(self):
+
+        self.application = QApplication([])
+        self.search_dialog = FindCreatePatient()
+        self.patient_views = [PatientView(id=3,
+                                          surname="Chasselair",
+                                          initials="Y.M.",
+                                          birthdate=date(1987, 4, 3),
+                                          sex="F"),
+                              PatientView(id=7,
+                                          surname="Chasselase",
+                                          initials="T.Y.",
+                                          birthdate=date(1987, 12, 17),
+                                          sex="F"),
+                              PatientView(id=7,
+                                          surname="Chasselinome",
+                                          initials="S.Y.",
+                                          birthdate=date(1992, 2, 28),
+                                          sex="F")]
+
+    def rollback(self):
+
+        self.app.quit()
+
+    def test_show_patients(self):
+        """ Show patients in views on table """
+
+        self.search_dialog.load_patient_selection(self.patient_views)
+        selected_count = self.search_dialog.patientTable.rowCount()
+        names = [self.search_dialog.patientTable.item(row, 0).text() 
+                 for row in range(selected_count)]
+        self.assertIn("Chasselair", names,
+                       "Name Chasselair not found")
+        self.assertIn("Chasselase", names,
+                       "Name Chasselase not found")
+        self.assertIn("Chasselinome", names,
+                       "Name Chasselinome not found")

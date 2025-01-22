@@ -30,7 +30,7 @@ from PyQt6.QtWidgets import (QApplication, QDialog, QListWidget,
                              QVBoxLayout, QHBoxLayout, QSizePolicy,
                              QPushButton, 
                              QLineEdit, QTextEdit, QListWidgetItem,
-                             QTreeWidgetItem)
+                             QTreeWidgetItem, QTableWidgetItem)
 from PyQt6.QtGui import QValidator
 from .helpers import not_empty
 from .patientdialog  import Ui_inputPatient
@@ -118,9 +118,11 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
         self.search_params = tuple()
         self.startSearchButton.clicked.connect(
             self.search_for_patients)
+        self.cancelSearchButton.clicked.connect(self.done)
+        self.stackedWidget.setCurrentIndex(0)
 
     def search_for_patients(self, event):
-        """ The parameters are entered, cast of the search
+        """ The parameters are entered, cast off the search
 
         The search is parametrized by the search_params, a tuple containing:
 
@@ -145,8 +147,13 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
                 except ValueError:
                     self.statusLabel.setText(f"Datum {birthdate_text} ongeldig")
                     return
-            birthdate = date(birthdate_list[2], birthdate_list[1],
-                                birthdate_list[0])
+            try:
+                birthdate = date(birthdate_list[2], birthdate_list[1],
+                                 birthdate_list[0])
+            except ValueError:
+                # print(f"Datum {birthdate_text} ongeldig")
+                self.statusLabel.setText(f"Datum {birthdate_text} ongeldig")
+                return                
         else:
             birthdate = None
         name_part = self.SearchNameEdit.text()
@@ -157,10 +164,31 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
         else:
             self.statusLabel.setText("Vul minstens één veld!")
 
+    def load_patient_selection(self, patient_views):
+        """ Load the table with an iterable of patients """
+
+        self.patientTable.setColumnCount(4)
+        self.patientTable.setHorizontalHeaderLabels(["Naam",
+                                                    "Voorletters",
+                                                    "Geboortedatum",
+                                                    "Sexe"])
+        self.patientTable.setRowCount(len(patient_views))
+        for row in range(len(patient_views)):
+            for column in range(4):
+                if column == 0:
+                    the_field = patient_views[row].surname
+                elif column == 1:
+                    the_field = patient_views[row].initials
+                elif column == 2:
+                    the_field = str(patient_views[row].birthdate)
+                elif column == 3:
+                    the_field = patient_views[row].sex
+                the_item = QTableWidgetItem(the_field, type=4015)
+                self.patientTable.setItem(row, column,the_item)
 
 # Code for testing purposes
 if __name__ == "__main__":
     app = QApplication([])
     main_window = FindCreatePatient()
-    main_window.show()
+    main_window.open()
     sys.exit(app.exec())

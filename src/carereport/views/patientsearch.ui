@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Zoek en selecteer patient</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>patienticon.svg</normaloff>patienticon.svg</iconset>
+  </property>
   <property name="modal">
    <bool>true</bool>
   </property>
@@ -26,7 +30,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="searchFor">
     <widget class="QFrame" name="searchCriteriaFrame">
@@ -131,16 +135,6 @@
     </widget>
    </widget>
    <widget class="QWidget" name="patientResultPage">
-    <widget class="QTableView" name="patientTable">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>341</width>
-       <height>171</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="QWidget" name="horizontalLayoutWidget">
      <property name="geometry">
       <rect>
@@ -192,6 +186,19 @@
        </widget>
       </item>
      </layout>
+    </widget>
+    <widget class="QTableWidget" name="patientTable">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>21</y>
+       <width>381</width>
+       <height>151</height>
+      </rect>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
     </widget>
    </widget>
    <widget class="QWidget" name="page_2"/>

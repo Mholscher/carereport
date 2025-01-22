@@ -13,6 +13,9 @@ class Ui_PatientSearchDialog(object):
     def setupUi(self, PatientSearchDialog):
         PatientSearchDialog.setObjectName("PatientSearchDialog")
         PatientSearchDialog.resize(434, 300)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("src/carereport/views/patienticon.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        PatientSearchDialog.setWindowIcon(icon)
         PatientSearchDialog.setModal(True)
         self.stackedWidget = QtWidgets.QStackedWidget(parent=PatientSearchDialog)
         self.stackedWidget.setGeometry(QtCore.QRect(20, 10, 401, 251))
@@ -65,9 +68,6 @@ class Ui_PatientSearchDialog(object):
         self.stackedWidget.addWidget(self.searchFor)
         self.patientResultPage = QtWidgets.QWidget()
         self.patientResultPage.setObjectName("patientResultPage")
-        self.patientTable = QtWidgets.QTableView(parent=self.patientResultPage)
-        self.patientTable.setGeometry(QtCore.QRect(10, 20, 341, 171))
-        self.patientTable.setObjectName("patientTable")
         self.horizontalLayoutWidget = QtWidgets.QWidget(parent=self.patientResultPage)
         self.horizontalLayoutWidget.setGeometry(QtCore.QRect(10, 190, 380, 51))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
@@ -88,6 +88,12 @@ class Ui_PatientSearchDialog(object):
         self.patientSelectButton.setDefault(True)
         self.patientSelectButton.setObjectName("patientSelectButton")
         self.selectPageButtonsLayout.addWidget(self.patientSelectButton)
+        self.patientTable = QtWidgets.QTableWidget(parent=self.patientResultPage)
+        self.patientTable.setGeometry(QtCore.QRect(10, 21, 381, 151))
+        self.patientTable.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.patientTable.setObjectName("patientTable")
+        self.patientTable.setColumnCount(0)
+        self.patientTable.setRowCount(0)
         self.stackedWidget.addWidget(self.patientResultPage)
         self.page_2 = QtWidgets.QWidget()
         self.page_2.setObjectName("page_2")
@@ -102,7 +108,7 @@ class Ui_PatientSearchDialog(object):
         self.statusLabel.setObjectName("statusLabel")
 
         self.retranslateUi(PatientSearchDialog)
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(PatientSearchDialog)
 
     def retranslateUi(self, PatientSearchDialog):
