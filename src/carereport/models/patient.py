@@ -22,10 +22,10 @@ and the like. It does not have medical data nor hospitalization info
 from datetime import date
 from typing import List
 from sqlalchemy import (String, Date, Integer, Index, ForeignKey,
-                        Index)
+                        Index, select)
 from sqlalchemy.orm import (mapped_column, validates, relationship,
                             Mapped)
-from carereport import (Base, validate_field_existance)
+from carereport import (Base, validate_field_existance, session)
 from .medical import DietHeader
 
 class EmptyNameError(ValueError):
@@ -126,6 +126,30 @@ class Patient(Base):
         """ Return the diet lines for the date for_date """
 
         return DietHeader.get_diets(self, for_date)
+
+    @staticmethod
+    def patient_search(search_params):
+        """ The method returns patients selected based on the parameters 
+
+        The search parameters are the following:
+
+            :birthdate: A date not in the future, to find patients born that day
+            :surname: (part of) the surname of the patient(s) to be found
+            :initials: (part of) the initials of the patient(s) to be found
+
+        """
+
+        patient_qry = select(Patient)
+        if search_params[0]:
+            patient_qry = patient_qry.where(Patient.birthdate==search_params[0])
+        if search_params[1]:
+            patient_qry = patient_qry.where(Patient.surname.like(
+                                                '%' + search_params[1] + '%'))
+        if search_params[2]:
+            patient_qry = patient_qry.where(Patient.initials.like(
+                                                '%' + search_params[2] + '%'))
+        rows = session.execute(patient_qry).all()
+        return [row[0] for row in rows]
 
 
 class Intake(Base):

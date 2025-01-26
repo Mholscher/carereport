@@ -30,7 +30,7 @@ class TestCreatePatient(unittest.TestCase):
 
         pass
 
-    def rollback(self):
+    def tearDown(self):
 
         session.reset()
         
@@ -122,6 +122,61 @@ class TestCreatePatient(unittest.TestCase):
             patient.initials = "U."
             patient.birthdate = date.today()
             patient.sex = "U"
+
+
+class TestGetPatients(unittest.TestCase):
+
+    def setUp(self):
+
+        self.patient1 = Patient(surname="Talany", initials="K.I.",
+                               birthdate=date(1998, 12, 1), sex="F")
+        session.add(self.patient1)
+        self.patient2 = Patient(surname="Balny", initials="T.G.",
+                               birthdate=date(1991, 11, 10), sex="M")
+        session.add(self.patient2)
+        self.patient3 = Patient(surname="Kalanach", initials="P.I.",
+                               birthdate=date(1985, 2, 21), sex="F")
+        session.add(self.patient3)
+        self.patient4 = Patient(surname="Kaltenbach", initials="A.I.",
+                               birthdate=date(1991, 11, 10), sex="F")
+        session.add(self.patient4)
+        session.flush()
+
+    def tearDown(self):
+
+
+        session.reset()
+        cr.Base.metadata.drop_all(cr.engine)
+        cr.Base.metadata.create_all(cr.engine)
+
+    def test_find_with_all_params(self):
+        """ A search with all params succeds """
+
+        search_params = (date(1991, 11, 10), "Balny", "T.G.")
+        patients = Patient.patient_search(search_params)
+        self.assertEqual(len(patients), 1,
+                         "Wrong number of patients returned")
+        self.assertEqual(patients[0].surname, self.patient2.surname,
+                         "Patient name incorrect")
+
+    def test_find_with_less_params(self):
+        """ A search with just one parameter """
+
+        search_params = (date(1991, 11, 10), None, None)
+        patients = Patient.patient_search(search_params)
+        self.assertEqual(len(patients), 2, 
+                         "Wrong number of patients returned")
+
+    def test_find_with_part_name(self):
+        """ Search with part of a surname """
+
+        search_params = (None, "tenba", "I.")
+        patients = Patient.patient_search(search_params)
+        self.assertEqual(patients[0].surname, self.patient4.surname,
+                         "Patient name incorrect")
+        
+
+        
 
 
 class TestIntake(unittest.TestCase):

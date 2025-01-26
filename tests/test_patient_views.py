@@ -16,6 +16,7 @@
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
 from datetime import date
+import carereport as cr
 from carereport import session
 from carereport.models.patient import Patient
 from carereport.views.patient_views import PatientView
@@ -27,9 +28,11 @@ class TestCreatePatientView(unittest.TestCase):
 
         pass
 
-    def rollback(self):
+    def tearDown(self):
 
         session.reset()
+        cr.Base.metadata.drop_all(cr.engine)
+        cr.Base.metadata.create_all(cr.engine)
 
 
     def test_create_patient_view(self):
@@ -75,7 +78,7 @@ class TestUpdatePatientFromView(unittest.TestCase):
                                         birthdate=date(1995, 2, 13),
                                         sex="M")
 
-    def rollback(self):
+    def tearDown(self):
 
         session.reset()
 
@@ -102,3 +105,48 @@ class TestUpdatePatientFromView(unittest.TestCase):
         self.patient_view.update_patient(self.patient)
         self.assertEqual(self.patient.id, 12,
                          "id changed")
+
+
+class TestViewsFromPatients(unittest.TestCase):
+
+    def setUp(self):
+
+        self.patient1 = Patient(
+                          surname="Knalpot",
+                          initials="H.",
+                          birthdate=date(1956, 2, 19),
+                          sex="M")
+        session.add(self.patient1)
+        self.patient2 = Patient(
+                          surname="Linkeruitlaatpoort",
+                          initials="K.",
+                          birthdate=date(1977, 12, 3),
+                          sex="F")
+        session.add(self.patient2)
+        self.patient_list = [self.patient1, self.patient2]
+        session.flush()
+
+    def tearDown(self):
+
+        session.delete(self.patient1)
+        session.delete(self.patient2)
+        session.commit()
+        session.reset()
+
+    def test_create_list_of_views(self):
+        """ Create a list of views from a list of patients """
+
+        patient_view_list = PatientView.from_patient_list(self.patient_list)
+        self.assertEqual(len(patient_view_list), len(self.patient_list),
+                         "Lists do not have equal length")
+        self.assertIn(self.patient1.surname, [patient_view_list[0].surname,
+                                              patient_view_list[1].surname],
+                      "Name not taken in views")
+
+    def test_query_patients_and_create_list(self):
+        """ Create a list of views from a search of patients """
+
+        search_params = (None, "pot", None)
+        patient_view_list = PatientView.get_patientlist_for_params(search_params)
+        self.assertEqual(len(patient_view_list), 1,
+                         "Wrong length of view list")

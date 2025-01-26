@@ -19,6 +19,7 @@ from datetime import date
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import QDate
 from carereport import session
+from carereport.models.patient import Patient
 from carereport.views.patient_views import PatientView
 from carereport.views.scripts_patient import (PatientChanges,
                                               FindCreatePatient)
@@ -29,7 +30,7 @@ class TestCreatePatientInput(unittest.TestCase):
 
         self.app = QApplication([])
 
-    def rollback(self):
+    def tearDown(self):
 
         session.reset()
         self.app.quit()
@@ -81,7 +82,7 @@ class TestStandardInput(unittest.TestCase):
                                          sex="M")
         self.patient_form = PatientChanges(self.patient_view)
 
-    def rollback(self):
+    def tearDown(self):
 
         session.reset()
         self.app.quit()
@@ -131,10 +132,10 @@ class TestSearchCriterionsPatient(unittest.TestCase):
 
     def setUp(self):
 
-        self.application = QApplication([])
+        self.app = QApplication([])
         self.search_dialog = FindCreatePatient()
 
-    def rollback(self):
+    def tearDown(self):
 
         self.app.quit()
 
@@ -185,10 +186,10 @@ class TestDateInput(unittest.TestCase):
 
     def setUp(self):
 
-        self.application = QApplication([])
+        self.app = QApplication([])
         self.search_dialog = FindCreatePatient()
 
-    def rollback(self):
+    def tearDown(self):
 
         self.app.quit()
 
@@ -241,7 +242,7 @@ class TestPatientSelection(unittest.TestCase):
 
     def setUp(self):
 
-        self.application = QApplication([])
+        self.app = QApplication([])
         self.search_dialog = FindCreatePatient()
         self.patient_views = [PatientView(id=3,
                                           surname="Chasselair",
@@ -258,10 +259,28 @@ class TestPatientSelection(unittest.TestCase):
                                           initials="S.Y.",
                                           birthdate=date(1992, 2, 28),
                                           sex="F")]
+        self.patient1 = Patient(surname="Scaffiy", initials="E.U.",
+                               birthdate=date(1982, 10, 8), sex="F")
+        session.add(self.patient1)
+        self.patient2 = Patient(surname="Snately", initials="W.",
+                               birthdate=date(1953, 1, 12), sex="M")
+        session.add(self.patient2)
+        self.patient3 = Patient(surname="Snatch", initials="E.I.M.",
+                               birthdate=date(1973, 1, 12), sex="M")
+        session.add(self.patient3)
+        self.patient4 = Patient(surname="Frety", initials="F.R.",
+                               birthdate=date(1992, 5, 30), sex="F")
+        session.add(self.patient4)
+        session.flush()
 
-    def rollback(self):
+
+    def tearDown(self):
 
         self.app.quit()
+        
+        session.rollback()
+        # cr.Base.metadata.drop_all(cr.engine)
+        # cr.Base.metadata.create_all(cr.engine)
 
     def test_show_patients(self):
         """ Show patients in views on table """
@@ -276,3 +295,18 @@ class TestPatientSelection(unittest.TestCase):
                        "Name Chasselase not found")
         self.assertIn("Chasselinome", names,
                        "Name Chasselinome not found")
+
+    def test_show_no_patients(self):
+        """ Show no rows for empty selection """
+
+        self.search_dialog.load_patient_selection([])
+        selected_count = self.search_dialog.patientTable.rowCount()
+        self.assertFalse(selected_count, "Showing **something")
+
+    def test_return_patient_data(self):
+        """ Requested data is returned """
+
+        self.search_dialog.search_params =(None, "Snat", None)
+        patients = self.search_dialog.select_patients_from_params()
+        self.assertEqual(len(patients), 2,
+                         "Incorrect no of patients returned")

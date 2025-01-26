@@ -68,4 +68,17 @@ class PatientView():
         return cls(id = patient.id,
                    surname = patient.surname,
                    initials = patient.initials,
-                   birthdate = patient.birthdate)
+                   birthdate = patient.birthdate,
+                   sex = patient.sex)
+
+    @classmethod
+    def from_patient_list(cls, patient_list):
+        """ Create a list of patient views from a list of patients """
+
+        return [cls.from_patient(patient) for patient in patient_list]
+
+    @classmethod
+    def get_patientlist_for_params(cls, search_params):
+        """ Get a list of patients and create patient views  """
+
+        return cls.from_patient_list(Patient.patient_search(search_params))

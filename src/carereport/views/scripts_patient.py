@@ -186,6 +186,11 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
                 the_item = QTableWidgetItem(the_field, type=4015)
                 self.patientTable.setItem(row, column,the_item)
 
+    def select_patients_from_params(self):
+        """ Get patients from data for search parameters """
+
+        return PatientView.get_patientlist_for_params(self.search_params)
+
 # Code for testing purposes
 if __name__ == "__main__":
     app = QApplication([])
