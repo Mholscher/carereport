@@ -3,8 +3,8 @@
 #    This file is part of carereport.
 
 #    carereport is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Lesser General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
+#    it under the terms of the GNU Lesser General Public License as published
+#    by the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 
 #    carereport is distributed in the hope that it will be useful,
@@ -21,12 +21,13 @@ and the like. It does not have medical data nor hospitalization info
 
 from datetime import date
 from typing import List
-from sqlalchemy import (String, Date, Integer, Index, ForeignKey,
+from sqlalchemy import (String, Date, Integer, ForeignKey,
                         Index, select)
 from sqlalchemy.orm import (mapped_column, validates, relationship,
                             Mapped)
 from carereport import (Base, validate_field_existance, session)
 from .medical import DietHeader
+
 
 class EmptyNameError(ValueError):
     """ A patient must have a name """
@@ -80,25 +81,24 @@ class Patient(Base):
     initials = mapped_column(String(10), nullable=False)
     birthdate = mapped_column(Date)
     sex = mapped_column(String(1), nullable=True, server_default='')
-    medication:Mapped[List["Medication"]] = relationship(back_populates="patient")
-    exam_requests:Mapped[List["ExaminationRequest"]] =\
+    medication: Mapped[List["Medication"]] = relationship(
+                                                 back_populates="patient")
+    exam_requests: Mapped[List["ExaminationRequest"]] =\
         relationship(back_populates="patient")
-    diets:Mapped[List["DietHeader"]] =\
+    diets: Mapped[List["DietHeader"]] =\
         relationship(back_populates="patient")
-    intakes:Mapped[List["Intake"]] =\
+    intakes: Mapped[List["Intake"]] =\
         relationship(back_populates="patient")
-    diagnoses:Mapped[List["Diagnose"]] =\
+    diagnoses: Mapped[List["Diagnose"]] =\
         relationship(back_populates="patient")
 
+    __table_args__ = (Index("byname", "surname"),
+                      Index("bybirthdate", "birthdate"))
 
-
-    __table_args__= (Index("byname", "surname"),
-                     Index("bybirthdate", "birthdate"))
-
-    valid_sex = {"F" : "female",
-                 "M" : "male",
-                 "X" : "non-binary",
-                 " " : "unknown"}
+    valid_sex = {"F": "female",
+                 "M": "male",
+                 "X": "non-binary",
+                 " ": "unknown"}
 
     @validates("surname")
     def validate_name(self, key, surname):
@@ -129,19 +129,22 @@ class Patient(Base):
 
     @staticmethod
     def patient_search(search_params):
-        """ The method returns patients selected based on the parameters 
+        """ The method returns patients selected based on the parameters
 
         The search parameters are the following:
 
-            :birthdate: A date not in the future, to find patients born that day
+            :birthdate: A date not in the future, to find patients born that
+            day
             :surname: (part of) the surname of the patient(s) to be found
             :initials: (part of) the initials of the patient(s) to be found
 
+        The routine returns a list of patients.
         """
 
         patient_qry = select(Patient)
         if search_params[0]:
-            patient_qry = patient_qry.where(Patient.birthdate==search_params[0])
+            patient_qry = patient_qry.where(Patient.birthdate==
+                                            search_params[0])
         if search_params[1]:
             patient_qry = patient_qry.where(Patient.surname.like(
                                                 '%' + search_params[1] + '%'))
@@ -153,9 +156,11 @@ class Patient(Base):
 
 
 class Intake(Base):
-    """ An intake has taken place. This is the result. 
+    """ An intake has taken place. This is the result.
 
-    The intake is simply a human readable text. It is meant to tellwhat the end result was for the intake (think admitted, sent home, gave medication).
+    The intake is simply a human readable text. It is meant to tell
+    what the end result was for the intake (think admitted, sent home,
+    gave medication).
 
     Fields are
 
@@ -212,5 +217,5 @@ class IntakeResult(Base):
     intake_id = mapped_column(ForeignKey("intakes.id"), index=True)
     intake = relationship("Intake", back_populates="results")
 
-    __table_args__=(Index("by_link", "link_type",
-                          "link_key"),)
+    __table_args__ = (Index("by_link", "link_type",
+                            "link_key"),)

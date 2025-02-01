@@ -3,8 +3,8 @@
 #    This file is part of carereport.
 
 #    carereport is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Lesser General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
+#    it under the terms of the GNU Lesser General Public License as published
+#    by the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 
 #    carereport is distributed in the hope that it will be useful,
@@ -27,7 +27,7 @@ with
     #. the diagnose which was made
     #. the treatment selected for the diagnose
 
-Things related to non-medical care (ward, diet) are not defined 
+Things related to non-medical care (ward, diet) are not defined
 in this module.
 """
 
@@ -36,8 +36,7 @@ from sqlalchemy import (String, Date, Integer, text, ForeignKey, Index,
                         select, event, Boolean)
 from sqlalchemy.orm import (mapped_column, validates, relationship)
 from carereport import (Base, session, validate_field_existance)
-# from carereport.models import patient
-from ..models import patient
+
 
 class EndDateBeforeStartError(ValueError):
     """ The end date is before the start date """
@@ -110,6 +109,7 @@ class PermanentDietWithStartDateError(ValueError):
 
     pass
 
+
 class DietLinesFoodNameMissingError(ValueError):
     """ A name for a diet line is mandatory """
 
@@ -157,6 +157,7 @@ class ManagerIsMandatoryError(ValueError):
 
     pass
 
+
 class NameIsMandatoryError(ValueError):
     """ A treatment must have a name """
 
@@ -198,15 +199,14 @@ class Medication(Base):
     def medication_for_patient(cls, patient):
         """ Return current medication for a patient """
 
-        # print(patient.medication)
         return [medication for medication in patient.medication
-                if medication.end_date is None 
+                if medication.end_date is None
                 or medication.end_date >= date.today()]
-        
+
     @validates("start_date")
     def validate_start_date(self, key, start_date):
         """ Validate that the start date is before the end date """
-        
+
         if not self.end_date:
             return start_date
         if start_date >= self.end_date:
@@ -238,7 +238,7 @@ class Medication(Base):
         """ Frequency must be an unsigned integer """
 
         if (not isinstance(frequency, int)
-            or frequency < 1):
+                or frequency < 1):
             raise FrequencyMustBeANumber("Frequency must be a positive number")
         return frequency
 
@@ -258,7 +258,7 @@ class Medication(Base):
         """ User readable string representation """
 
         freq_type = (f" per {self.frequency_type}" if self.frequency_type
-                    else "")
+                     else "")
         return (f"{self.medication} {self.frequency}" + freq_type)
 
 
@@ -291,7 +291,7 @@ class ExaminationRequest(Base):
                              back_populates="examinations")
 
     __table_args__ = (Index("bydepdate", "examaning_department",
-          "date_request"),)
+                            "date_request"),)
 
     @validates("examination_kind")
     def validate_examination_kind(self, key, examination_kind):
@@ -322,7 +322,7 @@ class ExaminationRequest(Base):
             return date_execution
         if date_execution < self.date_request:
             raise ExecutionBeforeRequestError("execution cannot"
-                                             " be before request")
+                                              " be before request")
         return date_execution
 
     @validates("request_refused")
@@ -330,8 +330,8 @@ class ExaminationRequest(Base):
         """ A request can only be refused if it is not executed """
 
         if request_refused and self.date_execution:
-            raise ExecutedCannotBeRefusedError("You cannot refuse" 
-                                                " an executed request")
+            raise ExecutedCannotBeRefusedError("You cannot refuse"
+                                               " an executed request")
         return request_refused
 
     def add_to_intake(self):
@@ -353,12 +353,12 @@ class ExaminationRequest(Base):
         current_date = date.today()
         return [request for request in patient.exam_requests
                 if (not request.date_execution
-                or request.date_execution >= current_date)
+                    or request.date_execution >= current_date)
                 and not request.request_refused]
 
     @staticmethod
     def requests_for_department(department):
-        """ List outstanding requests per department. 
+        """ List outstanding requests per department.
 
         The department variable may be part (substring) of a department
         name.
@@ -366,16 +366,16 @@ class ExaminationRequest(Base):
 
         selection = select(ExaminationRequest).where(
             ExaminationRequest.examaning_department.like(
-            "%" + department + "%")).order_by(
-                ExaminationRequest.date_request.asc())
+                "%" + department + "%")).order_by(
+                    ExaminationRequest.date_request.asc())
         return list(session.execute(selection))
 
 
 class ExaminationResult(Base):
     """ The result of an examination
 
-    This is the result of an examination requested by a 
-    different department. There will be a request for it, and the 
+    This is the result of an examination requested by a
+    different department. There will be a request for it, and the
     result will link to this request.
     """
 
@@ -408,7 +408,7 @@ class DietHeader(Base):
     Diets consist of a general header (this object) and a list
     of "prescriptions" that form the rules of the diet.
 
-    Diet is an atypical item in the system. It may be a medical item 
+    Diet is an atypical item in the system. It may be a medical item
     (this patient should have a sugar limited diet for diabetes) or
     a lifestyle/care item (I am vegan). We make no difference.
     """
@@ -423,7 +423,7 @@ class DietHeader(Base):
     diet_lines = relationship("DietLines", back_populates="diet")
     patient_id = mapped_column(ForeignKey("patients.id"), index=True)
     patient = relationship("Patient", back_populates="diets")
- 
+
     @validates("start_date")
     def validate_start_date(self, key, start_date):
         """ A start date is only permitted on a temporary diet """
@@ -455,8 +455,8 @@ class DietHeader(Base):
         """ Check if this header has at least one line attached """
 
         if len(self.diet_lines) == 0:
-            raise DietHeaderMustHaveLinesError(f"Diet {self.diet_name}" 
-                                               f"must have lines")
+            raise DietHeaderMustHaveLinesError(f"Diet {self.diet_name}"
+                                               f" must have lines")
         return True
 
     def add_to_intake(self):
@@ -473,8 +473,8 @@ class DietHeader(Base):
         return [diet_header for diet_header in patient.diets
                 if diet_header.permanent_diet
                 or (diet_header.start_date <= for_date
-                and (diet_header.end_date is None
-                     or diet_header.end_date > for_date))]
+                    and (diet_header.end_date is None
+                         or diet_header.end_date > for_date))]
 
     @staticmethod
     def get_diets(patient, for_date):
@@ -488,7 +488,7 @@ class DietHeader(Base):
 
 
 class DietLines(Base):
-    """ Instructions for individual elements of a diet 
+    """ Instructions for individual elements of a diet
 
     Each line contains a rule to be considered for a diet.
     Think of "Patient should not have any sugar"
@@ -570,12 +570,12 @@ class Diagnose(Base):
 
         for examination in self.examinations:
             if self.patient != examination.patient:
-                raise DiagnoseAndExaminationNotSamePatientError("Diagnose "
-                    "and examination must be for same patient")
+                raise DiagnoseAndExaminationNotSamePatientError(
+                    "Diagnose and examination must be for same patient")
 
 
 class DiagnoseExaminations(Base):
-    """ A diagnose is based on the outcome of examinations. 
+    """ A diagnose is based on the outcome of examinations.
 
     This table links diagnoses to examinations. A diagnose will
     _usually_ be based on more examinations. In some cases, the examination
@@ -584,20 +584,20 @@ class DiagnoseExaminations(Base):
 
     __tablename__ = "diagnose_examination"
 
-    diagnose_id = mapped_column(ForeignKey("diagnose.id"),primary_key=True)
+    diagnose_id = mapped_column(ForeignKey("diagnose.id"), primary_key=True)
     examination_id = mapped_column(ForeignKey("examrequest.id"),
                                    primary_key=True)
 
 
 class Treatment(Base):
-    """ A treatment is the combination of all actions taken 
+    """ A treatment is the combination of all actions taken
 
-    Based on the diagnose the treating medical chooses actions: 
+    Based on the diagnose the treating medical chooses actions:
 
         * prescribe medication
         * do an operations
         * do nothing
-        * send the patient to another medic 
+        * send the patient to another medic
 
     Some actions (like e.g. medication) will consist of a link to
     another entity, most wil just have a description.
@@ -619,6 +619,7 @@ class Treatment(Base):
 
         return validate_field_existance(self, key, manager,
                                         ManagerIsMandatoryError)
+
     @validates("name")
     def validate_name(self, key, name):
         """ A manager is required for a treatment """
@@ -638,7 +639,7 @@ class Treatment(Base):
 
 
 class TreatmentResult(Base):
-    """ Treatments should have results. 
+    """ Treatments should have results.
 
     In so far as the results are known, these are noted in these results.
     The results are coupled to the treatment itself.

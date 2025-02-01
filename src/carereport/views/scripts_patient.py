@@ -37,6 +37,7 @@ from .patientdialog  import Ui_inputPatient
 from .patientsearch import Ui_PatientSearchDialog
 from .patient_views import PatientView
 
+sex_translations = (("F", "Vrouw"), ("M", "Man"))
 
 class PatientChanges(QDialog, Ui_inputPatient):
     """ This class handles creating and changing patient data
@@ -120,6 +121,7 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
             self.search_for_patients)
         self.cancelSearchButton.clicked.connect(self.done)
         self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.currentChanged.connect(self.arrive_at_page)
 
     def search_for_patients(self, event):
         """ The parameters are entered, cast off the search
@@ -160,6 +162,8 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
         initials_part = self.searchInitialsEdit.text()
         self.search_params = (birthdate, name_part, initials_part)
         if any(self.search_params):
+            patient_views = self.select_patients_from_params()
+            self.load_patient_selection(patient_views)
             self.stackedWidget.setCurrentIndex(1)
         else:
             self.statusLabel.setText("Vul minstens één veld!")
@@ -182,7 +186,12 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
                 elif column == 2:
                     the_field = str(patient_views[row].birthdate)
                 elif column == 3:
-                    the_field = patient_views[row].sex
+                    for code, text in sex_translations:
+                        if patient_views[row].sex == code:
+                            the_field = text
+                            break
+                    else:
+                        the_field = patient_views[row].sex
                 the_item = QTableWidgetItem(the_field, type=4015)
                 self.patientTable.setItem(row, column,the_item)
 
@@ -190,6 +199,14 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
         """ Get patients from data for search parameters """
 
         return PatientView.get_patientlist_for_params(self.search_params)
+
+    def arrive_at_page(self, page_index):
+        """ Take any action when arriving at a page of the patient selection """
+
+        if page_index == 1:
+            self.statusLabel.setText("Kies patient of maak een nieuwe")
+        return
+
 
 # Code for testing purposes
 if __name__ == "__main__":

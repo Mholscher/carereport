@@ -248,17 +248,17 @@ class TestPatientSelection(unittest.TestCase):
                                           surname="Chasselair",
                                           initials="Y.M.",
                                           birthdate=date(1987, 4, 3),
-                                          sex="F"),
+                                          sex="Vrouw"),
                               PatientView(id=7,
                                           surname="Chasselase",
                                           initials="T.Y.",
                                           birthdate=date(1987, 12, 17),
-                                          sex="F"),
+                                          sex="Vrouw"),
                               PatientView(id=7,
                                           surname="Chasselinome",
                                           initials="S.Y.",
                                           birthdate=date(1992, 2, 28),
-                                          sex="F")]
+                                          sex="Vrouw")]
         self.patient1 = Patient(surname="Scaffiy", initials="E.U.",
                                birthdate=date(1982, 10, 8), sex="F")
         session.add(self.patient1)
@@ -310,3 +310,22 @@ class TestPatientSelection(unittest.TestCase):
         patients = self.search_dialog.select_patients_from_params()
         self.assertEqual(len(patients), 2,
                          "Incorrect no of patients returned")
+
+    def test_to_selction_set_message(self):
+        """ Getting to the patient result page """
+
+        self.search_dialog.stackedWidget.setCurrentIndex(0)
+        start_text = "Now on parameter set"
+        self.search_dialog.statusLabel.setText(start_text)
+        self.search_dialog.stackedWidget.setCurrentIndex(1)
+        self.assertNotEqual(self.search_dialog.statusLabel.text(),
+                            start_text,
+                            "Status text not changed")
+
+    def test_show_sex_translated(self):
+        """ Show sex as a word, not a code """
+
+        self.search_dialog.load_patient_selection(self.patient_views)
+        # print(self.search_dialog.patientTable.item(1, 3).data(0))
+        self.assertEqual(self.search_dialog.patientTable.item(1, 3).data(0),
+                         "Vrouw", "Sex verkeerd")
