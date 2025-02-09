@@ -16,13 +16,14 @@
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
 from datetime import date
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication, QTableWidgetSelectionRange
 from PyQt6.QtCore import QDate
 from carereport import session
 from carereport.models.patient import Patient
 from carereport.views.patient_views import PatientView
 from carereport.views.scripts_patient import (PatientChanges,
                                               FindCreatePatient)
+
 
 class TestCreatePatientInput(unittest.TestCase):
 
@@ -76,10 +77,10 @@ class TestStandardInput(unittest.TestCase):
 
     def setUp(self):
         self.app = QApplication([])
-        self.patient_view =  PatientView(surname="Vanitator",
-                                         initials="O.M.",
-                                         birthdate=date(1966, 12, 6),
-                                         sex="M")
+        self.patient_view = PatientView(surname="Vanitator",
+                                        initials="O.M.",
+                                        birthdate=date(1966, 12, 6),
+                                        sex="M")
         self.patient_form = PatientChanges(self.patient_view)
 
     def tearDown(self):
@@ -106,8 +107,8 @@ class TestStandardInput(unittest.TestCase):
         self.patient_form.patient_name_edit.setText("Vanitatis")
         self.patient_form.reject()
         self.assertNotEqual(self.patient_view.surname,
-                         "Vanitatis",
-                         "Name set to view")
+                            "Vanitatis",
+                            "Name set to view")
 
     # @unittest.skip
     def test_empty_name_fails(self):
@@ -118,7 +119,7 @@ class TestStandardInput(unittest.TestCase):
         self.assertEqual(self.patient_view.surname,
                          "Vanitator",
                          "Name changed")
-        
+
     def test_empty_initials_fails(self):
         """ Empty initials does not update """
 
@@ -127,6 +128,7 @@ class TestStandardInput(unittest.TestCase):
         self.assertEqual(self.patient_view.initials,
                          "O.M.",
                          "Initials changed")
+
 
 class TestSearchCriterionsPatient(unittest.TestCase):
 
@@ -147,7 +149,7 @@ class TestSearchCriterionsPatient(unittest.TestCase):
         self.search_dialog.searchInitialsEdit.setText("Y.")
         self.search_dialog.startSearchButton.clicked.emit()
         self.assertEqual(self.search_dialog.search_params,
-                         (date(1976, 1, 17), 
+                         (date(1976, 1, 17),
                           "Sanoussin",
                           "Y."),
                          "Incorrect search_parameters")
@@ -158,7 +160,7 @@ class TestSearchCriterionsPatient(unittest.TestCase):
         self.search_dialog.birthdateEdit.setText("17-01-1976")
         self.search_dialog.startSearchButton.clicked.emit()
         self.assertEqual(self.search_dialog.search_params,
-                         (date(1976, 1, 17), 
+                         (date(1976, 1, 17),
                           "",
                           ""),
                          "Incorrect search_parameters")
@@ -236,7 +238,8 @@ class TestDateInput(unittest.TestCase):
         self.search_dialog.birthdateEdit.setText("12-31-1965")
         self.search_dialog.startSearchButton.clicked.emit()
         self.assertEqual(self.search_dialog.stackedWidget.currentIndex(),
-                        0, "Page switched")
+                         0, "Page switched")
+
 
 class TestPatientSelection(unittest.TestCase):
 
@@ -260,24 +263,22 @@ class TestPatientSelection(unittest.TestCase):
                                           birthdate=date(1992, 2, 28),
                                           sex="Vrouw")]
         self.patient1 = Patient(surname="Scaffiy", initials="E.U.",
-                               birthdate=date(1982, 10, 8), sex="F")
+                                birthdate=date(1982, 10, 8), sex="F")
         session.add(self.patient1)
         self.patient2 = Patient(surname="Snately", initials="W.",
-                               birthdate=date(1953, 1, 12), sex="M")
+                                birthdate=date(1953, 1, 12), sex="M")
         session.add(self.patient2)
         self.patient3 = Patient(surname="Snatch", initials="E.I.M.",
-                               birthdate=date(1973, 1, 12), sex="M")
+                                birthdate=date(1973, 1, 12), sex="M")
         session.add(self.patient3)
         self.patient4 = Patient(surname="Frety", initials="F.R.",
-                               birthdate=date(1992, 5, 30), sex="F")
+                                birthdate=date(1992, 5, 30), sex="F")
         session.add(self.patient4)
         session.flush()
-
 
     def tearDown(self):
 
         self.app.quit()
-        
         session.rollback()
         # cr.Base.metadata.drop_all(cr.engine)
         # cr.Base.metadata.create_all(cr.engine)
@@ -287,14 +288,14 @@ class TestPatientSelection(unittest.TestCase):
 
         self.search_dialog.load_patient_selection(self.patient_views)
         selected_count = self.search_dialog.patientTable.rowCount()
-        names = [self.search_dialog.patientTable.item(row, 0).text() 
+        names = [self.search_dialog.patientTable.item(row, 0).text()
                  for row in range(selected_count)]
         self.assertIn("Chasselair", names,
-                       "Name Chasselair not found")
+                      "Name Chasselair not found")
         self.assertIn("Chasselase", names,
-                       "Name Chasselase not found")
+                      "Name Chasselase not found")
         self.assertIn("Chasselinome", names,
-                       "Name Chasselinome not found")
+                      "Name Chasselinome not found")
 
     def test_show_no_patients(self):
         """ Show no rows for empty selection """
@@ -306,12 +307,12 @@ class TestPatientSelection(unittest.TestCase):
     def test_return_patient_data(self):
         """ Requested data is returned """
 
-        self.search_dialog.search_params =(None, "Snat", None)
+        self.search_dialog.search_params = (None, "Snat", None)
         patients = self.search_dialog.select_patients_from_params()
         self.assertEqual(len(patients), 2,
                          "Incorrect no of patients returned")
 
-    def test_to_selction_set_message(self):
+    def test_to_selection_set_message(self):
         """ Getting to the patient result page """
 
         self.search_dialog.stackedWidget.setCurrentIndex(0)
@@ -329,3 +330,38 @@ class TestPatientSelection(unittest.TestCase):
         # print(self.search_dialog.patientTable.item(1, 3).data(0))
         self.assertEqual(self.search_dialog.patientTable.item(1, 3).data(0),
                          "Vrouw", "Sex verkeerd")
+
+    def test_change_search_criteria(self):
+        """ Pressing the change search shows the criteria input """
+
+        self.search_dialog.stackedWidget.setCurrentIndex(1)
+        self.search_dialog.changeSearchButton.click()
+        self.assertEqual(self.search_dialog.stackedWidget.currentIndex(), 0,
+                         "Index not changed")
+
+    @unittest.skip
+    def test_cancel_search_from_selection(self):
+        """ Cancel search from the selection stack pane """
+
+        self.search_dialog.stackedWidget.setCurrentIndex(1)
+        self.search_dialog.cancelButton.click()
+        self.assertTrueś(self.search_dialog.isHidden(),
+                         "Dialog visible changed")
+
+    def test_existing_selected(self):
+        """ When "Choose" is selected, the dialog signals accepted """
+
+        self.search_dialog.load_patient_selection(self.patient_views)
+        range = QTableWidgetSelectionRange(1, 0, 1, 3)
+        self.search_dialog.patientTable.setRangeSelected(range, True)
+        selection_ranges = self.search_dialog.patientTable.selectedRanges()
+        self.assertEqual(selection_ranges[0].columnCount(),
+                         4, "Wrong number of columns")
+
+    def test_set_id_on_column_0(self):
+        """ The id from patient_view is set on column 0 """
+
+        self.search_dialog.load_patient_selection(self.patient_views)
+        self.assertEqual(self.search_dialog.patientTable.item(1, 0).id,
+                         self.patient_views[1].id,
+                         "Incorrect Id set")

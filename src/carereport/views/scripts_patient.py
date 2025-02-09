@@ -3,8 +3,8 @@
 #    This file is part of carereport.
 
 #    carereport is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Lesser General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
+#    it under the terms of the GNU Lesser General Public License as published
+#    by the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 
 #    carereport is distributed in the hope that it will be useful,
@@ -25,19 +25,14 @@ of the views interfacing class, PatientView, for the interface to the model.
 import sys
 from datetime import date
 from PyQt6.QtCore import QDate
-from PyQt6.QtWidgets import (QApplication, QDialog, QListWidget,
-                             QTreeWidget, QLabel, QWidget,
-                             QVBoxLayout, QHBoxLayout, QSizePolicy,
-                             QPushButton, 
-                             QLineEdit, QTextEdit, QListWidgetItem,
-                             QTreeWidgetItem, QTableWidgetItem)
-from PyQt6.QtGui import QValidator
+from PyQt6.QtWidgets import (QApplication, QDialog, QTableWidgetItem)
 from .helpers import not_empty
-from .patientdialog  import Ui_inputPatient
+from .patientdialog import Ui_inputPatient
 from .patientsearch import Ui_PatientSearchDialog
 from .patient_views import PatientView
 
 sex_translations = (("F", "Vrouw"), ("M", "Man"))
+
 
 class PatientChanges(QDialog, Ui_inputPatient):
     """ This class handles creating and changing patient data
@@ -60,7 +55,7 @@ class PatientChanges(QDialog, Ui_inputPatient):
                                      patient_view.birthdate.month,
                                      patient_view.birthdate.day))
         self.date_edit.setMaximumDate(QDate.currentDate())
-        self.buttonBox.accepted.connect(self.accept) # type: ignore
+        self.buttonBox.accepted.connect(self.accept)  # type: ignore
         self.patient_name_edit.focusInEvent = self.focusOnName
         self.initials_edit.focusInEvent = self.focusOnInitials
         self.patient_view = patient_view
@@ -120,8 +115,10 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
         self.startSearchButton.clicked.connect(
             self.search_for_patients)
         self.cancelSearchButton.clicked.connect(self.done)
+        self.cancelButton.clicked.connect(self.done)
         self.stackedWidget.setCurrentIndex(0)
         self.stackedWidget.currentChanged.connect(self.arrive_at_page)
+        self.changeSearchButton.clicked.connect(self.show_criteria_selection)
 
     def search_for_patients(self, event):
         """ The parameters are entered, cast off the search
@@ -131,8 +128,8 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
             :birthdate: the birthdate of thepatient to search for
             :surname: (part of) the surname of the patient
             :initials: (part of) the initials of the patient
-    
-        Not all of the items are required. One of them is enough 
+
+        Not all of the items are required. One of them is enough
         to start the search. Of course, the more fields are filled,
         the more precise the search, i.e. less results.
         """
@@ -147,7 +144,8 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
                 try:
                     birthdate_list[seqno] = int(datepart)
                 except ValueError:
-                    self.statusLabel.setText(f"Datum {birthdate_text} ongeldig")
+                    self.statusLabel.setText("Datum"
+                                             f"{birthdate_text} ongeldig")
                     return
             try:
                 birthdate = date(birthdate_list[2], birthdate_list[1],
@@ -155,7 +153,7 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
             except ValueError:
                 # print(f"Datum {birthdate_text} ongeldig")
                 self.statusLabel.setText(f"Datum {birthdate_text} ongeldig")
-                return                
+                return
         else:
             birthdate = None
         name_part = self.SearchNameEdit.text()
@@ -173,9 +171,9 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
 
         self.patientTable.setColumnCount(4)
         self.patientTable.setHorizontalHeaderLabels(["Naam",
-                                                    "Voorletters",
-                                                    "Geboortedatum",
-                                                    "Sexe"])
+                                                     "Voorletters",
+                                                     "Geboortedatum",
+                                                     "Sexe"])
         self.patientTable.setRowCount(len(patient_views))
         for row in range(len(patient_views)):
             for column in range(4):
@@ -193,7 +191,9 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
                     else:
                         the_field = patient_views[row].sex
                 the_item = QTableWidgetItem(the_field, type=4015)
-                self.patientTable.setItem(row, column,the_item)
+                if column == 0:
+                    the_item.id = patient_views[row].id
+                self.patientTable.setItem(row, column, the_item)
 
     def select_patients_from_params(self):
         """ Get patients from data for search parameters """
@@ -201,11 +201,17 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
         return PatientView.get_patientlist_for_params(self.search_params)
 
     def arrive_at_page(self, page_index):
-        """ Take any action when arriving at a page of the patient selection """
+        """ Take action when arriving at a page of the patient selection """
 
         if page_index == 1:
             self.statusLabel.setText("Kies patient of maak een nieuwe")
         return
+
+    def show_criteria_selection(self, event):
+        """ Show the selection criteria for changing """
+
+        self.stackedWidget.setCurrentIndex(0)
+        self.statusLabel.setText("Pas zoekcriteria aan")
 
 
 # Code for testing purposes

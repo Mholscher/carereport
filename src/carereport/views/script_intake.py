@@ -3,8 +3,8 @@
 #    This file is part of carereport.
 
 #    carereport is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Lesser General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
+#    it under the terms of the GNU Lesser General Public License as published
+#    by the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 
 #    carereport is distributed in the hope that it will be useful,
@@ -17,15 +17,16 @@
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional
-from carereport import (Patient, Medication, ExaminationRequest)
+from carereport import (Medication, ExaminationRequest)
 from .patient_views import PatientView
+
 
 @dataclass
 class NewIntake():
     """ The class holds all data that can or should be produced for an intake
     of a patient.
 
-    The intake may involve creating a new patient, that is 
+    The intake may involve creating a new patient, that is
     taken care of by a separate script, there you can find the data you
     needed for a patient.
 
@@ -36,10 +37,11 @@ class NewIntake():
 
     """
 
-    patient : Optional[PatientView] = None
-    date_intake : date = date.today()
-    medication : list[Medication] = field(default_factory=list)
+    patient: Optional[PatientView] = None
+    date_intake: date = date.today()
+    medication: list[Medication] = field(default_factory=list)
     examinations: list[ExaminationRequest] = field(default_factory=list)
+
 
 @dataclass
 class ExistingIntake():
@@ -49,8 +51,8 @@ class ExistingIntake():
     have no option to be empty or a default. Any data in the lists in the
     class is new data.
     """
-    
-    patient : PatientView
-    date_intake : date
-    medication : list[Medication] = field(default_factory=list)
+
+    patient: PatientView
+    date_intake: date
+    medication: list[Medication] = field(default_factory=list)
     examinations: list[ExaminationRequest] = field(default_factory=list)

@@ -3,8 +3,8 @@
 #    This file is part of carereport.
 
 #    carereport is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Lesser General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
+#    it under the terms of the GNU Lesser General Public License as published
+#    by the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 
 #    carereport is distributed in the hope that it will be useful,
@@ -14,7 +14,7 @@
 
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import date
 from typing import Optional
 from carereport import (Patient, Medication, ExaminationRequest)
@@ -29,12 +29,12 @@ class ChangingIdOfEntityError(ValueError):
 @dataclass
 class PatientView():
     """ View class associated with the Patient class """
-    
-    id : Optional[int]  = None
-    surname : str = ""
-    initials : str = ""
-    birthdate : date = date(1990, 1, 1)
-    sex : str = " "
+
+    id: Optional[int] = None
+    surname: str = ""
+    initials: str = ""
+    birthdate: date = date(1990, 1, 1)
+    sex: str = " "
 
     def to_patient(self):
         """ Create a patient in the model from this view """
@@ -65,11 +65,11 @@ class PatientView():
     def from_patient(cls, patient):
         """ Create a view for the patient """
 
-        return cls(id = patient.id,
-                   surname = patient.surname,
-                   initials = patient.initials,
-                   birthdate = patient.birthdate,
-                   sex = patient.sex)
+        return cls(id=patient.id,
+                   surname=patient.surname,
+                   initials=patient.initials,
+                   birthdate=patient.birthdate,
+                   sex=patient.sex)
 
     @classmethod
     def from_patient_list(cls, patient_list):
