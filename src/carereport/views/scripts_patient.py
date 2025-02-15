@@ -120,6 +120,7 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
         self.stackedWidget.currentChanged.connect(self.arrive_at_page)
         self.changeSearchButton.clicked.connect(self.show_criteria_selection)
         self.patientSelectButton.clicked.connect(self.selected_patient)
+        self.newPatientButton.clicked.connect(self.create_new_patient)
 
     def search_for_patients(self, event):
         """ The parameters are entered, cast off the search
@@ -221,6 +222,9 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
         TODO: refactor to use selectedranges
         """
 
+        if self.patientTable.selectedRanges() == []:
+            self.statusLabel.setText("Selecteer eerst een patiënt")
+            return
         for row in range(self.patientTable.rowCount()):
             if self.patientTable.item(row, 0).isSelected():
                 for patient_view in self.patient_views:
@@ -228,6 +232,12 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
                         QApplication.instance().current_patient_view =\
                             patient_view
                 break
+        self.accept()
+
+    def create_new_patient(self):
+        """ Create a new patient_view and make this current """
+
+        QApplication.instance().current_patient_view = PatientView()
         self.accept()
 
 

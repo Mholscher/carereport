@@ -3,8 +3,8 @@
 #    This file is part of carereport.
 
 #    carereport is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Lesser General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
+#    it under the terms of the GNU Lesser General Public License as published
+#    by the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 
 #    carereport is distributed in the hope that it will be useful,
@@ -284,6 +284,8 @@ class TestPatientSelection(unittest.TestCase):
 
         # self.app.quit()
         session.rollback()
+        if hasattr(QApplication.instance(), "current_patient_view"):
+            del QApplication.instance().current_patient_view
         # cr.Base.metadata.drop_all(cr.engine)
         # cr.Base.metadata.create_all(cr.engine)
 
@@ -343,14 +345,14 @@ class TestPatientSelection(unittest.TestCase):
         self.assertEqual(self.search_dialog.stackedWidget.currentIndex(), 0,
                          "Index not changed")
 
-    @unittest.skip
+    # @unittest.skip
     def test_cancel_search_from_selection(self):
         """ Cancel search from the selection stack pane """
 
         self.search_dialog.stackedWidget.setCurrentIndex(1)
         self.search_dialog.cancelButton.click()
-        self.assertTrueś(self.search_dialog.isHidden(),
-                         "Dialog visible changed")
+        self.assertTrue(self.search_dialog.isHidden(),
+                        "Dialog visible changed")
 
     def test_existing_selected(self):
         """ When "Choose" is selected, the dialog signals accepted """
@@ -380,3 +382,33 @@ class TestPatientSelection(unittest.TestCase):
         self.assertEqual(QApplication.instance().current_patient_view,
                          self.patient_views[1],
                          "Current_patient not set")
+
+    def test_no_selection_cannot_set_current(self):
+        """ We try to set current without patient being selected: fail """
+
+        self.search_dialog.load_patient_selection(self.patient_views)
+        self.search_dialog.selected_patient()
+        self.assertFalse(hasattr(QApplication.instance(),
+                                 "current_patient_view"),
+                         "Current_patient set without selection")
+
+    def test_no_selection_choose_selected_fails(self):
+        """ We stay in the dialog if select is clicked w/o selection """
+
+        self.search_dialog.stackedWidget.setCurrentIndex(1)
+        self.search_dialog.patientSelectButton.click()
+        self.assertFalse(self.search_dialog.isVisible(),
+                         "Dialog no longer visible")
+
+    def test_new_patient_sets_empty_current(self):
+        """ Choose create new sets empty current """
+
+        self.search_dialog.load_patient_selection(self.patient_views)
+        self.search_dialog.newPatientButton.click()
+        self.assertTrue(hasattr(QApplication.instance(),
+                                "current_patient_view"),
+                        "No patient current")
+        current = QApplication.instance().current_patient_view
+        self.assertFalse(all([current.id, current.surname,
+                             current.initials, current.sex]),
+                         "Field in current filled")
