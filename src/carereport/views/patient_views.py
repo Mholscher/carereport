@@ -17,7 +17,7 @@
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional
-from carereport import (Patient, Medication, ExaminationRequest)
+from carereport import (app, Patient, Medication, ExaminationRequest)
 
 
 class ChangingIdOfEntityError(ValueError):
@@ -82,3 +82,8 @@ class PatientView():
         """ Get a list of patients and create patient views  """
 
         return cls.from_patient_list(Patient.patient_search(search_params))
+
+    def set_current_patient(self):
+        """ The current patient for the application is set to this view """
+
+        app.current_patient_view = self

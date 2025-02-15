@@ -119,6 +119,7 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
         self.stackedWidget.setCurrentIndex(0)
         self.stackedWidget.currentChanged.connect(self.arrive_at_page)
         self.changeSearchButton.clicked.connect(self.show_criteria_selection)
+        self.patientSelectButton.clicked.connect(self.selected_patient)
 
     def search_for_patients(self, event):
         """ The parameters are entered, cast off the search
@@ -194,6 +195,7 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
                 if column == 0:
                     the_item.id = patient_views[row].id
                 self.patientTable.setItem(row, column, the_item)
+        self.patient_views = patient_views
 
     def select_patients_from_params(self):
         """ Get patients from data for search parameters """
@@ -204,7 +206,7 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
         """ Take action when arriving at a page of the patient selection """
 
         if page_index == 1:
-            self.statusLabel.setText("Kies patient of maak een nieuwe")
+            self.statusLabel.setText("Kies patiënt of maak een nieuwe")
         return
 
     def show_criteria_selection(self, event):
@@ -212,6 +214,21 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
 
         self.stackedWidget.setCurrentIndex(0)
         self.statusLabel.setText("Pas zoekcriteria aan")
+
+    def selected_patient(self):
+        """ Set the selected patient form the table as the current one.
+
+        TODO: refactor to use selectedranges
+        """
+
+        for row in range(self.patientTable.rowCount()):
+            if self.patientTable.item(row, 0).isSelected():
+                for patient_view in self.patient_views:
+                    if patient_view.id == self.patientTable.item(row, 0).id:
+                        QApplication.instance().current_patient_view =\
+                            patient_view
+                break
+        self.accept()
 
 
 # Code for testing purposes

@@ -22,6 +22,7 @@ from sqlalchemy.orm import DeclarativeBase
 from configparser import ConfigParser
 from sqlalchemy import (String, DateTime)
 from sqlalchemy.orm import sessionmaker, mapped_column
+from PyQt6.QtWidgets import QApplication
 
 config = ConfigParser()
 success = config.read('localcarereport.cfg')
@@ -33,6 +34,7 @@ if success:
 else:
     raise FileNotFoundError('Configuration file not loaded!')
 
+
 class Base(DeclarativeBase):
     """ Add mutation fields to each table """
 
@@ -40,6 +42,9 @@ class Base(DeclarativeBase):
                                onupdate=getpass.getuser)
     updated_at = mapped_column(DateTime, default=datetime.now, 
                                onupdate=datetime.now)
+
+
+app = QApplication([])
 
 
 def validate_field_existance(instance, key, field, raise_on_empty):

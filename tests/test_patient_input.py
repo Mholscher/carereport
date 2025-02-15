@@ -18,7 +18,7 @@ import unittest
 from datetime import date
 from PyQt6.QtWidgets import QApplication, QTableWidgetSelectionRange
 from PyQt6.QtCore import QDate
-from carereport import session
+from carereport import session, app
 from carereport.models.patient import Patient
 from carereport.views.patient_views import PatientView
 from carereport.views.scripts_patient import (PatientChanges,
@@ -29,12 +29,13 @@ class TestCreatePatientInput(unittest.TestCase):
 
     def setUp(self):
 
-        self.app = QApplication([])
+        # self.app = QApplication([])
+        pass
 
     def tearDown(self):
 
         session.reset()
-        self.app.quit()
+        # self.app.quit()
 
     def test_create_for_view(self):
         """ The basics: create the screen for a view """
@@ -76,7 +77,8 @@ class TestCreatePatientInput(unittest.TestCase):
 class TestStandardInput(unittest.TestCase):
 
     def setUp(self):
-        self.app = QApplication([])
+
+        # self.app = QApplication([])
         self.patient_view = PatientView(surname="Vanitator",
                                         initials="O.M.",
                                         birthdate=date(1966, 12, 6),
@@ -86,7 +88,7 @@ class TestStandardInput(unittest.TestCase):
     def tearDown(self):
 
         session.reset()
-        self.app.quit()
+        # self.app.quit()
 
     def test_accept_input(self):
         """ Accepting input updates the view """
@@ -134,12 +136,13 @@ class TestSearchCriterionsPatient(unittest.TestCase):
 
     def setUp(self):
 
-        self.app = QApplication([])
+        # self.app = QApplication([])
         self.search_dialog = FindCreatePatient()
 
     def tearDown(self):
 
-        self.app.quit()
+        # self.app.quit()
+        pass
 
     def test_create_search_criterions(self):
         """ Create criteria for a search of patient """
@@ -188,12 +191,13 @@ class TestDateInput(unittest.TestCase):
 
     def setUp(self):
 
-        self.app = QApplication([])
+        # self.app = QApplication([])
         self.search_dialog = FindCreatePatient()
 
     def tearDown(self):
 
-        self.app.quit()
+        # self.app.quit()
+        pass
 
     def test_full_date(self):
         """ Test that a date with all digits work """
@@ -245,7 +249,7 @@ class TestPatientSelection(unittest.TestCase):
 
     def setUp(self):
 
-        self.app = QApplication([])
+        # self.app = QApplication([])
         self.search_dialog = FindCreatePatient()
         self.patient_views = [PatientView(id=3,
                                           surname="Chasselair",
@@ -257,7 +261,7 @@ class TestPatientSelection(unittest.TestCase):
                                           initials="T.Y.",
                                           birthdate=date(1987, 12, 17),
                                           sex="Vrouw"),
-                              PatientView(id=7,
+                              PatientView(id=12,
                                           surname="Chasselinome",
                                           initials="S.Y.",
                                           birthdate=date(1992, 2, 28),
@@ -278,7 +282,7 @@ class TestPatientSelection(unittest.TestCase):
 
     def tearDown(self):
 
-        self.app.quit()
+        # self.app.quit()
         session.rollback()
         # cr.Base.metadata.drop_all(cr.engine)
         # cr.Base.metadata.create_all(cr.engine)
@@ -365,3 +369,14 @@ class TestPatientSelection(unittest.TestCase):
         self.assertEqual(self.search_dialog.patientTable.item(1, 0).id,
                          self.patient_views[1].id,
                          "Incorrect Id set")
+
+    def test_select_patient_as_current(self):
+        """ A patient form the table is selected to be the cuurent one """
+
+        self.search_dialog.load_patient_selection(self.patient_views)
+        range = QTableWidgetSelectionRange(1, 0, 1, 3)
+        self.search_dialog.patientTable.setRangeSelected(range, True)
+        self.search_dialog.selected_patient()
+        self.assertEqual(QApplication.instance().current_patient_view,
+                         self.patient_views[1],
+                         "Current_patient not set")
