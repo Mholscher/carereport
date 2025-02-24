@@ -12,7 +12,14 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_inputPatient(object):
     def setupUi(self, inputPatient):
         inputPatient.setObjectName("inputPatient")
+        inputPatient.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
         inputPatient.resize(400, 336)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(inputPatient.sizePolicy().hasHeightForWidth())
+        inputPatient.setSizePolicy(sizePolicy)
+        inputPatient.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.NoContextMenu)
         self.buttonBox = QtWidgets.QDialogButtonBox(parent=inputPatient)
         self.buttonBox.setGeometry(QtCore.QRect(40, 280, 341, 32))
         self.buttonBox.setOrientation(QtCore.Qt.Orientation.Horizontal)

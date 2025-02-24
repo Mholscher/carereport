@@ -16,7 +16,7 @@
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
 from datetime import date
-from PyQt6.QtWidgets import QApplication, QTableWidgetSelectionRange
+from PyQt6.QtWidgets import QTableWidgetSelectionRange
 from PyQt6.QtCore import QDate
 from carereport import session, app
 from carereport.models.patient import Patient
@@ -284,8 +284,8 @@ class TestPatientSelection(unittest.TestCase):
 
         # self.app.quit()
         session.rollback()
-        if hasattr(QApplication.instance(), "current_patient_view"):
-            del QApplication.instance().current_patient_view
+        if hasattr(app, "current_patient_view"):
+            del app.current_patient_view
         # cr.Base.metadata.drop_all(cr.engine)
         # cr.Base.metadata.create_all(cr.engine)
 
@@ -379,7 +379,7 @@ class TestPatientSelection(unittest.TestCase):
         range = QTableWidgetSelectionRange(1, 0, 1, 3)
         self.search_dialog.patientTable.setRangeSelected(range, True)
         self.search_dialog.selected_patient()
-        self.assertEqual(QApplication.instance().current_patient_view,
+        self.assertEqual(app.current_patient_view,
                          self.patient_views[1],
                          "Current_patient not set")
 
@@ -388,7 +388,7 @@ class TestPatientSelection(unittest.TestCase):
 
         self.search_dialog.load_patient_selection(self.patient_views)
         self.search_dialog.selected_patient()
-        self.assertFalse(hasattr(QApplication.instance(),
+        self.assertFalse(hasattr(app,
                                  "current_patient_view"),
                          "Current_patient set without selection")
 
@@ -405,10 +405,10 @@ class TestPatientSelection(unittest.TestCase):
 
         self.search_dialog.load_patient_selection(self.patient_views)
         self.search_dialog.newPatientButton.click()
-        self.assertTrue(hasattr(QApplication.instance(),
+        self.assertTrue(hasattr(app,
                                 "current_patient_view"),
                         "No patient current")
-        current = QApplication.instance().current_patient_view
+        current = app.current_patient_view
         self.assertFalse(all([current.id, current.surname,
                              current.initials, current.sex]),
                          "Field in current filled")

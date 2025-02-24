@@ -133,7 +133,8 @@ class Patient(Base):
 
         The search parameters are the following:
 
-            :birthdate: A date not in the future, to find patients born that day
+            :birthdate: A date not in the future, to find patients born that
+                            day
             :surname: (part of) the surname of the patient(s) to be found
             :initials: (part of) the initials of the patient(s) to be found
 

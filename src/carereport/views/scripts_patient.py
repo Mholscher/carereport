@@ -27,6 +27,7 @@ from datetime import date
 from PyQt6.QtCore import QDate
 from PyQt6.QtWidgets import (QApplication, QDialog, QTableWidgetItem)
 from .helpers import not_empty
+from carereport import app
 from .patientdialog import Ui_inputPatient
 from .patientsearch import Ui_PatientSearchDialog
 from .patient_views import PatientView
@@ -44,6 +45,7 @@ class PatientChanges(QDialog, Ui_inputPatient):
         super().__init__()
 
         self.setupUi(self)
+        self.setFixedSize(400, 336)
         self.patient_name_edit.setText(patient_view.surname)
         self.initials_edit.setText(patient_view.initials)
         self.sex_box.addItems(["Vrouw", "Man"])
@@ -111,6 +113,7 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
         super().__init__()
 
         self.setupUi(self)
+        self.setFixedSize(434, 300)
         self.search_params = tuple()
         self.startSearchButton.clicked.connect(
             self.search_for_patients)
@@ -121,6 +124,8 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
         self.changeSearchButton.clicked.connect(self.show_criteria_selection)
         self.patientSelectButton.clicked.connect(self.selected_patient)
         self.newPatientButton.clicked.connect(self.create_new_patient)
+        self.patientTable.itemSelectionChanged.connect(
+            self.on_selection_changed)
 
     def search_for_patients(self, event):
         """ The parameters are entered, cast off the search
@@ -207,6 +212,7 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
         """ Take action when arriving at a page of the patient selection """
 
         if page_index == 1:
+            self.patientSelectButton.setEnabled(False)
             self.statusLabel.setText("Kies patiënt of maak een nieuwe")
         return
 
@@ -229,8 +235,8 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
             if self.patientTable.item(row, 0).isSelected():
                 for patient_view in self.patient_views:
                     if patient_view.id == self.patientTable.item(row, 0).id:
-                        QApplication.instance().current_patient_view =\
-                            patient_view
+                        app.current_patient_view = patient_view
+                        break
                 break
         self.accept()
 
@@ -240,10 +246,30 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
         QApplication.instance().current_patient_view = PatientView()
         self.accept()
 
+    def on_selection_changed(self, event):
+        """ If a selection is changed, we may enable/disable buttons """
+
+        if self.patientTable.selectedRanges() != []:
+            self.patientSelectButton.setEnabled(True)
+        else:
+            self.patientTable.patientSelectButton.setEnabled(False)
+
+
+class FindCreateChangePatient(object):
+    """ Find or create a patient and change the data
+
+    The user is allowed to enter some search criteria, and if the patient is
+    found, select it as the current patient. After that the patient can be
+    changed. The change will be saved to the database or rolled back.
+    """
+
+    pass
+
 
 # Code for testing purposes
 if __name__ == "__main__":
-    app = QApplication([])
+    patient_view = PatientView()
     main_window = FindCreatePatient()
-    main_window.open()
+    # main_window = PatientChanges(patient_view)
+    main_window.show()
     sys.exit(app.exec())

@@ -32,7 +32,8 @@ class NewIntake():
 
         :patient: The patient the intake was for; None means new patient
         :date_intake: The day this intake is being done. Default: today.
-        :medication: Medication for the patient. Maybe previously prescribed or newly prescribed
+        :medication: Medication for the patient. Maybe previously prescribed or
+                        newly prescribed
         :examinations: Examinations requested from the immediate intake
 
     """
