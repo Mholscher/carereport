@@ -246,7 +246,7 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
         QApplication.instance().current_patient_view = PatientView()
         self.accept()
 
-    def on_selection_changed(self, event):
+    def on_selection_changed(self):
         """ If a selection is changed, we may enable/disable buttons """
 
         if self.patientTable.selectedRanges() != []:

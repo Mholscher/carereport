@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Zorg rapportage</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>1</horstretch>
+     <verstretch>1</verstretch>
+    </sizepolicy>
+   </property>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_Bestand">
+    <property name="title">
+     <string>&amp;Bestand</string>
+    </property>
+    <addaction name="actionAfsluiten"/>
+   </widget>
+   <widget class="QMenu" name="menuI_ntake">
+    <property name="title">
+     <string>I&amp;ntake</string>
+    </property>
+    <addaction name="actionNieuw"/>
+    <addaction name="actionAanpassen"/>
+   </widget>
+   <widget class="QMenu" name="menu_Pati_nt">
+    <property name="title">
+     <string>&amp;Patiënt</string>
+    </property>
+    <addaction name="actionPatientZoeken"/>
+   </widget>
+   <addaction name="menu_Bestand"/>
+   <addaction name="menuI_ntake"/>
+   <addaction name="menu_Pati_nt"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionAfsluiten">
+   <property name="text">
+    <string>A&amp;fsluiten</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::QuitRole</enum>
+   </property>
+  </action>
+  <action name="action_Nieuw">
+   <property name="text">
+    <string>&amp;Nieuw</string>
+   </property>
+   <property name="shortcut">
+    <string>Backspace, Backspace</string>
+   </property>
+  </action>
+  <action name="actionAanpassen">
+   <property name="text">
+    <string>&amp;Aanpassen</string>
+   </property>
+  </action>
+  <action name="actionPatientZoeken">
+   <property name="text">
+    <string>&amp;Zoeken</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionNieuw">
+   <property name="text">
+    <string>N&amp;ieuw</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

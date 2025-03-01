@@ -17,8 +17,10 @@
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional
+from PyQt6.QtCore import pyqtSignal
 from carereport import (Medication, ExaminationRequest)
 from .patient_views import PatientView
+from .scripts_patient import FindCreateChangePatient
 
 
 @dataclass
@@ -42,6 +44,10 @@ class NewIntake():
     date_intake: date = date.today()
     medication: list[Medication] = field(default_factory=list)
     examinations: list[ExaminationRequest] = field(default_factory=list)
+
+    def __post_init__(self):
+
+        self.intake_script = FindCreateChangePatient()
 
 
 @dataclass

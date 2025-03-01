@@ -59,3 +59,4 @@ from carereport.models.patient import Patient, Intake
 from carereport.models.medical import (Medication, ExaminationRequest,
                                        ExaminationResult, DietHeader,
                                        DietLines, Diagnose)
+from carereport.views import care_app
