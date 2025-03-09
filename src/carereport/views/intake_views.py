@@ -17,14 +17,12 @@
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional
-from PyQt6.QtCore import pyqtSignal
-from carereport import (Medication, ExaminationRequest)
-from .patient_views import PatientView
-from .scripts_patient import FindCreateChangePatient
+# from PyQt6.QtCore import pyqtSignal
+from carereport import (app, Medication, ExaminationRequest)
 
 
 @dataclass
-class NewIntake():
+class IntakeView():
     """ The class holds all data that can or should be produced for an intake
     of a patient.
 
@@ -40,26 +38,15 @@ class NewIntake():
 
     """
 
-    patient: Optional[PatientView] = None
+    patient: Optional["PatientView"] = None
     date_intake: date = date.today()
     medication: list[Medication] = field(default_factory=list)
-    examinations: list[ExaminationRequest] = field(default_factory=list)
+    examinations: list[ExaminationRequest] = field(default_factory=list) 
 
-    def __post_init__(self):
+    @classmethod
+    def create_view_from_intake(cls, intake):
+        """ Create a view from an intake in the database """
 
-        self.intake_script = FindCreateChangePatient()
-
-
-@dataclass
-class ExistingIntake():
-    """ Data for an existing intake for a patient.
-
-    The data is the same as for a new intake, the patient and date of intake
-    have no option to be empty or a default. Any data in the lists in the
-    class is new data.
-    """
-
-    patient: PatientView
-    date_intake: date
-    medication: list[Medication] = field(default_factory=list)
-    examinations: list[ExaminationRequest] = field(default_factory=list)
+        intake_view = cls(patient=app.current_patient_view)
+        app.current_patient_view.current_intake = intake_view
+        return intake_view

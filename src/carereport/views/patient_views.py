@@ -17,7 +17,8 @@
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional
-from carereport import (app, Patient, Medication, ExaminationRequest)
+from carereport import (app, Patient)  # , Medication, ExaminationRequest)
+from .intake_views import IntakeView
 
 
 class ChangingIdOfEntityError(ValueError):
@@ -35,6 +36,7 @@ class PatientView():
     initials: str = ""
     birthdate: date = date(1990, 1, 1)
     sex: str = " "
+    current_intake: IntakeView = None
 
     def to_patient(self):
         """ Create a patient in the model from this view """
