@@ -13,10 +13,10 @@ Care report module models.medical
 .. automodule:: carereport.models.medical
    :members:
 
-Care report module views.script_intake
+Care report module views.intake_views
 ---------------------------------------
 
-.. automodule:: carereport.views.script_intake
+.. automodule:: carereport.views.intake_views
    :members:
 
 Care report module views.scripts_patient
