@@ -45,7 +45,7 @@ class PatientView():
                        surname=self.surname,
                        initials=self.initials,
                        birthdate=self.birthdate,
-                       sex=self.sex)
+                       sex=self.sex if self.sex is not None else " ")
 
     def update_patient(self, patient):
         """ Update patient with data from this view """
@@ -60,7 +60,7 @@ class PatientView():
         if self.birthdate != patient.birthdate:
             patient.birthdate = self.birthdate
         if self.sex != patient.sex:
-            patient.sex = self.sex
+            patient.sex = self.sex if self.sex is not None else " "
         return patient
 
     @classmethod

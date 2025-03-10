@@ -18,7 +18,13 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional
 # from PyQt6.QtCore import pyqtSignal
-from carereport import (app, Medication, ExaminationRequest)
+from carereport import (app, Intake, Medication, ExaminationRequest)
+
+
+class NoCurrentPatientError(BaseException):
+    """ There must be a current patient for the requested operation """
+
+    pass
 
 
 @dataclass
@@ -41,12 +47,22 @@ class IntakeView():
     patient: Optional["PatientView"] = None
     date_intake: date = date.today()
     medication: list[Medication] = field(default_factory=list)
-    examinations: list[ExaminationRequest] = field(default_factory=list) 
+    examinations: list[ExaminationRequest] = field(default_factory=list)
 
     @classmethod
     def create_view_from_intake(cls, intake):
         """ Create a view from an intake in the database """
 
+        if not hasattr(app, "current_patient_view"):
+            raise NoCurrentPatientError("No current patient found")
+
         intake_view = cls(patient=app.current_patient_view)
         app.current_patient_view.current_intake = intake_view
         return intake_view
+
+    def create_intake_from_view(self):
+        """ Create an intake from this view """
+
+        patient_model = app.current_patient_view.to_patient()
+        return Intake(patient=patient_model,
+                      date_intake=self.date_intake)

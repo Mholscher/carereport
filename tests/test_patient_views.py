@@ -3,8 +3,8 @@
 #    This file is part of carereport.
 
 #    carereport is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Lesser General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
+#    it under the terms of the GNU Lesser General Public License as published
+#    by the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 
 #    carereport is distributed in the hope that it will be useful,
@@ -34,7 +34,6 @@ class TestCreatePatientView(unittest.TestCase):
         cr.Base.metadata.drop_all(cr.engine)
         cr.Base.metadata.create_all(cr.engine)
 
-
     def test_create_patient_view(self):
         """ Test creating a patient view of a patient in a session """
 
@@ -56,11 +55,22 @@ class TestCreatePatientView(unittest.TestCase):
                                    initials="T.V.",
                                    birthdate=date(2018, 5, 9),
                                    sex="M")
-        patient=patient_view.to_patient()
+        patient = patient_view.to_patient()
         self.assertEqual(patient.birthdate, patient_view.birthdate,
                          "Birthdate not filled correctly")
         self.assertEqual(patient.surname, patient_view.surname,
                          "Surname not filled correctly")
+
+    def test_view_no_sex_should_bcome_space(self):
+        """ A patient should have a default sex of unknown """
+
+        patient_view = PatientView(surname="Boresti",
+                                   initials="V.",
+                                   birthdate=date(2011, 2, 9),
+                                   sex=None)
+        patient = patient_view.to_patient()
+        self.assertEqual(patient.sex, " ",
+                         "Sex not defaulted correctly")
 
 
 class TestUpdatePatientFromView(unittest.TestCase):
@@ -68,10 +78,10 @@ class TestUpdatePatientFromView(unittest.TestCase):
     def setUp(self):
 
         self.patient = Patient(id = 12,
-                          surname="Lambavi",
-                          initials="K.P.",
-                          birthdate=date(1996, 2, 9),
-                          sex="F")
+                              surname="Lambavi",
+                              initials="K.P.",
+                              birthdate=date(1996, 2, 9),
+                              sex="F")
         self.patient_view = PatientView(id=12,
                                         surname="Chibouste",
                                         initials="L.",

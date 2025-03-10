@@ -18,7 +18,8 @@ import unittest
 from datetime import date
 from carereport import (app, session, Intake, Patient)
 from carereport.views.patient_views import PatientView
-from carereport.views.intake_views import IntakeView
+from carereport.views.intake_views import (IntakeView, NoCurrentPatientError)
+
 
 class TestViewFromToIntake(unittest.TestCase):
 
@@ -53,3 +54,18 @@ class TestViewFromToIntake(unittest.TestCase):
         self.assertEqual(self.patient_view.current_intake, view,
                          "Current intake not in patient view")
 
+    def test_create_intake_from_view(self):
+        """ Create an intake from the view """
+
+        intake_view = IntakeView(patient=self.patient_view,
+                                 date_intake=date(2025, 1, 12))
+        intake = intake_view.create_intake_from_view()
+        self.assertEqual(intake.date_intake, intake_view.date_intake,
+                         "Data not transferred correctly")
+
+    def test_no_intake_wo_patient(self):
+        """ An intake can only be created if there is current patient """
+
+        del app.current_patient_view
+        with self.assertRaises(NoCurrentPatientError):
+            intake_view = IntakeView.create_view_from_intake(self.intake)
