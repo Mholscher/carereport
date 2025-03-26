@@ -14,6 +14,11 @@
 
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
+""" The intake views contains intake classes used for the intake of new
+patients into the system. It serves to marshall data between the windows
+of the system and the model for an intake.
+"""
+
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional
@@ -66,3 +71,4 @@ class IntakeView():
         patient_model = app.current_patient_view.to_patient()
         return Intake(patient=patient_model,
                       date_intake=self.date_intake)
+

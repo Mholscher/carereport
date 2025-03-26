@@ -22,7 +22,8 @@ from carereport import session, app
 from carereport.models.patient import Patient
 from carereport.views.patient_views import PatientView
 from carereport.views.scripts_patient import (PatientChanges,
-                                              FindCreatePatient)
+                                              FindCreatePatient,
+                                              FindCreateChangePatient)
 
 
 class TestCreatePatientInput(unittest.TestCase):
@@ -402,7 +403,7 @@ class TestPatientSelection(unittest.TestCase):
 
     def test_new_patient_sets_empty_current(self):
         """ Choose create new sets empty current """
-
+        import pdb; pdb.set_trace()
         self.search_dialog.load_patient_selection(self.patient_views)
         self.search_dialog.newPatientButton.click()
         self.assertTrue(hasattr(app,
@@ -412,3 +413,69 @@ class TestPatientSelection(unittest.TestCase):
         self.assertFalse(all([current.id, current.surname,
                              current.initials, current.sex]),
                          "Field in current filled")
+
+    def test_click_new_patient_emits_accepted(self):
+        """ Click a new patient should return accepted """
+
+        def has_accepted():
+
+            nonlocal str_result
+            str_result = "Success!"
+
+        str_result = "Failure"
+        self.search_dialog.load_patient_selection(self.patient_views)
+        self.search_dialog.accepted.connect(has_accepted)
+        self.search_dialog.newPatientButton.click()
+        self.assertEqual(str_result, "Success!",
+                         "No success :=(")
+
+
+class TestFindCreateChange(unittest.TestCase):
+
+    def setUp(self):
+
+        # self.app = QApplication([])
+        self.patient_views = [PatientView(id=3,
+                                          surname="Chasselair",
+                                          initials="Y.M.",
+                                          birthdate=date(1987, 4, 3),
+                                          sex="Vrouw"),
+                              PatientView(id=7,
+                                          surname="Chasselase",
+                                          initials="T.Y.",
+                                          birthdate=date(1987, 12, 17),
+                                          sex="Vrouw"),
+                              PatientView(id=12,
+                                          surname="Chasselinome",
+                                          initials="S.Y.",
+                                          birthdate=date(1992, 2, 28),
+                                          sex="Vrouw")]
+        self.patient1 = Patient(surname="Scaffiy", initials="E.U.",
+                                birthdate=date(1982, 10, 8), sex="F")
+        session.add(self.patient1)
+        self.patient2 = Patient(surname="Snately", initials="W.",
+                                birthdate=date(1953, 1, 12), sex="M")
+        session.add(self.patient2)
+        self.patient3 = Patient(surname="Snatch", initials="E.I.M.",
+                                birthdate=date(1973, 1, 12), sex="M")
+        session.add(self.patient3)
+        self.patient4 = Patient(surname="Frety", initials="F.R.",
+                                birthdate=date(1992, 5, 30), sex="F")
+        session.add(self.patient4)
+        session.flush()
+
+    def tearDown(self):
+
+        # self.app.quit()
+        session.rollback()
+        if hasattr(app, "current_patient_view"):
+            del app.current_patient_view
+        # cr.Base.metadata.drop_all(cr.engine)
+        # cr.Base.metadata.create_all(cr.engine)
+
+    def test_can_create_search_box(self):
+        """ A search box will be created """
+
+        find_etc = FindCreateChangePatient()
+        self.assertTrue(hasattr(find_etc, "find_patient"))
+

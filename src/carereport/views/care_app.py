@@ -58,8 +58,13 @@ class CareAppWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setCentralWidget(CentralForm())
         self.actionAfsluiten.triggered.connect(self.close)
+        # self.actionNieuw.triggered.connect(FindCreateChangePatient)
         self.show()
         self.statusbar.showMessage("Carereport klaar")
 
 
 careapp_mainwindow = CareAppWindow()
+from .scripts_patient import NewIntake
+careapp_mainwindow.new_intake = NewIntake()
+careapp_mainwindow.actionNieuw.triggered.connect(
+    careapp_mainwindow.new_intake.ask_user)

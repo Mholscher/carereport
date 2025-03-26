@@ -24,6 +24,7 @@ from carereport.models.patient import (Patient, Intake, IntakeResult)
 from carereport.models.medical import (DietHeader, DietLines, Medication,
                                        ExaminationRequest)
 
+
 class TestCreatePatient(unittest.TestCase):
 
     def setUp(self):
@@ -33,7 +34,6 @@ class TestCreatePatient(unittest.TestCase):
     def tearDown(self):
 
         session.reset()
-        
 
     def test_create_patient(self):
         """ Test creating a patient in the current session """
@@ -129,21 +129,20 @@ class TestGetPatients(unittest.TestCase):
     def setUp(self):
 
         self.patient1 = Patient(surname="Talany", initials="K.I.",
-                               birthdate=date(1998, 12, 1), sex="F")
+                                birthdate=date(1998, 12, 1), sex="F")
         session.add(self.patient1)
         self.patient2 = Patient(surname="Balny", initials="T.G.",
-                               birthdate=date(1991, 11, 10), sex="M")
+                                birthdate=date(1991, 11, 10), sex="M")
         session.add(self.patient2)
         self.patient3 = Patient(surname="Kalanach", initials="P.I.",
-                               birthdate=date(1985, 2, 21), sex="F")
+                                birthdate=date(1985, 2, 21), sex="F")
         session.add(self.patient3)
         self.patient4 = Patient(surname="Kaltenbach", initials="A.I.",
-                               birthdate=date(1991, 11, 10), sex="F")
+                                birthdate=date(1991, 11, 10), sex="F")
         session.add(self.patient4)
         session.flush()
 
     def tearDown(self):
-
 
         session.reset()
         cr.Base.metadata.drop_all(cr.engine)
@@ -174,9 +173,6 @@ class TestGetPatients(unittest.TestCase):
         patients = Patient.patient_search(search_params)
         self.assertEqual(patients[0].surname, self.patient4.surname,
                          "Patient name incorrect")
-        
-
-        
 
 
 class TestIntake(unittest.TestCase):
@@ -184,38 +180,36 @@ class TestIntake(unittest.TestCase):
     def setUp(self):
 
         self.patient1 = Patient(surname="Scanda", initials="K.U.",
-                               birthdate=date(1982, 10, 8), sex="F")
+                                birthdate=date(1982, 10, 8), sex="F")
         self.patient2 = Patient(surname="Bandala", initials="W.",
-                               birthdate=date(1953, 1, 28), sex="M")
+                                birthdate=date(1953, 1, 28), sex="M")
         self.diethead1 = DietHeader(diet_name="Vega",
-                                    permanent_diet = True)
+                                    permanent_diet=True)
         self.diethead2 = DietHeader(diet_name="Drink much",
-                                    start_date = date(2024, 8, 7),
+                                    start_date=date(2024, 8, 7),
                                     end_date=None)
         self.diethead3 = DietHeader(diet_name="Carbo hydrate",
-                                    start_date = date(2024, 7, 12),
+                                    start_date=date(2024, 7, 12),
                                     end_date=date(2025, 2, 17))
         self.dietline1 = DietLines(food_name="Water",
                                    application_type="One liter a day",
                                    description="Drink at least 1 liter"
                                                " of water a day",
-                                    diet=self.diethead2)
+                                   diet=self.diethead2)
         self.dietline2 = DietLines(food_name="Protein",
                                    application_type="50 grams a day",
                                    description="Should eat at least 50"
                                                " grams of proteins daily",
-                                    diet=self.diethead1)
+                                   diet=self.diethead1)
         self.dietline1 = DietLines(food_name="Cookies",
                                    application_type="Don't eat",
                                    description="Not now, not ever, never",
-                                    diet=self.diethead3)
+                                   diet=self.diethead3)
         self.intake1 = Intake(date_intake=date(2024, 8, 22),
                               result="Patient admitted",
                               patient=self.patient1)
 
-
     def tearDown(self):
-
 
         session.reset()
         cr.Base.metadata.drop_all(cr.engine)
@@ -232,8 +226,8 @@ class TestIntake(unittest.TestCase):
         """ An intake cannot be in the future """
 
         with self.assertRaises(ValueError):
-            intake2 = Intake(date_intake=date.today() + timedelta(days=1),
-                             result="Flunks!")
+            Intake(date_intake=date.today() + timedelta(days=1),
+                   result="Flunks!")
             session.flush()
 
     def test_intake_can_be_today(self):
@@ -258,30 +252,30 @@ class TestIntakeResults(unittest.TestCase):
         self.diethead1 = DietHeader(diet_name="Vega",
                                     permanent_diet = True)
         self.diethead2 = DietHeader(diet_name="Drink much",
-                                    start_date = date(2024, 8, 7),
+                                    start_date=date(2024, 8, 7),
                                     end_date=None)
         self.diethead3 = DietHeader(diet_name="Carbo hydrate",
-                                    start_date = date(2024, 7, 12),
+                                    start_date=date(2024, 7, 12),
                                     end_date=date(2025, 2, 17))
         self.dietline1 = DietLines(food_name="Water",
                                    application_type="One liter a day",
                                    description="Drink at least 1 liter"
                                                " of water a day",
-                                    diet=self.diethead2)
+                                   diet=self.diethead2)
         self.dietline2 = DietLines(food_name="Protein",
                                    application_type="50 grams a day",
                                    description="Should eat at least 50"
                                                " grams of proteins daily",
-                                    diet=self.diethead1)
+                                   diet=self.diethead1)
         self.dietline1 = DietLines(food_name="Cookies",
                                    application_type="Don't eat",
                                    description="Not now, not ever, never",
-                                    diet=self.diethead3)
+                                   diet=self.diethead3)
         self.intake1 = Intake(date_intake=date(2024, 8, 22),
                               result="Patient admitted",
                               patient=self.patient1)
         self.medication1 = Medication(medication="Asphacron 70mg",
-                                 patient=self.patient1)
+                                     patient=self.patient1)
         self.exam_request = ExaminationRequest(examination_kind="Röntgen"
                                                " scan",
                                                examaning_department= "Radio",
@@ -309,8 +303,8 @@ class TestIntakeResults(unittest.TestCase):
         found = 0
         for intakeresult in self.intake1.results:
             if (intakeresult.link_type == "medi0001"
-                and intakeresult.link_key == self.medication1.id):
-                    found += 1
+               and intakeresult.link_key == self.medication1.id):
+                found += 1
         self.assertTrue(found > 0, "No link found")
 
     def test_can_link_intake_examination(self):
@@ -322,7 +316,7 @@ class TestIntakeResults(unittest.TestCase):
         found = 0
         for intakeresult in self.intake1.results:
             if (intakeresult.link_type == "exam0001"
-                and intakeresult.link_key == self.exam_request.id):
+               and intakeresult.link_key == self.exam_request.id):
                     found += 1
         self.assertTrue(found > 0, "No link found")
 
@@ -335,6 +329,6 @@ class TestIntakeResults(unittest.TestCase):
         found = 0
         for intakeresult in self.intake1.results:
             if (intakeresult.link_type == "diet0001"
-                and intakeresult.link_key == self.diethead1.id):
-                    found += 1
+               and intakeresult.link_key == self.diethead1.id):
+                found += 1
         self.assertTrue(found > 0, "No link found")

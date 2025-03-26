@@ -24,3 +24,10 @@ Care report module views.scripts_patient
 
 .. automodule:: carereport.views.scripts_patient
    :members:
+
+Care report module views.patient_views
+---------------------------------------
+
+.. automodule:: carereport.views.patient_views
+   :members:
+    

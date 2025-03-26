@@ -68,4 +68,4 @@ class TestViewFromToIntake(unittest.TestCase):
 
         del app.current_patient_view
         with self.assertRaises(NoCurrentPatientError):
-            intake_view = IntakeView.create_view_from_intake(self.intake)
+            IntakeView.create_view_from_intake(self.intake)

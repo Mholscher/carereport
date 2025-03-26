@@ -14,6 +14,11 @@
 
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
+""" The patient views contains classes used for recording patient
+data into the system. It serves to marshall data between the windows
+of the system and the model for a patient.
+"""
+
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional
@@ -45,7 +50,7 @@ class PatientView():
                        surname=self.surname,
                        initials=self.initials,
                        birthdate=self.birthdate,
-                       sex=self.sex if self.sex is not None else " ")
+                       sex=" " if self.sex is None else self.sex)
 
     def update_patient(self, patient):
         """ Update patient with data from this view """
@@ -60,7 +65,7 @@ class PatientView():
         if self.birthdate != patient.birthdate:
             patient.birthdate = self.birthdate
         if self.sex != patient.sex:
-            patient.sex = self.sex if self.sex is not None else " "
+            patient.sex = " " if self.sex is None else self.sex
         return patient
 
     @classmethod

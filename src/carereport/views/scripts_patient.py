@@ -27,12 +27,16 @@ from datetime import date
 from PyQt6.QtCore import QDate
 from PyQt6.QtWidgets import (QApplication, QDialog, QTableWidgetItem)
 from .helpers import not_empty
-from carereport import app
+from carereport import app, session
+from .care_app import careapp_mainwindow as main_window
 from .patientdialog import Ui_inputPatient
 from .patientsearch import Ui_PatientSearchDialog
 from .patient_views import PatientView
+from .intake_views import IntakeView
+# from PyQt6.QtTest import QSignalSpy
 
-sex_translations = (("F", "Vrouw"), ("M", "Man"))
+sex_translations = (("F", "Vrouw"), ("M", "Man"),
+                    (" ", "Onbekend"))
 
 
 class PatientChanges(QDialog, Ui_inputPatient):
@@ -40,9 +44,9 @@ class PatientChanges(QDialog, Ui_inputPatient):
 
     It exchanges the data with the model through the patient view.
     """
-    def __init__(self, patient_view):
+    def __init__(self, patient_view, parent=None):
 
-        super().__init__()
+        super().__init__(parent=parent)
 
         self.setupUi(self)
         self.setFixedSize(400, 336)
@@ -57,7 +61,7 @@ class PatientChanges(QDialog, Ui_inputPatient):
                                      patient_view.birthdate.month,
                                      patient_view.birthdate.day))
         self.date_edit.setMaximumDate(QDate.currentDate())
-        self.buttonBox.accepted.connect(self.accept)  # type: ignore
+        self.accepted.connect(self.on_accept)  # type: ignore
         self.patient_name_edit.focusInEvent = self.focusOnName
         self.initials_edit.focusInEvent = self.focusOnInitials
         self.patient_view = patient_view
@@ -79,19 +83,18 @@ class PatientChanges(QDialog, Ui_inputPatient):
                                            edited_date.month(),
                                            edited_date.day())
 
-    def accept(self):
+    def on_accept(self):
         """ The input was OK-ed by the user """
 
         filled_name = not_empty(self.patient_name_edit)
         filled_initials = not_empty(self.initials_edit)
         if filled_name and filled_initials:
             self.update_patient_view()
-            return super().accept()
+            return
         if not filled_name:
             self.nameerrorlabel.setText("*")
         if not filled_initials:
             self.initialserrorlabel.setText("*")
-        return
 
     def focusOnName(self, event):
         """ Reset error label """
@@ -108,9 +111,9 @@ class PatientChanges(QDialog, Ui_inputPatient):
 
 class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
 
-    def __init__(self):
+    def __init__(self, parent=None):
 
-        super().__init__()
+        super().__init__(parent=parent)
 
         self.setupUi(self)
         self.setFixedSize(434, 300)
@@ -255,6 +258,17 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
             self.patientTable.patientSelectButton.setEnabled(False)
 
 
+def NewIntake():
+    """ Create a new intake for an existing or new patient
+
+    The data and event handlers are in the 
+    :py:func:`FindCreateChangePatient`
+    type
+    """
+
+    return FindCreateChangePatient()
+
+
 class FindCreateChangePatient(object):
     """ Find or create a patient and change the data
 
@@ -263,13 +277,37 @@ class FindCreateChangePatient(object):
     changed. The change will be saved to the database or rolled back.
     """
 
-    pass
+    def __init__(self):
+
+        self.find_patient = FindCreatePatient(parent=main_window)
+        self.find_patient.accepted.connect(self.patient_ready)
+
+    def ask_user(self):
+        """ Find or create the patient using "my" find/create """
+
+        self.find_patient.show()
+
+    def patient_ready(self):
+        """ Start the patient modify for intake """
+
+        self.modify_patient = PatientChanges(app.current_patient_view)
+        self.modify_patient.current_intake = IntakeView(
+            patient=self.modify_patient)
+        self.modify_patient.accepted.connect(self.update_patient_data)
+        self.modify_patient.show()
+
+    def update_patient_data(self):
+        """ Update patient + add to session """
+
+        patient = app.current_patient_view.to_patient()
+        intake = self.modify_patient.current_intake.create_intake_from_view()
+        session.add(patient, intake)
 
 
 # Code for testing purposes
 if __name__ == "__main__":
     patient_view = PatientView()
-    main_window = FindCreatePatient()
-    # main_window = PatientChanges(patient_view)
-    main_window.show()
+    window = FindCreatePatient()
+    # window = PatientChanges(patient_view)
+    window.show()
     sys.exit(app.exec())
