@@ -95,24 +95,27 @@ class TestUpdatePatientFromView(unittest.TestCase):
     def test_update_patient(self):
         """ Update the patient data from the view """
 
-        self.patient_view.update_patient(self.patient)
-        self.assertEqual(self.patient.surname, self.patient_view.surname,
+        self.patient_view.patient = self.patient_view.to_patient()
+        self.patient_view.update_patient()
+        self.assertEqual(self.patient_view.patient.surname, self.patient_view.surname,
                          "Surname not updated")
-        self.assertEqual(self.patient.birthdate, self.patient_view.birthdate,
+        self.assertEqual(self.patient_view.patient.birthdate, self.patient_view.birthdate,
                          "Date of birth not updated")
 
     def test_ids_must_match(self):
         """ We must not overwrite data if ids differ """
 
+        self.patient_view.patient = self.patient
         self.patient.id = 8
         with self.assertRaises(ValueError):
-            self.patient_view.update_patient(self.patient)
+            self.patient_view.update_patient()
 
     def test_unmatched_id_in_view_permitted(self):
         """ Can have not matching ids if in view is None """
 
+        self.patient_view.patient = self.patient_view.to_patient()
         self.patient_view.id = None
-        self.patient_view.update_patient(self.patient)
+        self.patient_view.update_patient()
         self.assertEqual(self.patient.id, 12,
                          "id changed")
 

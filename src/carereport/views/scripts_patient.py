@@ -26,8 +26,9 @@ import sys
 from datetime import date
 from PyQt6.QtCore import QDate
 from PyQt6.QtWidgets import (QApplication, QDialog, QTableWidgetItem)
+from sqlalchemy import select
 from .helpers import not_empty
-from carereport import app, session
+from carereport import (app, session, Patient)
 from .care_app import careapp_mainwindow as main_window
 from .patientdialog import Ui_inputPatient
 from .patientsearch import Ui_PatientSearchDialog
@@ -261,7 +262,7 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
 def NewIntake():
     """ Create a new intake for an existing or new patient
 
-    The data and event handlers are in the 
+    The data and event handlers are in the
     :py:func:`FindCreateChangePatient`
     type
     """
@@ -299,9 +300,14 @@ class FindCreateChangePatient(object):
     def update_patient_data(self):
         """ Update patient + add to session """
 
-        patient = app.current_patient_view.to_patient()
+        if app.current_patient_view.id:
+            self.modify_patient.patient_view.update_patient()
+        else:
+            patient = app.current_patient_view.to_patient()
+            session.add(patient)
         intake = self.modify_patient.current_intake.create_intake_from_view()
-        session.add(patient, intake)
+        session.add(intake)
+        session.commit()
 
 
 # Code for testing purposes

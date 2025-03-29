@@ -403,7 +403,7 @@ class TestPatientSelection(unittest.TestCase):
 
     def test_new_patient_sets_empty_current(self):
         """ Choose create new sets empty current """
-        import pdb; pdb.set_trace()
+
         self.search_dialog.load_patient_selection(self.patient_views)
         self.search_dialog.newPatientButton.click()
         self.assertTrue(hasattr(app,
@@ -478,4 +478,3 @@ class TestFindCreateChange(unittest.TestCase):
 
         find_etc = FindCreateChangePatient()
         self.assertTrue(hasattr(find_etc, "find_patient"))
-

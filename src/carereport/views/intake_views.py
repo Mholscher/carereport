@@ -68,7 +68,7 @@ class IntakeView():
     def create_intake_from_view(self):
         """ Create an intake from this view """
 
-        patient_model = app.current_patient_view.to_patient()
+        patient_model = app.current_patient_view.patient
         return Intake(patient=patient_model,
                       date_intake=self.date_intake)
 

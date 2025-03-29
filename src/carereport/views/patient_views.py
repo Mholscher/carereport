@@ -42,6 +42,7 @@ class PatientView():
     birthdate: date = date(1990, 1, 1)
     sex: str = " "
     current_intake: IntakeView = None
+    patient: Optional[Patient] = None
 
     def to_patient(self):
         """ Create a patient in the model from this view """
@@ -52,21 +53,21 @@ class PatientView():
                        birthdate=self.birthdate,
                        sex=" " if self.sex is None else self.sex)
 
-    def update_patient(self, patient):
+    def update_patient(self):
         """ Update patient with data from this view """
 
-        if self.id is not None and self.id != patient.id:
+        if self.id is not None and self.id != self.patient.id:
             raise ChangingIdOfEntityError("Programming error: "
                                           "Patient view is not for patient")
-        if self.surname != patient.surname:
-            patient.surname = self.surname
-        if self.initials != patient.initials:
-            patient.initials = self.initials
-        if self.birthdate != patient.birthdate:
-            patient.birthdate = self.birthdate
-        if self.sex != patient.sex:
-            patient.sex = " " if self.sex is None else self.sex
-        return patient
+        if self.surname != self.patient.surname:
+            self.patient.surname = self.surname
+        if self.initials != self.patient.initials:
+            self.patient.initials = self.initials
+        if self.birthdate != self.patient.birthdate:
+            self.patient.birthdate = self.birthdate
+        if self.sex != self.patient.sex:
+            self.patient.sex = " " if self.sex is None else self.sex
+        return self.patient
 
     @classmethod
     def from_patient(cls, patient):
@@ -76,7 +77,8 @@ class PatientView():
                    surname=patient.surname,
                    initials=patient.initials,
                    birthdate=patient.birthdate,
-                   sex=patient.sex)
+                   sex=patient.sex,
+                   patient=patient)
 
     @classmethod
     def from_patient_list(cls, patient_list):
