@@ -24,6 +24,7 @@ from sqlalchemy import (String, DateTime)
 from sqlalchemy.orm import sessionmaker, mapped_column
 from PyQt6.QtWidgets import QApplication
 
+
 config = ConfigParser()
 success = config.read('localcarereport.cfg')
 if success:
@@ -59,4 +60,4 @@ from carereport.models.patient import Patient, Intake
 from carereport.models.medical import (Medication, ExaminationRequest,
                                        ExaminationResult, DietHeader,
                                        DietLines, Diagnose)
-from carereport.views import care_app
+import carereport.views.scripts_patient

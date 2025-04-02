@@ -26,10 +26,9 @@ import sys
 from datetime import date
 from PyQt6.QtCore import QDate
 from PyQt6.QtWidgets import (QApplication, QDialog, QTableWidgetItem)
-from sqlalchemy import select
 from .helpers import not_empty
-from carereport import (app, session, Patient)
-from .care_app import careapp_mainwindow as main_window
+from carereport import (app, session)
+from .care_app import mainwindow
 from .patientdialog import Ui_inputPatient
 from .patientsearch import Ui_PatientSearchDialog
 from .patient_views import PatientView
@@ -280,8 +279,10 @@ class FindCreateChangePatient(object):
 
     def __init__(self):
 
-        self.find_patient = FindCreatePatient(parent=main_window)
+        self.find_patient = FindCreatePatient(parent=mainwindow)
+        mainwindow.find_or_create_patient = self
         self.find_patient.accepted.connect(self.patient_ready)
+        self.ask_user()
 
     def ask_user(self):
         """ Find or create the patient using "my" find/create """
@@ -308,7 +309,10 @@ class FindCreateChangePatient(object):
         intake = self.modify_patient.current_intake.create_intake_from_view()
         session.add(intake)
         session.commit()
+        mainwindow.find_or_create_patient = None
 
+
+mainwindow.actionNieuw.triggered.connect(FindCreateChangePatient)
 
 # Code for testing purposes
 if __name__ == "__main__":

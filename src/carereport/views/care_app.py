@@ -19,11 +19,9 @@ QApplication, it is set up in the package.
 Here we create and set up the main window of the application and fill it
 with the actions the user can take."""
 
-from PyQt6.QtCore import QDate
 from PyQt6.QtWidgets import QMainWindow, QWidget
 from .mainwindow import Ui_MainWindow
 from .formhandle import Ui_Form
-from carereport import app
 
 
 class CentralForm(QWidget, Ui_Form):
@@ -63,8 +61,4 @@ class CareAppWindow(QMainWindow, Ui_MainWindow):
         self.statusbar.showMessage("Carereport klaar")
 
 
-careapp_mainwindow = CareAppWindow()
-from .scripts_patient import NewIntake
-careapp_mainwindow.new_intake = NewIntake()
-careapp_mainwindow.actionNieuw.triggered.connect(
-    careapp_mainwindow.new_intake.ask_user)
+mainwindow = CareAppWindow()
