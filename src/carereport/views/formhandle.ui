@@ -50,7 +50,7 @@
         <bool>false</bool>
        </property>
        <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
        </property>
        <property name="readOnly">
         <bool>true</bool>
@@ -151,7 +151,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string extracomment="Save the entered data to the database">Sla de gegevens in deze tab op</string>
+        <string extracomment="Save the entered data to the database">Sla gewijzigde gegevens voor deze patient op</string>
        </property>
        <property name="text">
         <string>Op&amp;slaan</string>
@@ -198,7 +198,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Verwijder alle gegevens in deze tab</string>
+        <string>Verwijder alle gegevens in de geselecteerde regel</string>
        </property>
        <property name="text">
         <string>&amp;Leeg maken</string>

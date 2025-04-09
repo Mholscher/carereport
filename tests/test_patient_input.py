@@ -21,6 +21,7 @@ from PyQt6.QtCore import QDate
 from carereport import session, app
 from carereport.models.patient import Patient
 from carereport.views.patient_views import PatientView
+from carereport.views.care_app import mainwindow
 from carereport.views.scripts_patient import (PatientChanges,
                                               FindCreatePatient,
                                               FindCreateChangePatient)
@@ -478,3 +479,55 @@ class TestFindCreateChange(unittest.TestCase):
 
         find_etc = FindCreateChangePatient()
         self.assertTrue(hasattr(find_etc, "find_patient"))
+
+
+class TestCreateChangeSideEffects(unittest.TestCase):
+
+    def setUp(self):
+
+        self.patient_views = [PatientView(id=3,
+                                          surname="Chasselair",
+                                          initials="Y.M.",
+                                          birthdate=date(1987, 4, 3),
+                                          sex="Vrouw"),
+                              PatientView(id=7,
+                                          surname="Chasselase",
+                                          initials="T.Y.",
+                                          birthdate=date(1987, 12, 17),
+                                          sex="Vrouw"),
+                              PatientView(id=12,
+                                          surname="Chasselinome",
+                                          initials="S.Y.",
+                                          birthdate=date(1992, 2, 28),
+                                          sex="Vrouw")]
+        self.patient1 = Patient(surname="Scaffiy", initials="E.U.",
+                                birthdate=date(1982, 10, 8), sex="F")
+        session.add(self.patient1)
+        self.patient2 = Patient(surname="Snately", initials="W.",
+                                birthdate=date(1953, 1, 12), sex="M")
+        session.add(self.patient2)
+        self.patient3 = Patient(surname="Snatch", initials="E.I.M.",
+                                birthdate=date(1973, 1, 12), sex="M")
+        session.add(self.patient3)
+        self.patient4 = Patient(surname="Frety", initials="F.R.",
+                                birthdate=date(1992, 5, 30), sex="F")
+        session.add(self.patient4)
+        session.flush()
+
+    def tearDown(self):
+
+        # self.app.quit()
+        session.rollback()
+        if hasattr(app, "current_patient_view"):
+            del app.current_patient_view
+
+    def test_change_current(self):
+        """ Changing the current patient view changes fields """
+
+        self.patient_views[1].set_current_patient()
+        user_form = mainwindow.main_form
+        print(self.patient_views[1].surname + ', ' + self.patient_views[1].initials,)
+        self.assertEqual(user_form.patientnameedit.text(),
+                         self.patient_views[1].surname + ', ' +
+                         self.patient_views[1].initials,
+                         "Name not to screen")

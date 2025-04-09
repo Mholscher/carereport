@@ -19,7 +19,9 @@ QApplication, it is set up in the package.
 Here we create and set up the main window of the application and fill it
 with the actions the user can take."""
 
+from PyQt6.QtCore import QLocale
 from PyQt6.QtWidgets import QMainWindow, QWidget
+from carereport import app
 from .mainwindow import Ui_MainWindow
 from .formhandle import Ui_Form
 
@@ -54,11 +56,26 @@ class CareAppWindow(QMainWindow, Ui_MainWindow):
 
         super().__init__()
         self.setupUi(self)
-        self.setCentralWidget(CentralForm())
+        self.main_form = CentralForm()
+        self.setCentralWidget(self.main_form)
         self.actionAfsluiten.triggered.connect(self.close)
-        # self.actionNieuw.triggered.connect(FindCreateChangePatient)
         self.show()
         self.statusbar.showMessage("Carereport klaar")
 
+    def on_current_patient_change(self):
+        """ Set all fields/attributes in the main window
+
+        This does not entail changes to e.g. the tabwidget with the patient
+        detail data, like diet medication etc. This is the responsibility
+        of the individual tab pages
+        """
+
+        self.main_form.patientnameedit.setText(app.current_patient_view.surname
+                                               + ', ' +
+                                               app.current_patient_view.initials)
+        born = app.current_patient_view.birthdate
+        loc = QLocale()
+        self.main_form.birthdateedit.setText(loc.toString(born,
+                                             loc.FormatType.ShortFormat))
 
 mainwindow = CareAppWindow()

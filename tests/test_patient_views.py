@@ -55,10 +55,10 @@ class TestCreatePatientView(unittest.TestCase):
                                    initials="T.V.",
                                    birthdate=date(2018, 5, 9),
                                    sex="M")
-        patient = patient_view.to_patient()
-        self.assertEqual(patient.birthdate, patient_view.birthdate,
+        patient_view.to_patient()
+        self.assertEqual(patient_view.patient.birthdate, patient_view.birthdate,
                          "Birthdate not filled correctly")
-        self.assertEqual(patient.surname, patient_view.surname,
+        self.assertEqual(patient_view.patient.surname, patient_view.surname,
                          "Surname not filled correctly")
 
     def test_view_no_sex_should_bcome_space(self):
@@ -68,8 +68,8 @@ class TestCreatePatientView(unittest.TestCase):
                                    initials="V.",
                                    birthdate=date(2011, 2, 9),
                                    sex=None)
-        patient = patient_view.to_patient()
-        self.assertEqual(patient.sex, " ",
+        patient_view.to_patient()
+        self.assertEqual(patient_view.patient.sex, " ",
                          "Sex not defaulted correctly")
 
 
@@ -86,7 +86,8 @@ class TestUpdatePatientFromView(unittest.TestCase):
                                         surname="Chibouste",
                                         initials="L.",
                                         birthdate=date(1995, 2, 13),
-                                        sex="M")
+                                        sex="M",
+                                        patient=self.patient)
 
     def tearDown(self):
 
@@ -95,7 +96,6 @@ class TestUpdatePatientFromView(unittest.TestCase):
     def test_update_patient(self):
         """ Update the patient data from the view """
 
-        self.patient_view.patient = self.patient_view.to_patient()
         self.patient_view.update_patient()
         self.assertEqual(self.patient_view.patient.surname, self.patient_view.surname,
                          "Surname not updated")
@@ -113,7 +113,6 @@ class TestUpdatePatientFromView(unittest.TestCase):
     def test_unmatched_id_in_view_permitted(self):
         """ Can have not matching ids if in view is None """
 
-        self.patient_view.patient = self.patient_view.to_patient()
         self.patient_view.id = None
         self.patient_view.update_patient()
         self.assertEqual(self.patient.id, 12,

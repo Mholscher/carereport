@@ -25,6 +25,7 @@ of the views interfacing class, PatientView, for the interface to the model.
 import sys
 from datetime import date
 from PyQt6.QtCore import QDate
+from PyQt6.QtCore import QLocale as Loc
 from PyQt6.QtWidgets import (QApplication, QDialog, QTableWidgetItem)
 from .helpers import not_empty
 from carereport import (app, session)
@@ -192,7 +193,10 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
                 elif column == 1:
                     the_field = patient_views[row].initials
                 elif column == 2:
-                    the_field = str(patient_views[row].birthdate)
+                    born = patient_views[row].birthdate
+                    the_field = Loc().toString(QDate(born.year, born.month,
+                                               born.day),
+                                               Loc.FormatType.ShortFormat)
                 elif column == 3:
                     for code, text in sex_translations:
                         if patient_views[row].sex == code:
@@ -304,8 +308,8 @@ class FindCreateChangePatient(object):
         if app.current_patient_view.id:
             self.modify_patient.patient_view.update_patient()
         else:
-            patient = app.current_patient_view.to_patient()
-            session.add(patient)
+            app.current_patient_view.to_patient()
+            session.add(app.current_patient_view.patient)
         intake = self.modify_patient.current_intake.create_intake_from_view()
         session.add(intake)
         session.commit()
