@@ -84,18 +84,49 @@ class PatientChanges(QDialog, Ui_inputPatient):
                                            edited_date.month(),
                                            edited_date.day())
 
+    def update_patient(self):
+        """ Update the patient with the data from the view. 
+
+        This should be the last thing done after all changes from the window
+        have been put into the view.
+        """
+
+        patient = self.patient_view.patient
+        if self.patient_view.surname != patient.surname:
+            patient.surname = self.patient_view.surname
+        if self.patient_view.initials != patient.initials:
+            patient.initials = self.patient_view.initials
+        if self.patient_view.birthdate != patient.birthdate:
+            patient.birthdate = self.patient_view.birthdate
+        if self.patient_view.sex != patient.sex:
+            patient.sex = self.patient_view.sex
+
+    def accept(self):
+        """ Check if the data in the dialog is acceptable 
+
+        If it is, accept the data, else give message and stay on dialog.
+        """
+
+        problem_list = []
+        if not self.patient_name_edit.text():
+            problem_list.append("Achternaam kan niet leeg zijn")
+        if not self.initials_edit.text():
+            problem_list.append("Initialen kunnen niet leeg zijn")
+
+        if problem_list:
+            self.statusLabel.setText(";".join(problem_list))
+        else:
+            super(PatientChanges, self).accept()
+
+
     def on_accept(self):
         """ The input was OK-ed by the user """
 
-        filled_name = not_empty(self.patient_name_edit)
-        filled_initials = not_empty(self.initials_edit)
-        if filled_name and filled_initials:
-            self.update_patient_view()
-            return
-        if not filled_name:
-            self.nameerrorlabel.setText("*")
-        if not filled_initials:
-            self.initialserrorlabel.setText("*")
+        self.update_patient_view()
+        if self.patient_view.id:
+            self.update_patient()
+        else:
+            self.patient_view.to_patient()
 
     def focusOnName(self, event):
         """ Reset error label """
@@ -306,7 +337,7 @@ class FindCreateChangePatient(object):
         """ Update patient + add to session """
 
         if app.current_patient_view.id:
-            self.modify_patient.patient_view.update_patient()
+            self.modify_patient.update_patient()
         else:
             app.current_patient_view.to_patient()
             session.add(app.current_patient_view.patient)
@@ -321,7 +352,7 @@ mainwindow.actionNieuw.triggered.connect(FindCreateChangePatient)
 # Code for testing purposes
 if __name__ == "__main__":
     patient_view = PatientView()
-    window = FindCreatePatient()
-    # window = PatientChanges(patient_view)
+    # window = FindCreatePatient()
+    window = PatientChanges(patient_view)
     window.show()
     sys.exit(app.exec())

@@ -89,6 +89,9 @@ class Ui_inputPatient(object):
         self.nameerrorlabel.setText("")
         self.nameerrorlabel.setObjectName("nameerrorlabel")
         self.patientgegevens.addWidget(self.nameerrorlabel, 0, 2, 1, 1)
+        self.statusLabel = QtWidgets.QLabel(parent=inputPatient)
+        self.statusLabel.setGeometry(QtCore.QRect(17, 310, 371, 20))
+        self.statusLabel.setObjectName("statusLabel")
 
         self.retranslateUi(inputPatient)
         self.buttonBox.accepted.connect(inputPatient.accept) # type: ignore
@@ -109,13 +112,4 @@ class Ui_inputPatient(object):
         self.gpinfo_label.setText(_translate("inputPatient", "Huisarts"))
         self.birthdate_label.setText(_translate("inputPatient", "Geboortedatum"))
         self.sex_label.setText(_translate("inputPatient", "Geslacht"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    inputPatient = QtWidgets.QDialog()
-    ui = Ui_inputPatient()
-    ui.setupUi(inputPatient)
-    inputPatient.show()
-    sys.exit(app.exec())
+        self.statusLabel.setText(_translate("inputPatient", "Vul/wijzig de gegevens"))

@@ -30,4 +30,9 @@ Care report module views.patient_views
 
 .. automodule:: carereport.views.patient_views
    :members:
-    
+
+Care report module views.diet_views
+---------------------------------------
+
+.. automodule:: carereport.views.diet_views
+   :members:

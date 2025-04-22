@@ -160,6 +160,19 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QLabel" name="statusLabel">
+   <property name="geometry">
+    <rect>
+     <x>17</x>
+     <y>310</y>
+     <width>371</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Vul/wijzig de gegevens</string>
+   </property>
+  </widget>
  </widget>
  <tabstops>
   <tabstop>patient_name_edit</tabstop>

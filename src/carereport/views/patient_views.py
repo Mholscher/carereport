@@ -34,6 +34,24 @@ class ChangingIdOfEntityError(ValueError):
     pass
 
 
+class SurnameCannotBeEmptyError(ValueError):
+    """ Cannot create a patient without a surname """
+
+    pass
+
+
+class InitialsCannotBeEmptyError(ValueError):
+    """ Cannot create a patient without initials """
+
+    pass
+
+
+class BirthdateInFutureError(ValueError):
+    """ A birthdate cannot be in the future """
+
+    pass
+
+
 class _ChangePatientEmitter(QObject):
     """ Class to be able to emit current patient change signal """
 
@@ -44,7 +62,7 @@ class _ChangePatientEmitter(QObject):
         QObject.__init__(self)
 
     def new_patient(self):
-        """ Signal the setting of a new patient as "current" """
+        """ Signal the setting of another patient as "current" """
 
         self.newCurrentPatient.emit()
 

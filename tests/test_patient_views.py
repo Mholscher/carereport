@@ -15,11 +15,14 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
-from datetime import date
+from datetime import date, timedelta
 import carereport as cr
 from carereport import session
 from carereport.models.patient import Patient
-from carereport.views.patient_views import PatientView
+from carereport.views.patient_views import (PatientView,
+                                            SurnameCannotBeEmptyError,
+                                            InitialsCannotBeEmptyError,
+                                            BirthdateInFutureError)
 
 
 class TestCreatePatientView(unittest.TestCase):

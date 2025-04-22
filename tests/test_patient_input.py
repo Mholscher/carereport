@@ -489,17 +489,17 @@ class TestCreateChangeSideEffects(unittest.TestCase):
                                           surname="Chasselair",
                                           initials="Y.M.",
                                           birthdate=date(1987, 4, 3),
-                                          sex="Vrouw"),
+                                          sex="F"),
                               PatientView(id=7,
                                           surname="Chasselase",
                                           initials="T.Y.",
                                           birthdate=date(1987, 12, 17),
-                                          sex="Vrouw"),
+                                          sex="F"),
                               PatientView(id=12,
                                           surname="Chasselinome",
                                           initials="S.Y.",
                                           birthdate=date(1992, 2, 28),
-                                          sex="Vrouw")]
+                                          sex="F")]
         self.patient1 = Patient(surname="Scaffiy", initials="E.U.",
                                 birthdate=date(1982, 10, 8), sex="F")
         session.add(self.patient1)
@@ -526,8 +526,27 @@ class TestCreateChangeSideEffects(unittest.TestCase):
 
         self.patient_views[1].set_current_patient()
         user_form = mainwindow.main_form
-        print(self.patient_views[1].surname + ', ' + self.patient_views[1].initials,)
         self.assertEqual(user_form.patientnameedit.text(),
                          self.patient_views[1].surname + ', ' +
                          self.patient_views[1].initials,
                          "Name not to screen")
+
+    def test_change_patient_name(self):
+        """ Changing the name on screen ends in view """
+
+        patient_view = self.patient_views[1]
+        patient_view.to_patient()
+        patient = patient_view.patient
+        patient_view.patient = patient
+        patient_dialog = PatientChanges(patient_view)
+        self.assertEqual(patient_dialog.patient_name_edit.text(),
+                        patient.surname,
+                        "Filling surname failed!")
+        patient_dialog.patient_name_edit.setText("Chasselaste")
+        patient_dialog.buttonBox.buttons()[0].click()
+        self.assertEqual(patient_view.surname,
+                         "Chasselaste",
+                         "View surname not updated")
+        self.assertEqual(patient.surname, "Chasselaste",
+                         "Surname not replaced by new value")
+        
