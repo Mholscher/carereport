@@ -89,10 +89,10 @@ class PatientView():
         """ Create a patient in the model from this view """
 
         self.patient = Patient(id=self.id,
-                          surname=self.surname,
-                          initials=self.initials,
-                          birthdate=self.birthdate,
-                          sex=" " if self.sex is None else self.sex)
+                               surname=self.surname,
+                               initials=self.initials,
+                               birthdate=self.birthdate,
+                               sex=" " if self.sex is None else self.sex)
         self.set_current_patient()
 
     def update_patient(self):

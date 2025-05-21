@@ -94,8 +94,33 @@ class TestDietViewFromToDiet(unittest.TestCase):
         self.assertFalse(diet_view.diet_header.permanent_diet,
                          "Permanent not changed")
 
+    def test_create_diet_views(self):
+        """ Create diet views for a patient """
 
-class TestDietLineViewFromTOLine(unittest.TestCase):
+        diets = DietView.diets_for_patient(self.patient_view)
+        self.assertEqual(len(diets), 1,
+                         f"Wrong number of diets: {len(diets)}")
+        self.assertEqual(diets[0].id, 2101,
+                         f"Wrong diet id: {diets[0].id}")
+
+    def test_create_diet_line_views_for_diet(self):
+        """ Get the lines for a diet """
+
+        diet_line = DietLines(id=17,
+                              food_name="Taart",
+                              application_type="Niet gebruiken",
+                              description="Taart bevat gewoonlijk"
+                              " heel veel suiker",
+                              diet=self.diet)
+        diet_view = DietView.create_from_diet(self.diet)
+        diet_lines = diet_view.lines()
+        self.assertEqual(len(diet_lines), 2,
+                         f"Wrong number of lines: {len(diet_lines)}")
+        ids = [diet.id for diet in diet_lines]
+        self.assertIn(12, ids, "At least one id not in lines")
+
+
+class TestDietLineViewFromToLine(unittest.TestCase):
 
     def setUp(self):
 

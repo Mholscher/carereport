@@ -27,7 +27,6 @@ from datetime import date
 from PyQt6.QtCore import QDate
 from PyQt6.QtCore import QLocale as Loc
 from PyQt6.QtWidgets import (QApplication, QDialog, QTableWidgetItem)
-from .helpers import not_empty
 from carereport import (app, session)
 from .care_app import mainwindow
 from .patientdialog import Ui_inputPatient
@@ -85,7 +84,7 @@ class PatientChanges(QDialog, Ui_inputPatient):
                                            edited_date.day())
 
     def update_patient(self):
-        """ Update the patient with the data from the view. 
+        """ Update the patient with the data from the view.
 
         This should be the last thing done after all changes from the window
         have been put into the view.
@@ -102,7 +101,7 @@ class PatientChanges(QDialog, Ui_inputPatient):
             patient.sex = self.patient_view.sex
 
     def accept(self):
-        """ Check if the data in the dialog is acceptable 
+        """ Check if the data in the dialog is acceptable
 
         If it is, accept the data, else give message and stay on dialog.
         """
@@ -117,7 +116,6 @@ class PatientChanges(QDialog, Ui_inputPatient):
             self.statusLabel.setText(";".join(problem_list))
         else:
             super(PatientChanges, self).accept()
-
 
     def on_accept(self):
         """ The input was OK-ed by the user """

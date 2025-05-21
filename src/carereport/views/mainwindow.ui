@@ -49,9 +49,17 @@
     </property>
     <addaction name="actionPatientZoeken"/>
    </widget>
+   <widget class="QMenu" name="menuDieet">
+    <property name="title">
+     <string>Dieet</string>
+    </property>
+    <addaction name="actionOverzicht"/>
+    <addaction name="actionBe_werk_geselecteerde"/>
+   </widget>
    <addaction name="menu_Bestand"/>
    <addaction name="menuI_ntake"/>
    <addaction name="menu_Pati_nt"/>
+   <addaction name="menuDieet"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionAfsluiten">
@@ -92,6 +100,16 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionOverzicht">
+   <property name="text">
+    <string>Overzicht</string>
+   </property>
+  </action>
+  <action name="actionBe_werk_geselecteerde">
+   <property name="text">
+    <string>Be&amp;werk geselecteerde</string>
    </property>
   </action>
  </widget>

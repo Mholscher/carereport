@@ -15,14 +15,11 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
-from datetime import date, timedelta
+from datetime import date
 import carereport as cr
 from carereport import session
 from carereport.models.patient import Patient
-from carereport.views.patient_views import (PatientView,
-                                            SurnameCannotBeEmptyError,
-                                            InitialsCannotBeEmptyError,
-                                            BirthdateInFutureError)
+from carereport.views.patient_views import (PatientView)
 
 
 class TestCreatePatientView(unittest.TestCase):
@@ -59,7 +56,8 @@ class TestCreatePatientView(unittest.TestCase):
                                    birthdate=date(2018, 5, 9),
                                    sex="M")
         patient_view.to_patient()
-        self.assertEqual(patient_view.patient.birthdate, patient_view.birthdate,
+        self.assertEqual(patient_view.patient.birthdate,
+                         patient_view.birthdate,
                          "Birthdate not filled correctly")
         self.assertEqual(patient_view.patient.surname, patient_view.surname,
                          "Surname not filled correctly")
@@ -80,11 +78,11 @@ class TestUpdatePatientFromView(unittest.TestCase):
 
     def setUp(self):
 
-        self.patient = Patient(id = 12,
-                              surname="Lambavi",
-                              initials="K.P.",
-                              birthdate=date(1996, 2, 9),
-                              sex="F")
+        self.patient = Patient(id=12,
+                               surname="Lambavi",
+                               initials="K.P.",
+                               birthdate=date(1996, 2, 9),
+                               sex="F")
         self.patient_view = PatientView(id=12,
                                         surname="Chibouste",
                                         initials="L.",
@@ -100,9 +98,11 @@ class TestUpdatePatientFromView(unittest.TestCase):
         """ Update the patient data from the view """
 
         self.patient_view.update_patient()
-        self.assertEqual(self.patient_view.patient.surname, self.patient_view.surname,
+        self.assertEqual(self.patient_view.patient.surname,
+                         self.patient_view.surname,
                          "Surname not updated")
-        self.assertEqual(self.patient_view.patient.birthdate, self.patient_view.birthdate,
+        self.assertEqual(self.patient_view.patient.birthdate,
+                         self.patient_view.birthdate,
                          "Date of birth not updated")
 
     def test_ids_must_match(self):

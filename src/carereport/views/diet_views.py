@@ -14,12 +14,18 @@
 
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
-""" The intake views contains intake classes used for the intake of new
-patients into the system. It serves to marshall data between the windows
-of the system and the model for an intake.
+""" The diet views contains classes used for the diets of
+patients.
+
+Diet views come in 2 parts, a header describing the "general nature" of
+the diet ("sugarfree") and specific rules (lines) for different types
+of food.
+
+These views serve to marshall data between the windows of the system and 
+the model.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import date
 from typing import Optional
 from ..models.medical import DietHeader, DietLines
@@ -33,7 +39,7 @@ class DietView():
     The :py:class:`DietHeader` appears exactly once, while there can be more
     lines in the header, each for a :py:class:`DietLine` of the diet.
 
-        :id: The id of the yheader of this diet
+        :id: The id of the header of this diet
         :diet_name: a name for the diet. It is not assumed to be unique, or
                         required, but making it unique helps communication
         :permanent_diet: Is this a permanent diet (like vegan)?
@@ -89,11 +95,24 @@ class DietView():
         if self.end_date != self.diet_header.end_date:
             self.diet_header.end_date = self.end_date
 
+    def lines(self):
+        """ Create a list of diet line views for this header """
+
+        line_views = []
+        for diet_line in self.diet_header.diet_lines:
+            line_views.append(DietLineView.create_from_diet_line(diet_line,
+                                                                 self))
+        return line_views
+
     @staticmethod
     def diets_for_patient(patient_view):
         """ Create a list of diet views for a patient  """
 
-        return []
+        diet_views = []
+        patient = patient_view.patient
+        for diet in patient.diets:
+            diet_views.append(DietView.create_from_diet(diet))
+        return diet_views
 
 
 @dataclass

@@ -540,8 +540,8 @@ class TestCreateChangeSideEffects(unittest.TestCase):
         patient_view.patient = patient
         patient_dialog = PatientChanges(patient_view)
         self.assertEqual(patient_dialog.patient_name_edit.text(),
-                        patient.surname,
-                        "Filling surname failed!")
+                         patient.surname,
+                         "Filling surname failed!")
         patient_dialog.patient_name_edit.setText("Chasselaste")
         patient_dialog.buttonBox.buttons()[0].click()
         self.assertEqual(patient_view.surname,
@@ -549,4 +549,3 @@ class TestCreateChangeSideEffects(unittest.TestCase):
                          "View surname not updated")
         self.assertEqual(patient.surname, "Chasselaste",
                          "Surname not replaced by new value")
-        

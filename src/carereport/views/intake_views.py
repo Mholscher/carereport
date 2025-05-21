@@ -71,4 +71,3 @@ class IntakeView():
         patient_model = app.current_patient_view.patient
         return Intake(patient=patient_model,
                       date_intake=self.date_intake)
-
