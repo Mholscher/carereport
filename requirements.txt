@@ -2,7 +2,7 @@ alabaster==1.0.0
 Babel==2.15.0
 blessed==1.20.0
 bpython==0.24
--e git+https://github.com/Mholscher/carereport.git@0bb3b590e6f72e6acd58ed159975fd0bc005e5f0#egg=carereport
+-e git+https://github.com/Mholscher/carereport.git@561acbefe5607bcf42513ef8e68fffb3353e3db2#egg=carereport
 certifi==2024.7.4
 charset-normalizer==3.3.2
 curtsies==0.4.2
@@ -15,7 +15,7 @@ idna==3.7
 imagesize==1.4.1
 iniconfig==2.0.0
 jedi==0.19.1
-Jinja2==3.1.4
+Jinja2==3.1.6
 MarkupSafe==2.1.5
 mccabe==0.7.0
 mysqlclient==2.2.4

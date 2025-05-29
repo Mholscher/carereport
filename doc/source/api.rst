@@ -36,3 +36,9 @@ Care report module views.diet_views
 
 .. automodule:: carereport.views.diet_views
    :members:
+
+Care report module views.scripts_diet
+---------------------------------------
+
+.. automodule:: carereport.views.scripts_diet
+   :members:

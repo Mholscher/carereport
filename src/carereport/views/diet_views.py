@@ -21,7 +21,7 @@ Diet views come in 2 parts, a header describing the "general nature" of
 the diet ("sugarfree") and specific rules (lines) for different types
 of food.
 
-These views serve to marshall data between the windows of the system and 
+These views serve to marshall data between the windows of the system and
 the model.
 """
 
