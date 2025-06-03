@@ -32,6 +32,12 @@ from ..models.medical import DietHeader, DietLines
 from .patient_views import PatientView
 
 
+class DietEndBeforeStart(ValueError):
+    """ A diet's end date must be on or after start date """
+
+    pass
+
+
 @dataclass
 class DietView():
     """ The view for a dietheader plus its lines.
@@ -103,6 +109,14 @@ class DietView():
             line_views.append(DietLineView.create_from_diet_line(diet_line,
                                                                  self))
         return line_views
+
+    def check_diet_dates(self):
+        """ Check if the start and end dates are acceptable """
+
+        if self.permanent_diet:
+            return
+        if self.end_date < self.start_date:
+            raise DietEndBeforeStart("End date can not be before startdate")
 
     @staticmethod
     def diets_for_patient(patient_view):

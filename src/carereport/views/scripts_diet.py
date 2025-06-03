@@ -40,6 +40,8 @@ class CreateDiet():
         self.diet_view.diet_name = self.full_form.dietNameEdit.text()
         self.diet_view.permanent_diet =\
             self.full_form.permanentCheckBox.isChecked()
-        self.start_date = self.full_form.startDateEdit.date()
+        self.diet_view.start_date = self.full_form.startDateEdit.date()
         if self.full_form.endDateEdit.date():
-            self.end_date = self.full_form.endDateEdit.date()
+            self.diet_view.end_date = self.full_form.endDateEdit.date()
+        if self.diet_view.start_date and self.diet_view.end_date:
+            self.diet_view.check_diet_dates()

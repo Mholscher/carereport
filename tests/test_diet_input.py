@@ -67,10 +67,10 @@ class TestCreateDietHeader(unittest.TestCase):
         self.full_form.startDateEdit.setDate(date.today())
         self.full_form.endDateEdit.setDate(date.today() + timedelta(days=3))
         self.header.update_diet_view()
-        self.assertEqual(self.header.start_date,
+        self.assertEqual(self.header.diet_view.start_date,
                          self.full_form.startDateEdit.date(),
                          "Start date not updated")
-        self.assertEqual(self.header.end_date,
+        self.assertEqual(self.header.diet_view.end_date,
                          self.full_form.endDateEdit.date(),
                          "End date not updated")
 
@@ -82,5 +82,19 @@ class TestCreateDietHeader(unittest.TestCase):
         self.full_form.permanentCheckBox.setCheckState(CheckState.Unchecked)
         self.full_form.startDateEdit.setDate(date.today())
         with self.assertRaises(ValueError):
-            self.full_form.endDateEdit.setDate(date.today() + timedelta(days=-3))
+            self.full_form.endDateEdit.setDate(date.today()
+                                               + timedelta(days=-3))
             self.header.update_diet_view()
+
+    def test_dates_ignored_if_permanent(self):
+        """ The start before end rule must be ignored if permanent diet """
+
+        CheckState = Qt.CheckState
+        self.full_form.dietNameEdit.setText("Groentevrij")
+        self.full_form.permanentCheckBox.setCheckState(CheckState.Checked)
+        self.full_form.startDateEdit.setDate(date.today())
+        self.full_form.endDateEdit.setDate(date.today() + timedelta(days=-3))
+        self.header.update_diet_view()
+        self.assertTrue(self.header.diet_view.start_date
+                        > self.header.diet_view.end_date,
+                        "Invalid date order not ignored")
