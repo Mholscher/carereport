@@ -23,10 +23,23 @@ enables creation and maintenance of diets and rules within a diet.
 from datetime import date
 from PyQt6.QtCore import QDate
 from PyQt6.QtCore import QLocale as Loc
+from carereport import app
 from .diet_views import DietView
+""" This module sets up diets. It takes care of creating new diets, updating
+existing diets through diet views.
+"""
 
 
 class CreateDiet():
+    """ Create a new diet, using the view for diets.
+
+    The view holds one header and as many lines (rules for the patient) as
+    applicable for this diet.
+
+    An example is a sugar limited diet. The diet has a header saying "sugar
+    limited"  and rules like "Do not put sugar in your tea and coffee" or
+    "No caramel"
+    """
 
     def __init__(self, full_form):
 
@@ -40,8 +53,56 @@ class CreateDiet():
         self.diet_view.diet_name = self.full_form.dietNameEdit.text()
         self.diet_view.permanent_diet =\
             self.full_form.permanentCheckBox.isChecked()
-        self.diet_view.start_date = self.full_form.startDateEdit.date()
-        if self.full_form.endDateEdit.date():
-            self.diet_view.end_date = self.full_form.endDateEdit.date()
-        if self.diet_view.start_date and self.diet_view.end_date:
-            self.diet_view.check_diet_dates()
+        if self.diet_view.permanent_diet:
+            self.diet_view.start_date = None
+            self.diet_view.end_date = None
+        else:
+            self.diet_view.start_date = self.full_form.startDateEdit.date()
+            if self.full_form.endDateEdit.date():
+                self.diet_view.end_date = self.full_form.endDateEdit.date()
+            if self.diet_view.start_date and self.diet_view.end_date:
+                self.diet_view.check_diet_dates()
+        # self.diet_view.patient = app.current_patient_view
+
+    def update_diet(self):
+        """ At this point in the script the diet for the database is created.
+
+        The event to be processed is to save the diet.
+        """
+
+        self.diet_view.to_diet()
+
+
+class UpdateDiet():
+    """ Change the data on an existing diet.
+
+    Existing diets can be shown and changed. Examples are when a diet is made
+    permanent, when an end date diet is altered, or a typing error is fixed.
+    """
+
+    def __init__(self, diet_view, full_form):
+
+        self.pages_widget = full_form.DietPagesWidget
+        the_widget = self.pages_widget
+        the_widget.diet_name = diet_view.diet_name
+        the_widget.permanent_diet = diet_view.permanent_diet
+        the_widget.start_date = diet_view.start_date
+        the_widget.end_date = diet_view.end_date
+        self.diet_view = diet_view
+        self.full_form = full_form
+
+    def update_diet_view(self):
+        """ Update the values in a diet view """
+
+        self.diet_view.diet_name = self.full_form.dietNameEdit.text()
+        self.diet_view.permanent_diet =\
+            self.full_form.permanentCheckBox.isChecked()
+        if self.diet_view.permanent_diet:
+            self.diet_view.start_date = None
+            self.diet_view.end_date = None
+        else:
+            self.diet_view.start_date = self.full_form.startDateEdit.date()
+            if self.full_form.endDateEdit.date():
+                self.diet_view.end_date = self.full_form.endDateEdit.date()
+            if self.diet_view.start_date and self.diet_view.end_date:
+                self.diet_view.check_diet_dates()

@@ -18,7 +18,7 @@ from datetime import date, timedelta
 import unittest
 from PyQt6.QtCore import Qt
 from carereport.views.care_app import mainwindow
-from carereport.views.scripts_diet import CreateDiet
+from carereport.views.scripts_diet import (CreateDiet, UpdateDiet)
 from carereport.views.diet_views import DietView
 
 
@@ -86,15 +86,79 @@ class TestCreateDietHeader(unittest.TestCase):
                                                + timedelta(days=-3))
             self.header.update_diet_view()
 
-    def test_dates_ignored_if_permanent(self):
-        """ The start before end rule must be ignored if permanent diet """
+    def test_no_start_or_end_date_for_permanent(self):
+        """ Start and end date on the view are empty for a permanent diet """
 
         CheckState = Qt.CheckState
-        self.full_form.dietNameEdit.setText("Groentevrij")
+        self.full_form.dietNameEdit.setText("Vetarm")
         self.full_form.permanentCheckBox.setCheckState(CheckState.Checked)
         self.full_form.startDateEdit.setDate(date.today())
         self.full_form.endDateEdit.setDate(date.today() + timedelta(days=-3))
         self.header.update_diet_view()
-        self.assertTrue(self.header.diet_view.start_date
-                        > self.header.diet_view.end_date,
-                        "Invalid date order not ignored")
+        self.assertFalse(self.header.diet_view.start_date,
+                         "Start date not None")
+        self.assertFalse(self.header.diet_view.end_date,
+                         "End date not None")
+
+    @unittest.skip
+    def test_create_diet_from_view(self):
+        """ Create a diet from the view """
+
+        CheckState = Qt.CheckState
+        self.full_form.dietNameEdit.setText("Lactose belast")
+        self.full_form.permanentCheckBox.setCheckState(CheckState.Unchecked)
+        self.full_form.startDateEdit.setDate(date.today() + timedelta(days=4))
+        self.full_form.endDateEdit.setDate(date.today() + timedelta(days=8))
+        self.header.update_diet_view()
+        self.header.update_diet()
+        self.assertEqual(self.header.diet_view.diet_header.diet_name,
+                         self.header.diet_view.diet_name,
+                         "Name in diet not set")
+
+
+class TestUpdateDietHeader(unittest.TestCase):
+
+    def setUp(self):
+
+        # self.diet_form = mainwindow.centralWidget().DietPagesWidget
+        self.full_form = mainwindow.centralWidget()
+        self.view = DietView(diet_name="Brooddieet",
+                             permanent_diet=False,
+                             start_date=date.today(),
+                             end_date=date.today()+timedelta(days=15))
+
+    def tearDown(self):
+
+        pass
+
+    def test_fill_header_from_view(self):
+        """ Fill the header form from the diet view """
+
+        update_diet = UpdateDiet(self.view, self.full_form)
+        self.assertEqual(update_diet.pages_widget.diet_name,
+                         self.view.diet_name,
+                         "Name not filled")
+        self.assertEqual(update_diet.pages_widget.start_date,
+                         self.view.start_date,
+                         "Start date not filled")
+        self.assertEqual(update_diet.pages_widget.permanent_diet,
+                         self.view.permanent_diet,
+                         "Permanent incorrect")
+
+    def test_fill_change_view(self):
+        """ Change some fields, update the diet view """
+
+        CheckState = Qt.CheckState
+        update_diet = UpdateDiet(self.view, self.full_form)
+        diet_form = mainwindow.centralWidget()
+        diet_form.permanentCheckBox.setCheckState(CheckState.Unchecked)
+        diet_form.startDateEdit.setDate(self.view.start_date
+                                        - timedelta(days=2))
+        diet_form.endDateEdit.setDate(self.view.end_date + timedelta(days=7))
+        update_diet.update_diet_view()
+        self.assertEqual(self.view.start_date,
+                         diet_form.startDateEdit.date(),
+                         "Start date not changed")
+        self.assertEqual(self.view.end_date,
+                         diet_form.endDateEdit.date(),
+                         "End date not changed")
