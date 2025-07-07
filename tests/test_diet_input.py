@@ -162,3 +162,34 @@ class TestUpdateDietHeader(unittest.TestCase):
         self.assertEqual(self.view.end_date,
                          diet_form.endDateEdit.date(),
                          "End date not changed")
+
+    def test_set_permanent_ignores_dates(self):
+        """ Setting a diet to permanent should ignore date changes """
+
+        CheckState = Qt.CheckState
+        update_diet = UpdateDiet(self.view, self.full_form)
+        diet_form = mainwindow.centralWidget()
+        diet_form.permanentCheckBox.setCheckState(CheckState.Checked)
+        diet_form.startDateEdit.setDate(self.view.start_date
+                                        + timedelta(days=2))
+        diet_form.endDateEdit.setDate(self.view.end_date + timedelta(days=7))
+        update_diet.update_diet_view()
+        self.assertNotEqual(self.view.start_date,
+                            diet_form.startDateEdit.date(),
+                            "Start date changed")
+        self.assertNotEqual(self.view.end_date,
+                            diet_form.endDateEdit.date(),
+                            "End date changed")
+
+    def test_start_date_earlier_than_end_date(self):
+        """ The start date must be before the end date """
+
+        CheckState = Qt.CheckState
+        update_diet = UpdateDiet(self.view, self.full_form)
+        diet_form = mainwindow.centralWidget()
+        diet_form.permanentCheckBox.setCheckState(CheckState.Unchecked)
+        diet_form.startDateEdit.setDate(self.view.start_date
+                                        + timedelta(days=2))
+        with self.assertRaises(ValueError):
+            diet_form.endDateEdit.setDate(self.view.start_date)
+            update_diet.update_diet_view()
