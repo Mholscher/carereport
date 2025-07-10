@@ -30,22 +30,9 @@ existing diets through diet views.
 """
 
 
-class CreateDiet():
-    """ Create a new diet, using the view for diets.
-
-    The view holds one header and as many lines (rules for the patient) as
-    applicable for this diet.
-
-    An example is a sugar limited diet. The diet has a header saying "sugar
-    limited"  and rules like "Do not put sugar in your tea and coffee" or
-    "No caramel"
-    """
-
-    def __init__(self, full_form):
-
-        full_form.DietPagesWidget.setCurrentIndex(1)
-        self.diet_view = DietView()
-        self.full_form = full_form
+class _DietChanges():
+    """ This class contains shared functions for creating and updating  diet
+    views from input."""
 
     def update_diet_view(self):
         """ Update the values in a diet view """
@@ -62,7 +49,24 @@ class CreateDiet():
                 self.diet_view.end_date = self.full_form.endDateEdit.date()
             if self.diet_view.start_date and self.diet_view.end_date:
                 self.diet_view.check_diet_dates()
-        # self.diet_view.patient = app.current_patient_view
+
+
+class CreateDiet(_DietChanges):
+    """ Create a new diet, using the view for diets.
+
+    The view holds one header and as many lines (rules for the patient) as
+    applicable for this diet.
+
+    An example is a sugar limited diet. The diet has a header saying "sugar
+    limited"  and rules like "Do not put sugar in your tea and coffee" or
+    "No caramel"
+    """
+
+    def __init__(self, full_form):
+
+        full_form.DietPagesWidget.setCurrentIndex(1)
+        self.diet_view = DietView()
+        self.full_form = full_form
 
     def update_diet(self):
         """ At this point in the script the diet for the database is created.
@@ -73,7 +77,7 @@ class CreateDiet():
         self.diet_view.to_diet()
 
 
-class UpdateDiet():
+class UpdateDiet(_DietChanges):
     """ Change the data on an existing diet.
 
     Existing diets can be shown and changed. Examples are when a diet is made
@@ -91,18 +95,7 @@ class UpdateDiet():
         self.diet_view = diet_view
         self.full_form = full_form
 
-    def update_diet_view(self):
-        """ Update the values in a diet view """
+    def update_diet():
+        """ The data in the view is released into the diet """
 
-        self.diet_view.diet_name = self.full_form.dietNameEdit.text()
-        self.diet_view.permanent_diet =\
-            self.full_form.permanentCheckBox.isChecked()
-        if self.diet_view.permanent_diet:
-            self.diet_view.start_date = None
-            self.diet_view.end_date = None
-        else:
-            self.diet_view.start_date = self.full_form.startDateEdit.date()
-            if self.full_form.endDateEdit.date():
-                self.diet_view.end_date = self.full_form.endDateEdit.date()
-            if self.diet_view.start_date and self.diet_view.end_date:
-                self.diet_view.check_diet_dates()
+        self.diet_view.update_diet()
