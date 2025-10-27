@@ -23,30 +23,36 @@ enables creation and maintenance of diets and rules within a diet.
 from datetime import date
 from PyQt6.QtCore import QDate
 from PyQt6.QtCore import QLocale as Loc
+from PyQt6.QtWidgets import QWidget
 from carereport import app
 from .diet_views import DietView
+from .dietheader import Ui_DietHeaderWidget
 """ This module sets up diets. It takes care of creating new diets, updating
 existing diets through diet views.
 """
 
 
-class _DietChanges():
+class _DietChanges(QWidget, Ui_DietHeaderWidget):
     """ This class contains shared functions for creating and updating  diet
     views from input."""
+
+    def __init__(self, parent=None):
+
+        super().__init__(parent=parent)
 
     def update_diet_view(self):
         """ Update the values in a diet view """
 
-        self.diet_view.diet_name = self.full_form.dietNameEdit.text()
+        self.diet_view.diet_name = self.dietNameEdit.text()
         self.diet_view.permanent_diet =\
-            self.full_form.permanentCheckBox.isChecked()
+            self.permanentCheckBox.isChecked()
         if self.diet_view.permanent_diet:
             self.diet_view.start_date = None
             self.diet_view.end_date = None
         else:
-            self.diet_view.start_date = self.full_form.startDateEdit.date()
-            if self.full_form.endDateEdit.date():
-                self.diet_view.end_date = self.full_form.endDateEdit.date()
+            self.diet_view.start_date = self.startDateEdit.date()
+            if self.endDateEdit.date():
+                self.diet_view.end_date = self.endDateEdit.date()
             if self.diet_view.start_date and self.diet_view.end_date:
                 self.diet_view.check_diet_dates()
 
@@ -62,11 +68,11 @@ class CreateDiet(_DietChanges):
     "No caramel"
     """
 
-    def __init__(self, full_form):
+    def __init__(self, diet_view, parent=None):
 
-        full_form.DietPagesWidget.setCurrentIndex(1)
+        super().__init__(parent=parent)
         self.diet_view = DietView()
-        self.full_form = full_form
+        self.setupUi(self)
 
     def update_diet(self):
         """ At this point in the script the diet for the database is created.
@@ -84,18 +90,19 @@ class UpdateDiet(_DietChanges):
     permanent, when an end date diet is altered, or a typing error is fixed.
     """
 
-    def __init__(self, diet_view, full_form):
+    def __init__(self, diet_view, parent=None):
 
-        self.pages_widget = full_form.DietPagesWidget
-        the_widget = self.pages_widget
-        the_widget.diet_name = diet_view.diet_name
-        the_widget.permanent_diet = diet_view.permanent_diet
-        the_widget.start_date = diet_view.start_date
-        the_widget.end_date = diet_view.end_date
+        super().__init__(parent=parent)
+        self.setupUi(self)
+        # Fill the diet header
+        self.diet_name = diet_view.diet_name
+        self.permanent_diet = diet_view.permanent_diet
+        self.start_date = diet_view.start_date
+        self.end_date = diet_view.end_date
         self.diet_view = diet_view
-        self.full_form = full_form
+        # fill the lines
 
-    def update_diet():
+    def update_diet(self):
         """ The data in the view is released into the diet """
 
         self.diet_view.update_diet()
