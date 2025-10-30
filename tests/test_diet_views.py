@@ -197,3 +197,9 @@ class TestDietLineViewFromToLine(unittest.TestCase):
         self.assertEqual(diet_line.description,
                          self.diet_line_view.description,
                          f"Food name {diet_line.description} not correct")
+
+    def test_check_line_view_is_in_diet_view(self):
+        """ A created line should appear in the view of the diet """
+
+        self.assertIn(self.diet_line_view, self.diet_view.lines_views,
+                     "Line not in the view")

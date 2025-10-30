@@ -20,7 +20,7 @@ from PyQt6.QtCore import Qt
 # from carereport.views.dietline import Ui_DietLineForm as LineForm
 from carereport.views.care_app import mainwindow
 from carereport.views.dietheader import Ui_DietHeaderWidget
-from carereport.views.scripts_diet import (CreateDiet, UpdateDiet)
+from carereport.views.scripts_diet import (CreateDiet, UpdateDiet, UpdateDietLines)
 from carereport.views.diet_views import (DietView, DietLineView)
 
 
@@ -197,26 +197,41 @@ class TestDietLineView(unittest.TestCase):
 
     def setUp(self):
 
-        self.full_form = mainwindow.centralWidget()
-        self.view = DietView(diet_name="The actual diet",
-                             permanent_diet=False,
-                             start_date=date.today(),
-                             end_date=date.today()+timedelta(days=15))
+        # self.full_form = mainwindow.centralWidget()
+        self.diet_view = DietView(diet_name="The actual diet",
+                                  permanent_diet=False,
+                                  start_date=date.today(),
+                                  end_date=date.today()+timedelta(days=15))
 
     def tearDown(self):
 
         pass
 
-    @unittest.skip
     def test_create_diet_line_form(self):
         """ Create an diet line for a diet view """
 
         line = DietLineView(food_name="Cabbage",
                             description="You can eat this as you like",
                             application_type="irregularly",
-                            diet_view=self.view)
-        diet_form = UpdateDiet(self.view)
-        print("Food name:", self.FoodNameEdit.text())
-        line_form = self.diet_form
-        self.assertEqual(line.food_name, line_form.FoodNameEdit.text(),
+                            diet_view=self.diet_view)
+        diet_form = UpdateDietLines(self.diet_view)
+        self.assertEqual(line.food_name,
+                         diet_form.dietLineTable.itemAt(0, 0).text(),
                          "Food name not correctly filled for line")
+
+    def test_more_diet_lines(self):
+        """ More than one line is inserted correctly """
+
+        line1 = DietLineView(food_name="Potato",
+                             description="You can eat this as you like",
+                             application_type="often",
+                             diet_view=self.diet_view)
+        line2 = DietLineView(food_name="Mushroom",
+                             description="You can eat this, when you"
+                             " know it is not poisonous",
+                             application_type="as ypu like",
+                             diet_view=self.diet_view)
+        diet_form = UpdateDietLines(self.diet_view)
+        self.assertEqual(diet_form.dietLineTable.rowCount(), 2,
+                         "Incorrect number of lines:"
+                         + str(diet_form.dietLineTable.rowCount()))

@@ -79,6 +79,11 @@ class DietView():
                         diet_header=diet)
         return diet_view
 
+    def __post_init__(self):
+        """ Set the lines up; cannot do that the usual way """
+
+        self.lines_views = []
+
     def to_diet(self):
         """ Create a diet from this view """
 
@@ -103,7 +108,7 @@ class DietView():
 
     def lines(self):
         """ Create a list of diet line views for this header """
-
+ 
         line_views = []
         for diet_line in self.diet_header.diet_lines:
             line_views.append(DietLineView.create_from_diet_line(diet_line,
@@ -163,6 +168,11 @@ class DietLineView():
                    description=diet_line.description,
                    application_type=diet_line.application_type,
                    diet_line=diet_line)
+
+    def __post_init__(self):
+        print("Post init,", self.diet_view, "Lines", self.diet_view.lines_views)
+        self.diet_view.lines_views.append(self)
+        print("Post init end, Lines", self.diet_view.lines_views)
 
     def update_diet_line(self):
         """ Pass any changes to the view into the line """

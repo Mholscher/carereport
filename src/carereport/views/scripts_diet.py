@@ -23,9 +23,10 @@ enables creation and maintenance of diets and rules within a diet.
 from datetime import date
 from PyQt6.QtCore import QDate
 from PyQt6.QtCore import QLocale as Loc
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import (QWidget, QDialog, QTableWidgetItem)
 from carereport import app
 from .diet_views import DietView
+from .dietline import Ui_dietLineDialog
 from .dietheader import Ui_DietHeaderWidget
 """ This module sets up diets. It takes care of creating new diets, updating
 existing diets through diet views.
@@ -100,9 +101,26 @@ class UpdateDiet(_DietChanges):
         self.start_date = diet_view.start_date
         self.end_date = diet_view.end_date
         self.diet_view = diet_view
-        # fill the lines
 
     def update_diet(self):
         """ The data in the view is released into the diet """
 
         self.diet_view.update_diet()
+
+class UpdateDietLines(QDialog, Ui_dietLineDialog):
+    """ Create and update lines for one diet.
+
+    Both new and existing diets can have diet lines added and changed. whe
+    do not support deletion. 
+    """
+
+    def __init__(self, diet_view, parent=None):
+
+        super().__init__(parent=parent)
+        self.setupUi(self)
+        for lineno, line in enumerate(diet_view.lines_views):
+            self.dietLineTable.insertRow(lineno)
+            item_name = QTableWidgetItem(line.food_name)
+            self.dietLineTable.setItem(lineno, 0, item_name)
+            item_application_type = QTableWidgetItem(line.application_type)
+            self.dietLineTable.setItem(lineno, 1, item_application_type)
