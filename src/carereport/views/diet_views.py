@@ -170,9 +170,8 @@ class DietLineView():
                    diet_line=diet_line)
 
     def __post_init__(self):
-        print("Post init,", self.diet_view, "Lines", self.diet_view.lines_views)
+
         self.diet_view.lines_views.append(self)
-        print("Post init end, Lines", self.diet_view.lines_views)
 
     def update_diet_line(self):
         """ Pass any changes to the view into the line """

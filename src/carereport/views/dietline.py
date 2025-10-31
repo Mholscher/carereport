@@ -25,9 +25,6 @@ class Ui_dietLineDialog(object):
         self.descriptionLabel = QtWidgets.QLabel(parent=self.layoutWidget)
         self.descriptionLabel.setObjectName("descriptionLabel")
         self.DietLineLayout.addWidget(self.descriptionLabel, 2, 1, 1, 1)
-        self.DescriptionEdit = QtWidgets.QTextEdit(parent=self.layoutWidget)
-        self.DescriptionEdit.setObjectName("DescriptionEdit")
-        self.DietLineLayout.addWidget(self.DescriptionEdit, 2, 2, 1, 1)
         self.FoodNameEdit = QtWidgets.QLineEdit(parent=self.layoutWidget)
         self.FoodNameEdit.setObjectName("FoodNameEdit")
         self.DietLineLayout.addWidget(self.FoodNameEdit, 0, 2, 1, 1)
@@ -38,12 +35,17 @@ class Ui_dietLineDialog(object):
         self.applicationTypeLabel = QtWidgets.QLabel(parent=self.layoutWidget)
         self.applicationTypeLabel.setObjectName("applicationTypeLabel")
         self.DietLineLayout.addWidget(self.applicationTypeLabel, 1, 1, 1, 1)
-        self.lineEdit = QtWidgets.QLineEdit(parent=self.layoutWidget)
-        self.lineEdit.setObjectName("lineEdit")
-        self.DietLineLayout.addWidget(self.lineEdit, 1, 2, 1, 1)
+        self.ApplicationTypeEdit = QtWidgets.QLineEdit(parent=self.layoutWidget)
+        self.ApplicationTypeEdit.setObjectName("ApplicationTypeEdit")
+        self.DietLineLayout.addWidget(self.ApplicationTypeEdit, 1, 2, 1, 1)
+        self.DescriptionEdit = QtWidgets.QPlainTextEdit(parent=self.layoutWidget)
+        self.DescriptionEdit.setObjectName("DescriptionEdit")
+        self.DietLineLayout.addWidget(self.DescriptionEdit, 2, 2, 1, 1)
         self.dietLineTable = QtWidgets.QTableWidget(parent=dietLineDialog)
         self.dietLineTable.setGeometry(QtCore.QRect(35, 20, 431, 192))
         self.dietLineTable.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.dietLineTable.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
+        self.dietLineTable.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
         self.dietLineTable.setColumnCount(2)
         self.dietLineTable.setObjectName("dietLineTable")
         self.dietLineTable.setRowCount(0)
@@ -68,6 +70,7 @@ class Ui_dietLineDialog(object):
         self.newLineButton.setObjectName("newLineButton")
 
         self.retranslateUi(dietLineDialog)
+        self.closeButton.clicked.connect(dietLineDialog.accept) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(dietLineDialog)
 
     def retranslateUi(self, dietLineDialog):

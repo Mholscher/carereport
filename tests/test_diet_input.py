@@ -17,6 +17,7 @@
 from datetime import date, timedelta
 import unittest
 from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QTableWidgetSelectionRange
 # from carereport.views.dietline import Ui_DietLineForm as LineForm
 from carereport.views.care_app import mainwindow
 from carereport.views.dietheader import Ui_DietHeaderWidget
@@ -197,7 +198,6 @@ class TestDietLineView(unittest.TestCase):
 
     def setUp(self):
 
-        # self.full_form = mainwindow.centralWidget()
         self.diet_view = DietView(diet_name="The actual diet",
                                   permanent_diet=False,
                                   start_date=date.today(),
@@ -235,3 +235,69 @@ class TestDietLineView(unittest.TestCase):
         self.assertEqual(diet_form.dietLineTable.rowCount(), 2,
                          "Incorrect number of lines:"
                          + str(diet_form.dietLineTable.rowCount()))
+        self.assertIn(diet_form.dietLineTable.itemAt(1, 0).text(),
+                      (line1.food_name, line2.food_name),
+                      "Text not correct in table")
+
+    def test_diet_lines_dialog_name(self):
+        """ The diet line dialog should be named after the diet """
+
+        diet_form = UpdateDietLines(self.diet_view)
+        self.assertTrue(diet_form.windowTitle().startswith(self.diet_view.diet_name),
+                        "Dialog title not starting with diet name")
+
+
+class TestDietChangeLines(unittest.TestCase):
+
+    def setUp(self):
+
+        self.diet_view = DietView(diet_name="Diet to change",
+                                  permanent_diet=True,
+                                  start_date=date.today(),
+                                  end_date=date.today()+timedelta(days=15))
+
+        self.diet_line1 = DietLineView(food_name="Vet vlees",
+                                       application_type="minder dan 3x per "
+                                       "week",
+                                       description="Vet vlees is niet "
+                                       "verboden, maar met is wel af te raden"
+                                       " vaak te eten.",
+                                       diet_view=self.diet_view)
+        self.diet_line2 = DietLineView(food_name="Groente",
+                                       application_type="minstens 250 gram "
+                                       "dagelijks",
+                                       description="Lekker en gezond!",
+                                       diet_view=self.diet_view)
+        self.update_dialog = UpdateDietLines(self.diet_view)
+
+    def tearDown(self):
+
+        pass
+
+    def test_select_line_fills_fields(self):
+        """ Selecting a line in the table fills the fields with data """
+
+        the_dialog = self.update_dialog
+        range_line_2 = QTableWidgetSelectionRange(1, 0, 1, 1)
+        the_dialog.dietLineTable.setRangeSelected(range_line_2, True)
+        self.assertEqual(the_dialog.FoodNameEdit.text(),
+                         the_dialog.dietLineTable.itemAt(1, 0).text(),
+                         "Food name not filled correctly")
+        self.assertEqual(self.diet_line1.description,
+                         the_dialog.DescriptionEdit.toPlainText(),
+                         "Description not filled")
+
+    def test_unselect_line_clears_fields(self):
+        """ Unselecting a line in the table clears the fields """
+
+        the_dialog = self.update_dialog
+        range_line_2 = QTableWidgetSelectionRange(1, 0, 1, 1)
+        the_dialog.dietLineTable.setRangeSelected(range_line_2, True)
+        self.assertEqual(the_dialog.FoodNameEdit.text(),
+                         the_dialog.dietLineTable.itemAt(1, 0).text(),
+                         "Food name not filled correctly")
+        the_dialog.dietLineTable.setRangeSelected(range_line_2, False)
+        self.assertEqual(the_dialog.FoodNameEdit.text(), "",
+                         "Food name not cleared")
+        self.assertEqual(the_dialog.DescriptionEdit.toPlainText(), "",
+                         "Description not filled")

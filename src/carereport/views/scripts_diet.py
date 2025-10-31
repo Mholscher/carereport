@@ -22,7 +22,7 @@ enables creation and maintenance of diets and rules within a diet.
 """
 from datetime import date
 from PyQt6.QtCore import QDate
-from PyQt6.QtCore import QLocale as Loc
+from PyQt6.QtCore import QLocale as Loc, pyqtSlot
 from PyQt6.QtWidgets import (QWidget, QDialog, QTableWidgetItem)
 from carereport import app
 from .diet_views import DietView
@@ -107,6 +107,7 @@ class UpdateDiet(_DietChanges):
 
         self.diet_view.update_diet()
 
+
 class UpdateDietLines(QDialog, Ui_dietLineDialog):
     """ Create and update lines for one diet.
 
@@ -118,9 +119,33 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
 
         super().__init__(parent=parent)
         self.setupUi(self)
+        self.dietLineTable.setHorizontalHeaderLabels(["Voeding", "Gebruikregel"])
+        self.dietLineTable.itemSelectionChanged.connect(self.changed_line_selection)
+        self.diet_view = diet_view
+        self.setWindowTitle(diet_view.diet_name + self.windowTitle())
         for lineno, line in enumerate(diet_view.lines_views):
             self.dietLineTable.insertRow(lineno)
             item_name = QTableWidgetItem(line.food_name)
             self.dietLineTable.setItem(lineno, 0, item_name)
             item_application_type = QTableWidgetItem(line.application_type)
             self.dietLineTable.setItem(lineno, 1, item_application_type)
+
+    @pyqtSlot()
+    def changed_line_selection(self):
+        """ A line is selected or deselected in the table with lines """
+
+        try:
+            new_selection = self.dietLineTable.selectedRanges()[0].topRow() - 1
+        except IndexError:
+            self.ApplicationTypeEdit.setText("")
+            self.DescriptionEdit.setPlainText("")
+            self.FoodNameEdit.setText("")
+            return
+        line_view = self.diet_view.lines_views[new_selection]
+        self.ApplicationTypeEdit.setText(line_view.application_type)
+        self.DescriptionEdit.setPlainText(line_view.description)
+        self.FoodNameEdit.setText(line_view.food_name)
+
+    def print_receipt(self):
+
+        print("Signal in slot")

@@ -49,9 +49,6 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="2">
-     <widget class="QTextEdit" name="DescriptionEdit"/>
-    </item>
     <item row="0" column="2">
      <widget class="QLineEdit" name="FoodNameEdit"/>
     </item>
@@ -92,7 +89,10 @@
      </widget>
     </item>
     <item row="1" column="2">
-     <widget class="QLineEdit" name="lineEdit"/>
+     <widget class="QLineEdit" name="ApplicationTypeEdit"/>
+    </item>
+    <item row="2" column="2">
+     <widget class="QPlainTextEdit" name="DescriptionEdit"/>
     </item>
    </layout>
   </widget>
@@ -107,6 +107,12 @@
    </property>
    <property name="editTriggers">
     <set>QAbstractItemView::NoEditTriggers</set>
+   </property>
+   <property name="selectionMode">
+    <enum>QAbstractItemView::SingleSelection</enum>
+   </property>
+   <property name="selectionBehavior">
+    <enum>QAbstractItemView::SelectRows</enum>
    </property>
    <property name="columnCount">
     <number>2</number>
@@ -189,5 +195,22 @@
   </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>closeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>dietLineDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>72</x>
+     <y>532</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>245</x>
+     <y>293</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
