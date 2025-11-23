@@ -16,7 +16,7 @@
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 from datetime import date, timedelta
 import unittest
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import (Qt, QPoint)
 from PyQt6.QtWidgets import QTableWidgetSelectionRange
 # from carereport.views.dietline import Ui_DietLineForm as LineForm
 from carereport.views.care_app import mainwindow
@@ -229,15 +229,21 @@ class TestDietLineView(unittest.TestCase):
         line2 = DietLineView(food_name="Mushroom",
                              description="You can eat this, when you"
                              " know it is not poisonous",
-                             application_type="as ypu like",
+                             application_type="as you like",
                              diet_view=self.diet_view)
         diet_form = UpdateDietLines(self.diet_view)
+        for lineno in range(diet_form.dietLineTable.rowCount()):
+            print("regel", lineno, diet_form.dietLineTable.itemAt(lineno,0),
+                  diet_form.dietLineTable.itemAt(lineno, 1))
         self.assertEqual(diet_form.dietLineTable.rowCount(), 2,
                          "Incorrect number of lines:"
                          + str(diet_form.dietLineTable.rowCount()))
-        self.assertIn(diet_form.dietLineTable.itemAt(1, 0).text(),
-                      (line1.food_name, line2.food_name),
-                      "Text not correct in table")
+        self.assertEqual(diet_form.dietLineTable.itemAt(1, 0).text(),
+                         line2.food_name,
+                         "Text not correct in table")
+        self.assertEqual(diet_form.dietLineTable.itemAt(0, 0).text(),
+                         line1.food_name,
+                         "Text not correct in table")
 
     def test_diet_lines_dialog_name(self):
         """ The diet line dialog should be named after the diet """
@@ -278,7 +284,7 @@ class TestDietChangeLines(unittest.TestCase):
         """ Selecting a line in the table fills the fields with data """
 
         the_dialog = self.update_dialog
-        range_line_2 = QTableWidgetSelectionRange(1, 0, 1, 1)
+        range_line_2 = QTableWidgetSelectionRange(0, 0, 0, 1)
         the_dialog.dietLineTable.setRangeSelected(range_line_2, True)
         self.assertEqual(the_dialog.FoodNameEdit.text(),
                          the_dialog.dietLineTable.itemAt(1, 0).text(),
@@ -291,7 +297,7 @@ class TestDietChangeLines(unittest.TestCase):
         """ Unselecting a line in the table clears the fields """
 
         the_dialog = self.update_dialog
-        range_line_2 = QTableWidgetSelectionRange(1, 0, 1, 1)
+        range_line_2 = QTableWidgetSelectionRange(0, 0, 0, 1)
         the_dialog.dietLineTable.setRangeSelected(range_line_2, True)
         self.assertEqual(the_dialog.FoodNameEdit.text(),
                          the_dialog.dietLineTable.itemAt(1, 0).text(),
@@ -301,3 +307,102 @@ class TestDietChangeLines(unittest.TestCase):
                          "Food name not cleared")
         self.assertEqual(the_dialog.DescriptionEdit.toPlainText(), "",
                          "Description not filled")
+
+    def test_updates_to_view(self):
+        """ Updates to field application type are passed to view """
+
+        the_dialog = self.update_dialog
+        range_line_2 = QTableWidgetSelectionRange(1, 0, 1, 1)
+        the_dialog.dietLineTable.setRangeSelected(range_line_2, True)
+        the_dialog.ApplicationTypeEdit.setText("dagelijks 250 gram")
+        the_dialog.ApplicationTypeEdit.editingFinished.emit()
+        the_dialog.dietLineTable.setRangeSelected(range_line_2, False)
+        self.assertEqual(self.diet_line2.application_type,
+                         "dagelijks 250 gram",
+                         "Application type not filled correctly")
+
+    def test_update_view_for_name(self):
+        """ Updates to field food name are passed to view """
+
+        the_dialog = self.update_dialog
+        range_line_2 = QTableWidgetSelectionRange(1, 0, 1, 1)
+        the_dialog.dietLineTable.setRangeSelected(range_line_2, True)
+        the_dialog.FoodNameEdit.setText("Zaden en knollen")
+        the_dialog.FoodNameEdit.editingFinished.emit()
+        the_dialog.dietLineTable.setRangeSelected(range_line_2, False)
+        self.assertEqual(self.diet_line2.food_name,
+                         "Zaden en knollen",
+                         "Food name not filled correctly")
+
+    @unittest.skip
+    def test_update_view_for_description(self):
+        """  Updates to field description are passed to the view """
+
+        the_dialog = self.update_dialog
+        # print("DescriptionEdit heeft type", type(the_dialog.DescriptionEdit))
+        range_line_2 = QTableWidgetSelectionRange(1, 0, 1, 1)
+        the_dialog.dietLineTable.setRangeSelected(range_line_2, True)
+        the_dialog.show()
+        the_dialog.DescriptionEdit.setFocus()
+        the_dialog.DescriptionEdit.setPlainText("Dit is de nieuwe tekst")
+        the_dialog.ApplicationTypeEdit.setFocus()
+        the_dialog.dietLineTable.setRangeSelected(range_line_2, False)
+        the_dialog.close()
+        self.assertEqual(self.diet_line2.description,
+                         "Dit is de nieuwe tekst",
+                         "Description not filled correctly")
+
+    def test_new_diet_line_inserts_row(self):
+        """ Inserting a new row makes it appear in the table """
+
+        the_dialog = self.update_dialog
+        old_row_count = the_dialog.dietLineTable.rowCount()
+        the_dialog.insert_new_line()
+        self.assertEqual(the_dialog.dietLineTable.rowCount(),
+                        old_row_count + 1,
+                        "No row added to table")
+
+    def test_adding_line_clears_inputs(self):
+        """ Inserting a new diet line empties the input fields """
+
+        the_dialog = self.update_dialog
+        range_line_2 = QTableWidgetSelectionRange(1, 0, 1, 1)
+        the_dialog.dietLineTable.setRangeSelected(range_line_2, True)
+        # Make false positives less likely
+        self.assertNotEqual(the_dialog.FoodNameEdit.text(),
+                            "",
+                            "Food name empty")
+        the_dialog.insert_new_line()
+        self.assertEqual(the_dialog.FoodNameEdit.text(),
+                         "",
+                         "Food name not empty")
+
+    def test_each_line_unique_name(self):
+        """ Each line in the test table must have a different food name """
+
+        the_dialog = self.update_dialog
+        name_list = [the_dialog.dietLineTable.itemAt(0, 0).text()]
+        for row in range(1, the_dialog.dietLineTable.rowCount()):
+            name_list.append(the_dialog.dietLineTable.itemAt(row, 0).text())
+            self.assertNotEqual(the_dialog.dietLineTable.itemAt(row, 0).text(),
+                                name_list[row -1],
+                                "Row names equal!")
+
+    def test_new_line_selected(self):
+        """ A line just added is selected """
+
+        the_dialog = self.update_dialog
+        for row in range(0, the_dialog.dietLineTable.rowCount()):
+            print("Food name:", the_dialog.dietLineTable.itemAt(row, 0).text())
+        the_dialog.insert_new_line()
+        for row_nr in range(0, 3):
+            print(row_nr, the_dialog.dietLineTable.itemAt(row_nr, 0).text())
+        print("Row count:", the_dialog.dietLineTable.rowCount())
+        self.assertEqual(the_dialog.dietLineTable.itemAt(
+                          the_dialog.dietLineTable.rowCount() - 1, 0).text(),
+                         the_dialog.dietLineTable.selectedItems()[0].text(),
+                         "Not equal text")
+        self.assertIn(the_dialog.dietLineTable.itemAt(
+                          the_dialog.dietLineTable.rowCount() - 1, 0),
+                      the_dialog.dietLineTable.selectedItems(),
+                      "Food name edit not selected")

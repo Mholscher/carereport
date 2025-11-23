@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>622</width>
-    <height>571</height>
+    <width>631</width>
+    <height>469</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -215,6 +215,12 @@
        <verstretch>1</verstretch>
       </sizepolicy>
      </property>
+     <property name="minimumSize">
+      <size>
+       <width>613</width>
+       <height>342</height>
+      </size>
+     </property>
      <property name="tabShape">
       <enum>QTabWidget::Rounded</enum>
      </property>
@@ -248,8 +254,14 @@
          <x>10</x>
          <y>9</y>
          <width>591</width>
-         <height>401</height>
+         <height>271</height>
         </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>1</horstretch>
+         <verstretch>1</verstretch>
+        </sizepolicy>
        </property>
        <property name="widgetResizable">
         <bool>true</bool>
@@ -260,7 +272,7 @@
           <x>0</x>
           <y>0</y>
           <width>589</width>
-          <height>399</height>
+          <height>269</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">

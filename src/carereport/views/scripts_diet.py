@@ -20,12 +20,15 @@ The diets are input through two input widgets that ar switching between each
 other. One holds a list of diets (the headers that is) and the other one
 enables creation and maintenance of diets and rules within a diet.
 """
+import sys
 from datetime import date
 from PyQt6.QtCore import QDate
 from PyQt6.QtCore import QLocale as Loc, pyqtSlot
-from PyQt6.QtWidgets import (QWidget, QDialog, QTableWidgetItem)
+from PyQt6.QtWidgets import (QWidget, QDialog, QTableWidgetItem,
+                             QTableWidgetSelectionRange)
+from .plaintextext import DescriptionWidget
 from carereport import app
-from .diet_views import DietView
+from .diet_views import DietView, DietLineView
 from .dietline import Ui_dietLineDialog
 from .dietheader import Ui_DietHeaderWidget
 """ This module sets up diets. It takes care of creating new diets, updating
@@ -111,8 +114,8 @@ class UpdateDiet(_DietChanges):
 class UpdateDietLines(QDialog, Ui_dietLineDialog):
     """ Create and update lines for one diet.
 
-    Both new and existing diets can have diet lines added and changed. whe
-    do not support deletion. 
+    Both new and existing diets can have diet lines added and changed. We
+    do not support deletion.
     """
 
     def __init__(self, diet_view, parent=None):
@@ -121,31 +124,97 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
         self.setupUi(self)
         self.dietLineTable.setHorizontalHeaderLabels(["Voeding", "Gebruikregel"])
         self.dietLineTable.itemSelectionChanged.connect(self.changed_line_selection)
+        self.FoodNameEdit.editingFinished.connect(
+            self.on_editing_finished_food_name)
+        self.ApplicationTypeEdit.editingFinished.connect(
+            self.on_editing_finished_application_type)
+        self.newLineButton.clicked.connect(self.insert_new_line)
         self.diet_view = diet_view
+        if self.diet_view.lines_views:
+            print(self.diet_view.lines_views[0])
         self.setWindowTitle(diet_view.diet_name + self.windowTitle())
+        self.dietLineTable.setRowCount(len(diet_view.lines_views))
         for lineno, line in enumerate(diet_view.lines_views):
-            self.dietLineTable.insertRow(lineno)
-            item_name = QTableWidgetItem(line.food_name)
-            self.dietLineTable.setItem(lineno, 0, item_name)
-            item_application_type = QTableWidgetItem(line.application_type)
-            self.dietLineTable.setItem(lineno, 1, item_application_type)
+            self.dietLineTable.setItem(0, lineno, QTableWidgetItem(line.food_name))
+            application_item = QTableWidgetItem(line.application_type)
+            self.dietLineTable.setItem(1, lineno, application_item)
+ 
+    def insert_new_line(self, initial_values=None):
+        """ Insert a new line in the collection.
+
+        All values in the edit fields are set to empty, but in the table the
+        values are set to placeholders. Editing replaces the placeholders
+        with actual values.
+        """
+
+        self.dietLineTable.insertRow(self.dietLineTable.rowCount())
+        current_row = self.dietLineTable.rowCount() - 1
+        selected_range = QTableWidgetSelectionRange(
+                            current_row, 0, current_row, 1)
+        self.dietLineTable.setRangeSelected(selected_range, True)
+        food_name_item = QTableWidgetItem("< Vul de voeding >")
+        application_type_item = QTableWidgetItem("< Geef de regel >")
+        self.dietLineTable.setItem(current_row, 0,
+                                   food_name_item)
+        self.dietLineTable.setItem(current_row, 1,
+                                   application_type_item)
+        self.line_view = DietLineView(self.diet_view)
+        self.ApplicationTypeEdit.setText("")
+        self.DescriptionEdit.setPlainText("")
+        self.FoodNameEdit.setText("")
 
     @pyqtSlot()
     def changed_line_selection(self):
         """ A line is selected or deselected in the table with lines """
 
         try:
-            new_selection = self.dietLineTable.selectedRanges()[0].topRow() - 1
+            new_selection = self.dietLineTable.selectedRanges()[0].topRow()
         except IndexError:
             self.ApplicationTypeEdit.setText("")
             self.DescriptionEdit.setPlainText("")
             self.FoodNameEdit.setText("")
             return
-        line_view = self.diet_view.lines_views[new_selection]
-        self.ApplicationTypeEdit.setText(line_view.application_type)
-        self.DescriptionEdit.setPlainText(line_view.description)
-        self.FoodNameEdit.setText(line_view.food_name)
+        if new_selection < len(self.diet_view.lines_views):
+            self.line_view = self.diet_view.lines_views[new_selection]
+        else:
+            self.line_view = DietLineView(self.diet_view)
+            return
+        self.DescriptionEdit.save_to_view = self.save_description_to_view
+        self.ApplicationTypeEdit.setText(self.line_view.application_type)
+        self.DescriptionEdit.setPlainText(self.line_view.description)
+        self.FoodNameEdit.setText(self.line_view.food_name)
 
-    def print_receipt(self):
+    def save_description_to_view(self):
+        """ Save the inputted text in description to view """
 
-        print("Signal in slot")
+        if self.DescriptionEdit.toPlainText() != self.line_view.description:
+            self.line_view.description = self.DescriptionEdit.toPlainText()
+
+    def on_editing_finished_application_type(self):
+        """ This is the handler for the focus out of ApplicationTypeEdit
+
+        It synchronizes the view to the latest input in the text line.
+        """
+
+        if self.line_view.application_type != self.ApplicationTypeEdit.text():
+            self.line_view.application_type = self.ApplicationTypeEdit.text()
+        self.dietLineTable.selectedItems()[1].setText(
+            self.ApplicationTypeEdit.text())
+
+    def on_editing_finished_food_name(self):
+        """ This is the handler for the focus out of FoodNameEdit
+
+        It synchronizes the view to the latest input in the text line.
+        """
+
+        if self.line_view.food_name != self.FoodNameEdit.text():
+            self.line_view.food_name = self.FoodNameEdit.text()
+        self.dietLineTable.selectedItems()[0].setText(
+            self.FoodNameEdit.text())
+
+
+if __name__ == "__main__":
+    diet_view = DietView()
+    window = UpdateDietLines(diet_view)
+    window.show()
+    sys.exit(app.exec())

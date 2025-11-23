@@ -141,7 +141,7 @@
       </property>
       <property name="dateTime">
        <datetime>
-        <hour>7</hour>
+        <hour>6</hour>
         <minute>0</minute>
         <second>0</second>
         <year>1989</year>
@@ -230,6 +230,22 @@
      </widget>
     </item>
    </layout>
+  </widget>
+  <widget class="QPushButton" name="changeLinesButton">
+   <property name="geometry">
+    <rect>
+     <x>529</x>
+     <y>200</y>
+     <width>141</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&amp;Wijzig dieet regels</string>
+   </property>
+   <property name="default">
+    <bool>true</bool>
+   </property>
   </widget>
  </widget>
  <resources/>
