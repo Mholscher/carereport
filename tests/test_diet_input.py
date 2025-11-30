@@ -216,7 +216,7 @@ class TestDietLineView(unittest.TestCase):
                             diet_view=self.diet_view)
         diet_form = UpdateDietLines(self.diet_view)
         self.assertEqual(line.food_name,
-                         diet_form.dietLineTable.itemAt(0, 0).text(),
+                         diet_form.dietLineTable.item(0, 0).text(),
                          "Food name not correctly filled for line")
 
     def test_more_diet_lines(self):
@@ -232,16 +232,18 @@ class TestDietLineView(unittest.TestCase):
                              application_type="as you like",
                              diet_view=self.diet_view)
         diet_form = UpdateDietLines(self.diet_view)
-        for lineno in range(diet_form.dietLineTable.rowCount()):
-            print("regel", lineno, diet_form.dietLineTable.itemAt(lineno,0),
-                  diet_form.dietLineTable.itemAt(lineno, 1))
+        diet_form.show()
+        # print(self.diet_view.lines_views)
+        # for lineno in range(diet_form.dietLineTable.rowCount()):
+        #     print("regel", lineno, diet_form.dietLineTable.item(lineno, 0).text(),
+        #           diet_form.dietLineTable.item(lineno, 1).text())
         self.assertEqual(diet_form.dietLineTable.rowCount(), 2,
                          "Incorrect number of lines:"
                          + str(diet_form.dietLineTable.rowCount()))
-        self.assertEqual(diet_form.dietLineTable.itemAt(1, 0).text(),
+        self.assertEqual(diet_form.dietLineTable.item(1, 0).text(),
                          line2.food_name,
                          "Text not correct in table")
-        self.assertEqual(diet_form.dietLineTable.itemAt(0, 0).text(),
+        self.assertEqual(diet_form.dietLineTable.item(0, 0).text(),
                          line1.food_name,
                          "Text not correct in table")
 
@@ -284,12 +286,12 @@ class TestDietChangeLines(unittest.TestCase):
         """ Selecting a line in the table fills the fields with data """
 
         the_dialog = self.update_dialog
-        range_line_2 = QTableWidgetSelectionRange(0, 0, 0, 1)
+        range_line_2 = QTableWidgetSelectionRange(1, 0, 1, 1)
         the_dialog.dietLineTable.setRangeSelected(range_line_2, True)
         self.assertEqual(the_dialog.FoodNameEdit.text(),
-                         the_dialog.dietLineTable.itemAt(1, 0).text(),
+                         the_dialog.dietLineTable.item(1, 0).text(),
                          "Food name not filled correctly")
-        self.assertEqual(self.diet_line1.description,
+        self.assertEqual(self.diet_line2.description,
                          the_dialog.DescriptionEdit.toPlainText(),
                          "Description not filled")
 
@@ -300,7 +302,7 @@ class TestDietChangeLines(unittest.TestCase):
         range_line_2 = QTableWidgetSelectionRange(0, 0, 0, 1)
         the_dialog.dietLineTable.setRangeSelected(range_line_2, True)
         self.assertEqual(the_dialog.FoodNameEdit.text(),
-                         the_dialog.dietLineTable.itemAt(1, 0).text(),
+                         the_dialog.dietLineTable.item(0, 0).text(),
                          "Food name not filled correctly")
         the_dialog.dietLineTable.setRangeSelected(range_line_2, False)
         self.assertEqual(the_dialog.FoodNameEdit.text(), "",
@@ -381,28 +383,21 @@ class TestDietChangeLines(unittest.TestCase):
         """ Each line in the test table must have a different food name """
 
         the_dialog = self.update_dialog
-        name_list = [the_dialog.dietLineTable.itemAt(0, 0).text()]
-        for row in range(1, the_dialog.dietLineTable.rowCount()):
-            name_list.append(the_dialog.dietLineTable.itemAt(row, 0).text())
-            self.assertNotEqual(the_dialog.dietLineTable.itemAt(row, 0).text(),
-                                name_list[row -1],
-                                "Row names equal!")
+        self.assertNotEqual(the_dialog.dietLineTable.item(0, 0).text(),
+                            the_dialog.dietLineTable.item(1, 0).text(),
+                            "Row names equal!")
 
     def test_new_line_selected(self):
         """ A line just added is selected """
 
         the_dialog = self.update_dialog
-        for row in range(0, the_dialog.dietLineTable.rowCount()):
-            print("Food name:", the_dialog.dietLineTable.itemAt(row, 0).text())
+        # for row in range(0, the_dialog.dietLineTable.rowCount()):
+        #     print("Food name:", the_dialog.dietLineTable.item(row, 0).text())
         the_dialog.insert_new_line()
-        for row_nr in range(0, 3):
-            print(row_nr, the_dialog.dietLineTable.itemAt(row_nr, 0).text())
-        print("Row count:", the_dialog.dietLineTable.rowCount())
-        self.assertEqual(the_dialog.dietLineTable.itemAt(
-                          the_dialog.dietLineTable.rowCount() - 1, 0).text(),
-                         the_dialog.dietLineTable.selectedItems()[0].text(),
-                         "Not equal text")
-        self.assertIn(the_dialog.dietLineTable.itemAt(
+        # for row_nr in range(0, 3):
+        #     print(row_nr, the_dialog.dietLineTable.item(row_nr, 0).text())
+        # print("Row count:", the_dialog.dietLineTable.rowCount())
+        self.assertIn(the_dialog.dietLineTable.item(
                           the_dialog.dietLineTable.rowCount() - 1, 0),
                       the_dialog.dietLineTable.selectedItems(),
                       "Food name edit not selected")

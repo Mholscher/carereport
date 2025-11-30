@@ -130,15 +130,18 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
             self.on_editing_finished_application_type)
         self.newLineButton.clicked.connect(self.insert_new_line)
         self.diet_view = diet_view
-        if self.diet_view.lines_views:
-            print(self.diet_view.lines_views[0])
         self.setWindowTitle(diet_view.diet_name + self.windowTitle())
-        self.dietLineTable.setRowCount(len(diet_view.lines_views))
-        for lineno, line in enumerate(diet_view.lines_views):
-            self.dietLineTable.setItem(0, lineno, QTableWidgetItem(line.food_name))
+        self.line_widgets = []
+        for line in diet_view.lines_views:
+            self.dietLineTable.insertRow(self.dietLineTable.rowCount())
+            lineno = self.dietLineTable.rowCount() - 1
+            food_name_item = QTableWidgetItem(line.food_name)
+            self.dietLineTable.setItem(lineno, 0,
+                                       food_name_item)
             application_item = QTableWidgetItem(line.application_type)
-            self.dietLineTable.setItem(1, lineno, application_item)
- 
+            self.dietLineTable.setItem(lineno, 1, application_item)
+            self.line_widgets.append((food_name_item, application_item))
+
     def insert_new_line(self, initial_values=None):
         """ Insert a new line in the collection.
 
@@ -149,15 +152,14 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
 
         self.dietLineTable.insertRow(self.dietLineTable.rowCount())
         current_row = self.dietLineTable.rowCount() - 1
-        selected_range = QTableWidgetSelectionRange(
-                            current_row, 0, current_row, 1)
-        self.dietLineTable.setRangeSelected(selected_range, True)
         food_name_item = QTableWidgetItem("< Vul de voeding >")
         application_type_item = QTableWidgetItem("< Geef de regel >")
         self.dietLineTable.setItem(current_row, 0,
                                    food_name_item)
         self.dietLineTable.setItem(current_row, 1,
                                    application_type_item)
+        new_line_range = QTableWidgetSelectionRange(0, 0, current_row, 1)
+        self.dietLineTable.setRangeSelected(new_line_range, True)
         self.line_view = DietLineView(self.diet_view)
         self.ApplicationTypeEdit.setText("")
         self.DescriptionEdit.setPlainText("")

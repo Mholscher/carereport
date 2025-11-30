@@ -58,7 +58,7 @@ class Ui_dietLineDialog(object):
         self.dietLineTable.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
         self.dietLineTable.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
         self.dietLineTable.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
-        self.dietLineTable.setRowCount(1)
+        self.dietLineTable.setRowCount(0)
         self.dietLineTable.setColumnCount(2)
         self.dietLineTable.setObjectName("dietLineTable")
         self.dietLineTable.verticalHeader().setVisible(False)
