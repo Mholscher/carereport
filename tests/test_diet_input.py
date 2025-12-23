@@ -254,6 +254,32 @@ class TestDietLineView(unittest.TestCase):
         self.assertTrue(diet_form.windowTitle().startswith(self.diet_view.diet_name),
                         "Dialog title not starting with diet name")
 
+    def test_create_line_unselects_previous(self):
+        """ If you create a line while one is selected, unselect previous """
+
+        diet_changes = UpdateDietLines(self.diet_view)
+        row_count = diet_changes.dietLineTable.rowCount()
+        self.assertEqual(row_count, 0,
+                         f"Row count incorrect: {row_count}")
+        diet_changes.insert_new_line()
+        self.assertEqual(row_count, 0,
+                         f"Row count incorrect: {row_count}")
+        current_selections = diet_changes.dietLineTable.selectedRanges()
+        self.assertEqual(len(current_selections), 1,
+                         f"Wrong no of selections: {len(current_selections)}")
+        diet_changes.dietLineTable.insertRow(diet_changes.dietLineTable.rowCount())
+        current_selections = diet_changes.dietLineTable.selectedRanges()
+        self.assertEqual(len(current_selections), 1,
+                         f"Wrong no of selections: {len(current_selections)}")
+        first_range = diet_changes.dietLineTable.selectedRanges()[0]
+        self.assertEqual(first_range.bottomRow(),
+                         first_range.topRow(),
+                         "More than one row in selection")
+        for range in diet_changes.dietLineTable.selectedRanges():
+            self.assertNotEqual(range.bottomRow(),
+                                1,
+                                "Wrong row in selection")
+
 
 class TestDietChangeLines(unittest.TestCase):
 

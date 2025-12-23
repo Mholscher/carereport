@@ -181,7 +181,7 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
         else:
             self.line_view = DietLineView(self.diet_view)
             return
-        self.DescriptionEdit.save_to_view = self.save_description_to_view
+        self.DescriptionEdit.save_to_view = self.save_description_to_view()
         self.ApplicationTypeEdit.setText(self.line_view.application_type)
         self.DescriptionEdit.setPlainText(self.line_view.description)
         self.FoodNameEdit.setText(self.line_view.food_name)
