@@ -53,7 +53,7 @@ class Ui_dietLineDialog(object):
         self.descriptionErrorLabel.setText("")
         self.descriptionErrorLabel.setObjectName("descriptionErrorLabel")
         self.DietLineLayout.addWidget(self.descriptionErrorLabel, 2, 3, 1, 1)
-        self.dietLineTable = QtWidgets.QTableWidget(parent=dietLineDialog)
+        self.dietLineTable = DietTableWidget(parent=dietLineDialog)
         self.dietLineTable.setGeometry(QtCore.QRect(35, 20, 431, 192))
         self.dietLineTable.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
         self.dietLineTable.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
@@ -101,4 +101,4 @@ class Ui_dietLineDialog(object):
         self.statusMessageLabel.setText(_translate("dietLineDialog", "Klaar"))
         self.newLineButton.setText(_translate("dietLineDialog", "&Nieuwe dieetregel"))
         self.pushButton.setText(_translate("dietLineDialog", "Op&slaan"))
-from .plaintextext import DescriptionWidget
+from .widgetext import DescriptionWidget, DietTableWidget

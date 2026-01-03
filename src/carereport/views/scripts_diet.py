@@ -21,12 +21,12 @@ other. One holds a list of diets (the headers that is) and the other one
 enables creation and maintenance of diets and rules within a diet.
 """
 import sys
-from datetime import date
-from PyQt6.QtCore import QDate
-from PyQt6.QtCore import QLocale as Loc, pyqtSlot
+# from datetime import date
+# from PyQt6.QtCore import QDate
+# from PyQt6.QtCore import QLocale as Loc, pyqtSlot
 from PyQt6.QtWidgets import (QWidget, QDialog, QTableWidgetItem,
                              QTableWidgetSelectionRange)
-from .plaintextext import DescriptionWidget
+# from .widgetext import DescriptionWidget
 from carereport import app
 from .diet_views import DietView, DietLineView
 from .dietline import Ui_dietLineDialog
@@ -122,16 +122,21 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
 
         super().__init__(parent=parent)
         self.setupUi(self)
-        self.dietLineTable.setHorizontalHeaderLabels(["Voeding", "Gebruikregel"])
-        self.dietLineTable.itemSelectionChanged.connect(self.changed_line_selection)
+        self.dietLineTable.setHorizontalHeaderLabels(["Voeding",
+                                                      "Gebruikregel"])
+        # self.dietLineTable.itemSelectionChanged.connect(self.changed_line_selection)
+        self.dietLineTable.FoodNameEdit = self.FoodNameEdit
         self.FoodNameEdit.editingFinished.connect(
             self.on_editing_finished_food_name)
+        self.dietLineTable.ApplicationTypeEdit = self.ApplicationTypeEdit
         self.ApplicationTypeEdit.editingFinished.connect(
             self.on_editing_finished_application_type)
+        self.dietLineTable.DescriptionEdit = self.DescriptionEdit
         self.newLineButton.clicked.connect(self.insert_new_line)
         self.diet_view = diet_view
         self.setWindowTitle(diet_view.diet_name + self.windowTitle())
         self.line_widgets = []
+        self.dietLineTable.lines_views = diet_view.lines_views
         for line in diet_view.lines_views:
             self.dietLineTable.insertRow(self.dietLineTable.rowCount())
             lineno = self.dietLineTable.rowCount() - 1
@@ -158,33 +163,17 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
                                    food_name_item)
         self.dietLineTable.setItem(current_row, 1,
                                    application_type_item)
-        new_line_range = QTableWidgetSelectionRange(0, 0, current_row, 1)
+        if self.dietLineTable.selectedRanges():
+            self.dietLineTable.setRangeSelected(
+                self.dietLineTable.selectedRanges()[0],
+                False)
+        new_line_range = QTableWidgetSelectionRange(current_row, 0,
+                                                    current_row, 1)
         self.dietLineTable.setRangeSelected(new_line_range, True)
         self.line_view = DietLineView(self.diet_view)
         self.ApplicationTypeEdit.setText("")
         self.DescriptionEdit.setPlainText("")
         self.FoodNameEdit.setText("")
-
-    @pyqtSlot()
-    def changed_line_selection(self):
-        """ A line is selected or deselected in the table with lines """
-
-        try:
-            new_selection = self.dietLineTable.selectedRanges()[0].topRow()
-        except IndexError:
-            self.ApplicationTypeEdit.setText("")
-            self.DescriptionEdit.setPlainText("")
-            self.FoodNameEdit.setText("")
-            return
-        if new_selection < len(self.diet_view.lines_views):
-            self.line_view = self.diet_view.lines_views[new_selection]
-        else:
-            self.line_view = DietLineView(self.diet_view)
-            return
-        self.DescriptionEdit.save_to_view = self.save_description_to_view()
-        self.ApplicationTypeEdit.setText(self.line_view.application_type)
-        self.DescriptionEdit.setPlainText(self.line_view.description)
-        self.FoodNameEdit.setText(self.line_view.food_name)
 
     def save_description_to_view(self):
         """ Save the inputted text in description to view """
@@ -198,8 +187,14 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
         It synchronizes the view to the latest input in the text line.
         """
 
-        if self.line_view.application_type != self.ApplicationTypeEdit.text():
-            self.line_view.application_type = self.ApplicationTypeEdit.text()
+        range_selected = self.dietLineTable.selectedRanges()[0]
+        if not range_selected:
+            return
+        row = range_selected.topRow()
+        if self.diet_view.lines_views[row].application_type !=\
+            self.ApplicationTypeEdit.text():
+            self.diet_view.lines_views[row].application_type =\
+                self.ApplicationTypeEdit.text()
         self.dietLineTable.selectedItems()[1].setText(
             self.ApplicationTypeEdit.text())
 
@@ -209,8 +204,12 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
         It synchronizes the view to the latest input in the text line.
         """
 
-        if self.line_view.food_name != self.FoodNameEdit.text():
-            self.line_view.food_name = self.FoodNameEdit.text()
+        range_selected = self.dietLineTable.selectedRanges()[0]
+        if not range_selected:
+            return
+        row = range_selected.topRow()
+        if self.diet_view.lines_views[row].food_name != self.FoodNameEdit.text():
+            self.diet_view.lines_views[row].food_name = self.FoodNameEdit.text()
         self.dietLineTable.selectedItems()[0].setText(
             self.FoodNameEdit.text())
 

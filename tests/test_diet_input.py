@@ -233,10 +233,6 @@ class TestDietLineView(unittest.TestCase):
                              diet_view=self.diet_view)
         diet_form = UpdateDietLines(self.diet_view)
         diet_form.show()
-        # print(self.diet_view.lines_views)
-        # for lineno in range(diet_form.dietLineTable.rowCount()):
-        #     print("regel", lineno, diet_form.dietLineTable.item(lineno, 0).text(),
-        #           diet_form.dietLineTable.item(lineno, 1).text())
         self.assertEqual(diet_form.dietLineTable.rowCount(), 2,
                          "Incorrect number of lines:"
                          + str(diet_form.dietLineTable.rowCount()))
@@ -267,6 +263,9 @@ class TestDietLineView(unittest.TestCase):
         current_selections = diet_changes.dietLineTable.selectedRanges()
         self.assertEqual(len(current_selections), 1,
                          f"Wrong no of selections: {len(current_selections)}")
+        self.assertEqual(current_selections[0].topRow(),
+                         current_selections[0].bottomRow(),
+                         "More than one row in selection")
         diet_changes.dietLineTable.insertRow(diet_changes.dietLineTable.rowCount())
         current_selections = diet_changes.dietLineTable.selectedRanges()
         self.assertEqual(len(current_selections), 1,
@@ -275,10 +274,6 @@ class TestDietLineView(unittest.TestCase):
         self.assertEqual(first_range.bottomRow(),
                          first_range.topRow(),
                          "More than one row in selection")
-        for range in diet_changes.dietLineTable.selectedRanges():
-            self.assertNotEqual(range.bottomRow(),
-                                1,
-                                "Wrong row in selection")
 
 
 class TestDietChangeLines(unittest.TestCase):
@@ -362,7 +357,7 @@ class TestDietChangeLines(unittest.TestCase):
                          "Zaden en knollen",
                          "Food name not filled correctly")
 
-    @unittest.skip
+    # @unittest.skip
     def test_update_view_for_description(self):
         """  Updates to field description are passed to the view """
 

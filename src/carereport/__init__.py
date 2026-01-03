@@ -31,7 +31,7 @@ if success:
     dburi = config['DATABASE']['SQLALCHEMY_DATABASE_URI']
     engine = create_engine(dburi, isolation_level="READ UNCOMMITTED")
     Session = sessionmaker(bind=engine)
-    session=Session()
+    session = Session()
 else:
     raise FileNotFoundError('Configuration file not loaded!')
 
