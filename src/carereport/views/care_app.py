@@ -31,7 +31,7 @@ class CentralForm(QWidget, Ui_Form):
 
     It shows the identification data of the "current patient" at the top of
     the window. Any data for this patient can de shown in the multi tabular
-    widget blow it. Think of medical data as examinations, but also data for
+    widget below it. Think of medical data as examinations, but also data for
     the day to day care, such as any diets the patient follows.
     """
 

@@ -89,6 +89,13 @@ class Ui_dietLineDialog(object):
         self.retranslateUi(dietLineDialog)
         self.closeButton.clicked.connect(dietLineDialog.accept) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(dietLineDialog)
+        dietLineDialog.setTabOrder(self.FoodNameEdit, self.ApplicationTypeEdit)
+        dietLineDialog.setTabOrder(self.ApplicationTypeEdit, self.DescriptionEdit)
+        dietLineDialog.setTabOrder(self.DescriptionEdit, self.closeButton)
+        dietLineDialog.setTabOrder(self.closeButton, self.newLineButton)
+        dietLineDialog.setTabOrder(self.newLineButton, self.resetButton)
+        dietLineDialog.setTabOrder(self.resetButton, self.pushButton)
+        dietLineDialog.setTabOrder(self.pushButton, self.dietLineTable)
 
     def retranslateUi(self, dietLineDialog):
         _translate = QtCore.QCoreApplication.translate

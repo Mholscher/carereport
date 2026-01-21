@@ -21,7 +21,7 @@ other. One holds a list of diets (the headers that is) and the other one
 enables creation and maintenance of diets and rules within a diet.
 """
 import sys
-# from datetime import date
+from datetime import date
 # from PyQt6.QtCore import QDate
 # from PyQt6.QtCore import QLocale as Loc, pyqtSlot
 from PyQt6.QtWidgets import (QWidget, QDialog, QTableWidgetItem,
@@ -31,9 +31,16 @@ from carereport import app
 from .diet_views import DietView, DietLineView
 from .dietline import Ui_dietLineDialog
 from .dietheader import Ui_DietHeaderWidget
+from .care_app import mainwindow
 """ This module sets up diets. It takes care of creating new diets, updating
 existing diets through diet views.
 """
+
+
+def update_view_from_widget(instance):
+    """ Update the view from a widget """
+
+    instance.header_widget.update_view()
 
 
 class _DietChanges(QWidget, Ui_DietHeaderWidget):
@@ -44,7 +51,15 @@ class _DietChanges(QWidget, Ui_DietHeaderWidget):
 
         super().__init__(parent=parent)
 
-    def update_diet_view(self):
+    def set_header_widget(self):
+        """ Make sure each of the edits "knows" this widget """
+
+        self.dietNameEdit.header_widget = self
+        self.startDateEdit.header_widget = self
+        self.endDateEdit.header_widget = self
+        self.permanentCheckBox.header_widget = self
+
+    def update_view(self):
         """ Update the values in a diet view """
 
         self.diet_view.diet_name = self.dietNameEdit.text()
@@ -55,7 +70,7 @@ class _DietChanges(QWidget, Ui_DietHeaderWidget):
             self.diet_view.end_date = None
         else:
             self.diet_view.start_date = self.startDateEdit.date()
-            if self.endDateEdit.date():
+            if self.endDateEdit.date() != date(9999, 12, 31):
                 self.diet_view.end_date = self.endDateEdit.date()
             if self.diet_view.start_date and self.diet_view.end_date:
                 self.diet_view.check_diet_dates()
@@ -77,6 +92,9 @@ class CreateDiet(_DietChanges):
         super().__init__(parent=parent)
         self.diet_view = DietView()
         self.setupUi(self)
+        save_button = mainwindow.centralWidget().saveDataButton
+        save_button.clicked.connect(self.update_view)
+        self.set_header_widget()
 
     def update_diet(self):
         """ At this point in the script the diet for the database is created.
@@ -94,21 +112,46 @@ class UpdateDiet(_DietChanges):
     permanent, when an end date diet is altered, or a typing error is fixed.
     """
 
-    def __init__(self, diet_view, parent=None):
+    def __init__(self, diet_view, parent=None, stretch=0):
 
         super().__init__(parent=parent)
         self.setupUi(self)
         # Fill the diet header
-        self.diet_name = diet_view.diet_name
-        self.permanent_diet = diet_view.permanent_diet
-        self.start_date = diet_view.start_date
-        self.end_date = diet_view.end_date
+        self.dietNameEdit.setText(diet_view.diet_name)
+        self.permanentCheckBox.setChecked(diet_view.permanent_diet)
+        self.startDateEdit.setDate(diet_view.start_date)
+        if diet_view.end_date:
+            self.endDateEdit.setDate(diet_view.end_date)
+        else:
+            self.endDateEdit.setDate(date(9999, 12, 31))
         self.diet_view = diet_view
+        save_button = mainwindow.centralWidget().saveDataButton
+        save_button.clicked.connect(self.update_view)
+        self.set_header_widget()
 
     def update_diet(self):
         """ The data in the view is released into the diet """
 
         self.diet_view.update_diet()
+
+    def update_view(self):
+        """ Update the view with changes from the window """
+
+        view = self.diet_view
+        if view.diet_name != self.dietNameEdit.text():
+            view.diet_name = self.dietNameEdit.text()
+        if view.permanent_diet != self.permanentCheckBox.isChecked():
+            view.permanent_diet = self.permanentCheckBox.isChecked()
+        if not view.permanent_diet:
+            if view.start_date != self.startDateEdit.date():
+                view.start_date = self.startDateEdit.date()
+            if view.end_date != self.endDateEdit.date():
+                if self.endDateEdit.date() == date(9999, 12, 31):
+                    view.end_date = None
+                else:
+                    view.end_date = self.endDateEdit.date()
+            if self.diet_view.start_date and self.diet_view.end_date:
+                self.diet_view.check_diet_dates()
 
 
 class UpdateDietLines(QDialog, Ui_dietLineDialog):
@@ -146,6 +189,9 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
             application_item = QTableWidgetItem(line.application_type)
             self.dietLineTable.setItem(lineno, 1, application_item)
             self.line_widgets.append((food_name_item, application_item))
+        self.FoodNameEdit.setReadOnly(True)
+        self.ApplicationTypeEdit.setReadOnly(True)
+        self.DescriptionEdit.setReadOnly(True)
 
     def insert_new_line(self, initial_values=None):
         """ Insert a new line in the collection.
@@ -192,7 +238,7 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
             return
         row = range_selected.topRow()
         if self.diet_view.lines_views[row].application_type !=\
-            self.ApplicationTypeEdit.text():
+                self.ApplicationTypeEdit.text():
             self.diet_view.lines_views[row].application_type =\
                 self.ApplicationTypeEdit.text()
         self.dietLineTable.selectedItems()[1].setText(
@@ -214,8 +260,30 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
             self.FoodNameEdit.text())
 
 
+class DietListWidget(QWidget):
+    """ DietTab maintains a tab for diet headers.
+
+    The diet tab is at the patient level, it will show all diets a patient
+    follows. The details (like what it means for different types of food)
+    are not shown, you can switch to a details screen to be shown those.
+    """
+
+    def __init__(self, patient_view):
+
+        super().__init__()
+        for diet in patient_view.patient.diets:
+            diet_view = DietView.create_from_diet(diet)
+            update_diet = UpdateDiet(diet_view)
+            diet_tab = mainwindow.centralWidget()
+            diet_tab.verticalLayoutDiet.addWidget(update_diet)
+
+
 if __name__ == "__main__":
-    diet_view = DietView()
-    window = UpdateDietLines(diet_view)
+    diet_view = DietView(diet_name="Test dieet",
+                         permanent_diet=False,
+                         start_date=date(2026, 1, 15),
+                         end_date=date(9999, 12, 31))
+    # window = UpdateDietLines(diet_view)
+    window = UpdateDiet(diet_view)
     window.show()
     sys.exit(app.exec())

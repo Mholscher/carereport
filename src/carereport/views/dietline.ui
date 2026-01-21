@@ -249,6 +249,16 @@
    <header>.widgetext</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>FoodNameEdit</tabstop>
+  <tabstop>ApplicationTypeEdit</tabstop>
+  <tabstop>DescriptionEdit</tabstop>
+  <tabstop>closeButton</tabstop>
+  <tabstop>newLineButton</tabstop>
+  <tabstop>resetButton</tabstop>
+  <tabstop>pushButton</tabstop>
+  <tabstop>dietLineTable</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
