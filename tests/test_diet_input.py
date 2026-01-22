@@ -16,14 +16,12 @@
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 from datetime import date, timedelta
 import unittest
-from PyQt6.QtCore import (Qt, QEvent)
+from PyQt6.QtCore import (Qt)
 from PyQt6.QtWidgets import QTableWidgetSelectionRange
-from PyQt6.QtGui import QFocusEvent
-# from carereport.views.dietline import Ui_DietLineForm as LineForm
-from carereport import (app, Patient, DietHeader, DietLines)
+from carereport import (Patient, DietHeader, DietLines)
 from carereport.views.care_app import mainwindow
 from carereport.views.patient_views import (PatientView)
-from carereport.views.dietheader import Ui_DietHeaderWidget
+# from carereport.views.dietheader import Ui_DietHeaderWidget
 from carereport.views.scripts_diet import (CreateDiet, UpdateDiet,
                                            UpdateDietLines, DietListWidget)
 from carereport.views.diet_views import (DietView, DietLineView)
@@ -486,7 +484,7 @@ class TestDietHeaderWidgetList(unittest.TestCase):
         self.dietline1_2 = DietLines(food_name="Pasta",
                                      application_type="Let op",
                                      description="De meeste pasta is gemaakt"
-                                     "met tarwe, daar zit gluten in.",
+                                     " met tarwe, daar zit gluten in.",
                                      diet=self.diet1)
 
         self.diet2 = DietHeader(diet_name="Groente",
@@ -530,3 +528,36 @@ class TestDietHeaderWidgetList(unittest.TestCase):
                       diet_views_from_interface,
                       "diet2_view not in group")
 
+    def test_open_line_dialog(self):
+        """ Open the update lines dialog from a widget """
+
+        diet_tab = DietListWidget(self.patient1_view)
+        layout = mainwindow.centralWidget().scrollAreaWidgetContents
+        diet_widgets_from_interface = []
+        for child in layout.children():
+            if isinstance(child, UpdateDiet):
+                diet_widgets_from_interface.append(child)
+        view0 = diet_widgets_from_interface[0]
+        view0.changeLinesButton.click()
+        self.assertIn(view0.lines_dialog, view0.children())
+
+    def test_line_dialog_filled_correctly(self):
+        """ The line dialog must be filled correctly """
+
+        diet_tab = DietListWidget(self.patient1_view)
+        layout = mainwindow.centralWidget().scrollAreaWidgetContents
+        diet_widgets_from_interface = []
+        for child in layout.children():
+            if isinstance(child, UpdateDiet):
+                diet_widgets_from_interface.append(child)
+        view0 = diet_widgets_from_interface[0]
+        view0.changeLinesButton.click()
+        range_line = QTableWidgetSelectionRange(1, 0, 1, 1)
+        view0.lines_dialog.dietLineTable.setRangeSelected(range_line, True)
+        # print(view0.lines_dialog.dietLineTable.lines_views)
+        self.assertIn(view0.lines_dialog.DescriptionEdit.toPlainText(),
+                      [self.dietline1_1.description,
+                       self.dietline1_2.description,
+                       self.dietline2_2.description,
+                       self.dietline2_1.description],
+                      "Description not from lines")

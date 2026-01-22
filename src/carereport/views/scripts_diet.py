@@ -127,6 +127,7 @@ class UpdateDiet(_DietChanges):
         self.diet_view = diet_view
         save_button = mainwindow.centralWidget().saveDataButton
         save_button.clicked.connect(self.update_view)
+        self.changeLinesButton.clicked.connect(self.show_lines_dialog)
         self.set_header_widget()
 
     def update_diet(self):
@@ -152,6 +153,11 @@ class UpdateDiet(_DietChanges):
                     view.end_date = self.endDateEdit.date()
             if self.diet_view.start_date and self.diet_view.end_date:
                 self.diet_view.check_diet_dates()
+
+    def show_lines_dialog(self):
+        """ Show the dialog for editing diet lines  (rules) """
+
+        self.lines_dialog = UpdateDietLines(self.diet_view, parent=self)
 
 
 class UpdateDietLines(QDialog, Ui_dietLineDialog):
@@ -192,6 +198,7 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
         self.FoodNameEdit.setReadOnly(True)
         self.ApplicationTypeEdit.setReadOnly(True)
         self.DescriptionEdit.setReadOnly(True)
+        self.show()
 
     def insert_new_line(self, initial_values=None):
         """ Insert a new line in the collection.

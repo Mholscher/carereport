@@ -1,6 +1,10 @@
 from datetime import date
 from PyQt6.QtWidgets import (QPlainTextEdit, QTableWidget,
                              QDateEdit, QLineEdit, QCheckBox)
+""" This module holds widget extensions used to make small
+additions to widgets, creating classes that can be used in the designer
+promoting certain widgets.
+"""
 
 
 class DescriptionWidget(QPlainTextEdit):

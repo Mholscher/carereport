@@ -82,7 +82,7 @@ class DietView():
     def __post_init__(self):
         """ Set the lines up; cannot do that the usual way """
 
-        self.lines_views = []
+        self.lines_views = [] if self.diet_header is None else self.lines()
 
     def to_diet(self):
         """ Create a diet from this view """
@@ -171,6 +171,8 @@ class DietLineView():
 
     def __post_init__(self):
 
+        if not hasattr(self.diet_view, "lines_views"):
+            self.diet_view.lines_views = []
         self.diet_view.lines_views.append(self)
         # print("Self:", self)
         # for line in self.diet_view.lines_views:

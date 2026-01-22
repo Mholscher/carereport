@@ -12,6 +12,10 @@ The diet code is only used for special application. Normally each diet should ha
     :Diet code: The system supplied code for this diet.
     :Time frame: The start and end date of a diet or “permanent”, meaning either really permanent or until an unspecified end date.
 
+.. note::
+    The time frame will be initialized with a start date of 01-01-1901 and an end date
+    of 31-12-9999. The end date is a shorthand for indefinitely.
+
 Each diet will have one or more rules. The individual rules contained in the diet are specified by:
 
     :Food identification: The name of the food type (vegetable, pork, milk based etc.) that the rule applies to
@@ -27,6 +31,10 @@ Medication holds records for each medication the patient uses. This is not a pre
     :Frequency and strength: The frequency which the medication is to be taken/administered
     :Start date: First date the medicine is to be taken
     :End date: If applicable: end date of the medication
+
+.. note::
+    The dates will be initialized with a start date of 01-01-1901 and an end date
+    of 31-12-9999. The end date is a shorthand for indefinitely.
     
 Examination request
 -------------------
