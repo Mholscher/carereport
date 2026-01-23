@@ -87,12 +87,13 @@ class DietView():
     def to_diet(self):
         """ Create a diet from this view """
 
-        return DietHeader(id=self.id,
-                          diet_name=self.diet_name,
-                          permanent_diet=self.permanent_diet,
-                          start_date=self.start_date,
-                          end_date=self.end_date,
-                          patient=self.patient.patient)
+        self.diet_header = DietHeader(id=self.id,
+                                      diet_name=self.diet_name,
+                                      permanent_diet=self.permanent_diet,
+                                      start_date=self.start_date,
+                                      end_date=self.end_date,
+                                      patient=self.patient.patient)
+        return self.diet_header
 
     def update_diet(self):
         """ Update the diet from the changed data in the view """

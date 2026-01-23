@@ -229,7 +229,7 @@
      </property>
      <widget class="QWidget" name="MedicationTab">
       <attribute name="title">
-       <string>Medicatie</string>
+       <string>&amp;Medicatie</string>
       </attribute>
       <attribute name="toolTip">
        <string>Voorgeschreven medicatie</string>
@@ -243,7 +243,7 @@
        </sizepolicy>
       </property>
       <attribute name="title">
-       <string>Dieet</string>
+       <string>&amp;Dieet</string>
       </attribute>
       <attribute name="toolTip">
        <string>Dieetregels voor de patient</string>
@@ -253,8 +253,8 @@
         <rect>
          <x>10</x>
          <y>10</y>
-         <width>591</width>
-         <height>291</height>
+         <width>609</width>
+         <height>310</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -274,8 +274,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>589</width>
-          <height>289</height>
+          <width>607</width>
+          <height>308</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -304,18 +304,18 @@
      </widget>
      <widget class="QWidget" name="examinationsTab">
       <attribute name="title">
-       <string>Onderzoeken</string>
+       <string>&amp;Onderzoeken</string>
       </attribute>
       <attribute name="toolTip">
        <string>Gevraagde onderzoeken</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="diagnoseTab">
+     <widget class="QWidget" name="DiagnoseTab">
       <property name="statusTip">
        <string/>
       </property>
       <attribute name="title">
-       <string>Diagnose</string>
+       <string>D&amp;iagnose</string>
       </attribute>
       <attribute name="toolTip">
        <string>Gestelde diagnoses</string>

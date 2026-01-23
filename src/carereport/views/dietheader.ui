@@ -92,6 +92,16 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="dateTime">
+        <datetime>
+         <hour>0</hour>
+         <minute>0</minute>
+         <second>0</second>
+         <year>9999</year>
+         <month>12</month>
+         <day>31</day>
+        </datetime>
+       </property>
       </widget>
      </item>
      <item row="2" column="5">

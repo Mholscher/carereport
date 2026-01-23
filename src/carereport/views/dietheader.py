@@ -52,6 +52,7 @@ class Ui_DietHeaderWidget(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.endDateEdit.sizePolicy().hasHeightForWidth())
         self.endDateEdit.setSizePolicy(sizePolicy)
+        self.endDateEdit.setDateTime(QtCore.QDateTime(QtCore.QDate(9999, 12, 31), QtCore.QTime(0, 0, 0)))
         self.endDateEdit.setObjectName("endDateEdit")
         self.dietHeaderGrid.addWidget(self.endDateEdit, 5, 2, 1, 1)
         self.nameErrorLabel = QtWidgets.QLabel(parent=self.gridLayoutWidget)

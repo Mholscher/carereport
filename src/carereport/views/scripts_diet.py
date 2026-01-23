@@ -91,6 +91,8 @@ class CreateDiet(_DietChanges):
 
         super().__init__(parent=parent)
         self.diet_view = DietView()
+        if diet_view.patient:
+            self.diet_view.patient = diet_view.patient
         self.setupUi(self)
         save_button = mainwindow.centralWidget().saveDataButton
         save_button.clicked.connect(self.update_view)
@@ -181,6 +183,7 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
         self.ApplicationTypeEdit.editingFinished.connect(
             self.on_editing_finished_application_type)
         self.dietLineTable.DescriptionEdit = self.DescriptionEdit
+        self.DescriptionEdit.line_widget = self
         self.newLineButton.clicked.connect(self.insert_new_line)
         self.diet_view = diet_view
         self.setWindowTitle(diet_view.diet_name + self.windowTitle())
@@ -278,10 +281,10 @@ class DietListWidget(QWidget):
     def __init__(self, patient_view):
 
         super().__init__()
+        diet_tab = mainwindow.centralWidget()
         for diet in patient_view.patient.diets:
             diet_view = DietView.create_from_diet(diet)
             update_diet = UpdateDiet(diet_view)
-            diet_tab = mainwindow.centralWidget()
             diet_tab.verticalLayoutDiet.addWidget(update_diet)
 
 

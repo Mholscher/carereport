@@ -31,8 +31,14 @@ class TestCreateDietHeader(unittest.TestCase):
 
     def setUp(self):
 
+        self.patient1 = Patient(surname="Toivonen",
+                                initials="K.F.",
+                                birthdate=date(1951, 7, 12),
+                                sex="M")
+        self.patient1_view = PatientView.from_patient(self.patient1)
         self.full_form = mainwindow.centralWidget()
-        self.diet = CreateDiet(DietView())
+        self.diet = CreateDiet(DietView(patient=self.patient1_view))
+
 
     def tearDown(self):
 
@@ -116,7 +122,7 @@ class TestCreateDietHeader(unittest.TestCase):
         self.assertFalse(self.diet.diet_view.end_date,
                          "End date not None")
 
-    @unittest.skip
+    # @unittest.skip
     def test_create_diet_from_view(self):
         """ Create a diet from the view """
 
@@ -447,12 +453,7 @@ class TestDietChangeLines(unittest.TestCase):
         """ A line just added is selected """
 
         the_dialog = self.update_dialog
-        # for row in range(0, the_dialog.dietLineTable.rowCount()):
-        #     print("Food name:", the_dialog.dietLineTable.item(row, 0).text())
         the_dialog.insert_new_line()
-        # for row_nr in range(0, 3):
-        #     print(row_nr, the_dialog.dietLineTable.item(row_nr, 0).text())
-        # print("Row count:", the_dialog.dietLineTable.rowCount())
         self.assertIn(the_dialog.dietLineTable.item(
                           the_dialog.dietLineTable.rowCount() - 1, 0),
                       the_dialog.dietLineTable.selectedItems(),
@@ -501,7 +502,7 @@ class TestDietHeaderWidgetList(unittest.TestCase):
         self.dietline2_2 = DietLines(food_name="Pasta",
                                      application_type="Let op",
                                      description="De meeste pasta is gemaakt"
-                                     "met tarwe, ook al geen groente",
+                                     " met tarwe, ook al geen groente",
                                      diet=self.diet2)
 
     def tearDown(self):

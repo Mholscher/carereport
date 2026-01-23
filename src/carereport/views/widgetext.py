@@ -13,9 +13,8 @@ class DescriptionWidget(QPlainTextEdit):
         """ The focus out event sets the view to the value of the field """
 
         # if event.type() == QEvent.Type.FocusAboutToChange:
-        if hasattr(self.parent, "update_view"):
-            print("Going to save:", self.toPlainText())
-            self.parent.update_view()
+        if hasattr(self, "line_widget"):
+            self.line_widget.save_description_to_view()
         super().focusOutEvent(event)
 
 
