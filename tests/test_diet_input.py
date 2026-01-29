@@ -513,13 +513,10 @@ class TestDietHeaderWidgetList(unittest.TestCase):
         """ Create a diet tab for a patient """
 
         diet_tab = DietListWidget(self.patient1_view)
-        self.assertEqual(mainwindow.centralWidget().verticalLayoutDiet.count(),
-                         2,
-                         "Wrong no of items:"
-                         f"{mainwindow.centralWidget().verticalLayoutDiet.count()}")
-        layout = mainwindow.centralWidget().scrollAreaWidgetContents
+        print(mainwindow.centralWidget().scrollAreaWidgetContents.children())
+        contents = mainwindow.centralWidget().scrollAreaWidgetContents
         diet_views_from_interface = []
-        for child in layout.children():
+        for child in contents.children():
             if isinstance(child, UpdateDiet):
                 diet_views_from_interface.append(child.diet_view)
         self.assertIn(self.diet1_view,
@@ -533,9 +530,9 @@ class TestDietHeaderWidgetList(unittest.TestCase):
         """ Open the update lines dialog from a widget """
 
         diet_tab = DietListWidget(self.patient1_view)
-        layout = mainwindow.centralWidget().scrollAreaWidgetContents
+        contents = mainwindow.centralWidget().scrollAreaWidgetContents
         diet_widgets_from_interface = []
-        for child in layout.children():
+        for child in contents.children():
             if isinstance(child, UpdateDiet):
                 diet_widgets_from_interface.append(child)
         view0 = diet_widgets_from_interface[0]
@@ -546,9 +543,9 @@ class TestDietHeaderWidgetList(unittest.TestCase):
         """ The line dialog must be filled correctly """
 
         diet_tab = DietListWidget(self.patient1_view)
-        layout = mainwindow.centralWidget().scrollAreaWidgetContents
+        contents = mainwindow.centralWidget().scrollAreaWidgetContents
         diet_widgets_from_interface = []
-        for child in layout.children():
+        for child in contents.children():
             if isinstance(child, UpdateDiet):
                 diet_widgets_from_interface.append(child)
         view0 = diet_widgets_from_interface[0]

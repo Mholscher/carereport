@@ -25,7 +25,7 @@ from datetime import date
 # from PyQt6.QtCore import QDate
 # from PyQt6.QtCore import QLocale as Loc, pyqtSlot
 from PyQt6.QtWidgets import (QWidget, QDialog, QTableWidgetItem,
-                             QTableWidgetSelectionRange)
+                             QTableWidgetSelectionRange, QSizePolicy)
 # from .widgetext import DescriptionWidget
 from carereport import app
 from .diet_views import DietView, DietLineView
@@ -127,6 +127,9 @@ class UpdateDiet(_DietChanges):
         else:
             self.endDateEdit.setDate(date(9999, 12, 31))
         self.diet_view = diet_view
+        self.sizePolicy = QSizePolicy()
+        self.sizePolicy.setVerticalPolicy(QSizePolicy.Policy.Fixed)
+        self.sizePolicy.setHorizontalPolicy(QSizePolicy.Policy.Expanding)
         save_button = mainwindow.centralWidget().saveDataButton
         save_button.clicked.connect(self.update_view)
         self.changeLinesButton.clicked.connect(self.show_lines_dialog)
@@ -271,9 +274,9 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
 
 
 class DietListWidget(QWidget):
-    """ DietTab maintains a tab for diet headers.
+    """ This widget maintains a tab for diet headers.
 
-    The diet tab is at the patient level, it will show all diets a patient
+    The widget is at the patient level, it will show all diets a patient
     follows. The details (like what it means for different types of food)
     are not shown, you can switch to a details screen to be shown those.
     """
@@ -285,7 +288,7 @@ class DietListWidget(QWidget):
         for diet in patient_view.patient.diets:
             diet_view = DietView.create_from_diet(diet)
             update_diet = UpdateDiet(diet_view)
-            diet_tab.verticalLayoutDiet.addWidget(update_diet)
+            diet_tab.verticalLayout_2.addWidget(update_diet)
 
 
 if __name__ == "__main__":
