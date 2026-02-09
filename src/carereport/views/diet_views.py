@@ -28,7 +28,8 @@ the model.
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional
-from ..models.medical import DietHeader, DietLines
+# from ..models.medical import DietHeader, DietLines
+from carereport import DietHeader, DietLines
 from .patient_views import PatientView
 
 

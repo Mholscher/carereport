@@ -142,7 +142,7 @@ class TestUpdateDietHeader(unittest.TestCase):
 
     def setUp(self):
 
-        # self.diet_form = mainwindow.centralWidget().DietPagesWidget
+        # self.self.diet_form = mainwindow.centralWidget().DietPagesWidget
         self.full_form = mainwindow.centralWidget()
         self.view = DietView(diet_name="Brooddieet",
                              permanent_diet=False,
@@ -238,7 +238,8 @@ class TestDietLineView(unittest.TestCase):
 
     def tearDown(self):
 
-        pass
+        if hasattr(self, "diet_form"):
+            self.diet_form.close()
 
     def test_create_diet_line_form(self):
         """ Create an diet line for a diet view """
@@ -247,9 +248,9 @@ class TestDietLineView(unittest.TestCase):
                             description="You can eat this as you like",
                             application_type="irregularly",
                             diet_view=self.diet_view)
-        diet_form = UpdateDietLines(self.diet_view)
+        self.diet_form = UpdateDietLines(self.diet_view)
         self.assertEqual(line.food_name,
-                         diet_form.dietLineTable.item(0, 0).text(),
+                         self.diet_form.dietLineTable.item(0, 0).text(),
                          "Food name not correctly filled for line")
 
     def test_more_diet_lines(self):
@@ -264,46 +265,47 @@ class TestDietLineView(unittest.TestCase):
                              " know it is not poisonous",
                              application_type="as you like",
                              diet_view=self.diet_view)
-        diet_form = UpdateDietLines(self.diet_view)
-        diet_form.show()
-        self.assertEqual(diet_form.dietLineTable.rowCount(), 2,
+        self.diet_form = UpdateDietLines(self.diet_view)
+        self.diet_form.show()
+        self.assertEqual(self.diet_form.dietLineTable.rowCount(), 2,
                          "Incorrect number of lines:"
-                         + str(diet_form.dietLineTable.rowCount()))
-        self.assertEqual(diet_form.dietLineTable.item(1, 0).text(),
+                         + str(self.diet_form.dietLineTable.rowCount()))
+        self.assertEqual(self.diet_form.dietLineTable.item(1, 0).text(),
                          line2.food_name,
                          "Text not correct in table")
-        self.assertEqual(diet_form.dietLineTable.item(0, 0).text(),
+        self.assertEqual(self.diet_form.dietLineTable.item(0, 0).text(),
                          line1.food_name,
                          "Text not correct in table")
 
     def test_diet_lines_dialog_name(self):
         """ The diet line dialog should be named after the diet """
 
-        diet_form = UpdateDietLines(self.diet_view)
-        self.assertTrue(diet_form.windowTitle().startswith(self.diet_view.diet_name),
+        self.diet_form = UpdateDietLines(self.diet_view)
+        self.assertTrue(self.diet_form.windowTitle().startswith(self.diet_view.diet_name),
                         "Dialog title not starting with diet name")
 
     def test_create_line_unselects_previous(self):
         """ If you create a line while one is selected, unselect previous """
 
-        diet_changes = UpdateDietLines(self.diet_view)
-        row_count = diet_changes.dietLineTable.rowCount()
+        self.diet_changes = UpdateDietLines(self.diet_view)
+        row_count = self.diet_changes.dietLineTable.rowCount()
         self.assertEqual(row_count, 0,
                          f"Row count incorrect: {row_count}")
-        diet_changes.insert_new_line()
+        self.diet_changes.insert_new_line()
         self.assertEqual(row_count, 0,
                          f"Row count incorrect: {row_count}")
-        current_selections = diet_changes.dietLineTable.selectedRanges()
+        current_selections = self.diet_changes.dietLineTable.selectedRanges()
         self.assertEqual(len(current_selections), 1,
                          f"Wrong no of selections: {len(current_selections)}")
         self.assertEqual(current_selections[0].topRow(),
                          current_selections[0].bottomRow(),
                          "More than one row in selection")
-        diet_changes.dietLineTable.insertRow(diet_changes.dietLineTable.rowCount())
-        current_selections = diet_changes.dietLineTable.selectedRanges()
+        self.diet_changes.dietLineTable.insertRow(
+            self.diet_changes.dietLineTable.rowCount())
+        current_selections = self.diet_changes.dietLineTable.selectedRanges()
         self.assertEqual(len(current_selections), 1,
                          f"Wrong no of selections: {len(current_selections)}")
-        first_range = diet_changes.dietLineTable.selectedRanges()[0]
+        first_range = self.diet_changes.dietLineTable.selectedRanges()[0]
         self.assertEqual(first_range.bottomRow(),
                          first_range.topRow(),
                          "More than one row in selection")
@@ -334,7 +336,8 @@ class TestDietChangeLines(unittest.TestCase):
 
     def tearDown(self):
 
-        pass
+        if hasattr(self, "update_dialog"):
+            self.update_dialog.close()
 
     def test_dialog_title_starts_with_diet_name(self):
         """ The update dialog has a title starting with diet name """
@@ -507,14 +510,20 @@ class TestDietHeaderWidgetList(unittest.TestCase):
 
     def tearDown(self):
 
-        pass
+        contents = mainwindow.centralWidget().scrollAreaWidgetContents
+        for child in reversed(contents.children()):
+            if type(child) in [UpdateDiet, CreateDiet]:
+                mainwindow.centralWidget().verticalLayout_2.removeWidget(child)
+                child.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, on=True)
+                child.close()
+        mainwindow.hide()
 
     def test_create_diet_tabs(self):
         """ Create a diet tab for a patient """
 
-        diet_tab = DietListWidget(self.patient1_view)
-        print(mainwindow.centralWidget().scrollAreaWidgetContents.children())
+        self.diet_tab = DietListWidget(self.patient1_view)
         contents = mainwindow.centralWidget().scrollAreaWidgetContents
+        mainwindow.show()
         diet_views_from_interface = []
         for child in contents.children():
             if isinstance(child, UpdateDiet):
@@ -529,8 +538,9 @@ class TestDietHeaderWidgetList(unittest.TestCase):
     def test_open_line_dialog(self):
         """ Open the update lines dialog from a widget """
 
-        diet_tab = DietListWidget(self.patient1_view)
+        self.diet_tab = DietListWidget(self.patient1_view)
         contents = mainwindow.centralWidget().scrollAreaWidgetContents
+        mainwindow.show()
         diet_widgets_from_interface = []
         for child in contents.children():
             if isinstance(child, UpdateDiet):
@@ -540,10 +550,18 @@ class TestDietHeaderWidgetList(unittest.TestCase):
         self.assertIn(view0.lines_dialog, view0.children())
 
     def test_line_dialog_filled_correctly(self):
-        """ The line dialog must be filled correctly """
+        """ The line dialog must be filled correctly
 
-        diet_tab = DietListWidget(self.patient1_view)
+        WARNING: This test works only because of the inclusion of
+        using pdb.set_trace(). Type "c" to complete the test.
+
+        Remove the hash from the unittest.skip to skip the test when running
+        without user input.
+        """
+
+        self.diet_tab = DietListWidget(self.patient1_view)
         contents = mainwindow.centralWidget().scrollAreaWidgetContents
+        mainwindow.show()
         diet_widgets_from_interface = []
         for child in contents.children():
             if isinstance(child, UpdateDiet):
@@ -552,10 +570,96 @@ class TestDietHeaderWidgetList(unittest.TestCase):
         view0.changeLinesButton.click()
         range_line = QTableWidgetSelectionRange(1, 0, 1, 1)
         view0.lines_dialog.dietLineTable.setRangeSelected(range_line, True)
-        # print(view0.lines_dialog.dietLineTable.lines_views)
+        import pdb; pdb.set_trace()
         self.assertIn(view0.lines_dialog.DescriptionEdit.toPlainText(),
                       [self.dietline1_1.description,
                        self.dietline1_2.description,
                        self.dietline2_2.description,
                        self.dietline2_1.description],
                       "Description not from lines")
+
+    def test_remove_no_diet_line(self):
+        """ If we have a diet, the no diet nmessage and button is removed """
+
+        self.diet_tab = DietListWidget(self.patient1_view)
+        contents = mainwindow.centralWidget().scrollAreaWidgetContents
+        for child in contents.children():
+            if child.objectName() == "noDietLabel":
+                self.assertFalse(child.isVisible(),
+                                 "The No diet message is in interface")
+            if child.objectName() == "addDietButton":
+                self.assertFalse(child.isVisible(),
+                                 "The new button is visible")
+
+    def test_add_a_diet(self):
+        """ Add a new diet to the list """
+
+        self.diet_tab = DietListWidget(self.patient1_view)
+        self.diet_tab.add_diet()
+        diet_views_from_interface = []
+        contents = mainwindow.centralWidget().scrollAreaWidgetContents
+        for child in contents.children():
+            if isinstance(child, CreateDiet):
+                diet_views_from_interface.append(child.diet_view)
+        self.assertEqual(len(diet_views_from_interface),
+                         1,
+                         "diet not added to interface")
+
+    def test_new_button_inserts_create_diet(self):
+        """ Clicking the new item button inserts a diet """
+
+        self.diet_tab = DietListWidget(self.patient1_view)
+        form_handler = mainwindow.centralWidget()
+        contents = form_handler.scrollAreaWidgetContents
+        mainwindow.show()
+        diet_views_found = []
+        for child in contents.children():
+            if isinstance(child, CreateDiet):
+                diet_views_found.append(child.diet_view)
+            if isinstance(child, UpdateDiet):
+                diet_views_found.append(child.diet_view)
+        number_of_headers = len(diet_views_found)
+        form_handler.newItemButton_2.click()
+        diet_views_found = []
+        for child in contents.children():
+            if isinstance(child, CreateDiet):
+                diet_views_found.append(child.diet_view)
+            if isinstance(child, UpdateDiet):
+                diet_views_found.append(child.diet_view)
+        self.assertEqual(len(diet_views_found),
+                         number_of_headers + 1,
+                         "No diet header added")
+
+    # @unittest.skip
+    def test_change_patient_changes_diets(self):
+        """ Changing the patient should change the diet in the UI 
+
+        WARNING: This test works only because of the inclusion of
+        using pdb.set_trace(). Type "c" to complete the test.
+
+        Remove the hash from the unittest.skip to skip the test when running
+        without user input.
+        """
+
+        mainwindow.set_new_current_patient(self.patient1_view)
+        form_handler = mainwindow.centralWidget()
+        contents = form_handler.scrollAreaWidgetContents
+        patient2 = Patient(surname="IJsselen",
+                          initials="P.N.",
+                          birthdate=date(1977, 9, 11),
+                          sex="F")
+        diet3 =  DietHeader(diet_name="Zonder kaas",
+                            permanent_diet=False,
+                            start_date=date.today() - timedelta(days=25),
+                            end_date=None,
+                            patient=patient2)
+        mainwindow.set_new_current_patient(PatientView.from_patient(patient2))
+        import pdb; pdb.set_trace()
+        diet_names = []
+        for child in contents.children():
+            if type(child) in (CreateDiet, UpdateDiet):
+                diet_names.append(child.diet_view.diet_name)
+        self.assertNotIn(self.diet1_view.diet_name, diet_names,
+                         "Patient 1 diet in widgets")
+        self.assertIn(diet3.diet_name, diet_names,
+                      "Patient 2 diet not in widgets")

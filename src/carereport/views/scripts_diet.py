@@ -22,11 +22,9 @@ enables creation and maintenance of diets and rules within a diet.
 """
 import sys
 from datetime import date
-# from PyQt6.QtCore import QDate
-# from PyQt6.QtCore import QLocale as Loc, pyqtSlot
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QWidget, QDialog, QTableWidgetItem,
                              QTableWidgetSelectionRange, QSizePolicy)
-# from .widgetext import DescriptionWidget
 from carereport import app
 from .diet_views import DietView, DietLineView
 from .dietline import Ui_dietLineDialog
@@ -50,6 +48,7 @@ class _DietChanges(QWidget, Ui_DietHeaderWidget):
     def __init__(self, parent=None):
 
         super().__init__(parent=parent)
+        mainwindow.newCurrentPatient.connect(self.update_diet)
 
     def set_header_widget(self):
         """ Make sure each of the edits "knows" this widget """
@@ -95,6 +94,7 @@ class CreateDiet(_DietChanges):
             self.diet_view.patient = diet_view.patient
         self.setupUi(self)
         save_button = mainwindow.centralWidget().saveDataButton
+        save_button.disconnect()
         save_button.clicked.connect(self.update_view)
         self.set_header_widget()
 
@@ -104,6 +104,7 @@ class CreateDiet(_DietChanges):
         The event to be processed is to save the diet.
         """
 
+        self.update_view()
         self.diet_view.to_diet()
 
 
@@ -131,6 +132,7 @@ class UpdateDiet(_DietChanges):
         self.sizePolicy.setVerticalPolicy(QSizePolicy.Policy.Fixed)
         self.sizePolicy.setHorizontalPolicy(QSizePolicy.Policy.Expanding)
         save_button = mainwindow.centralWidget().saveDataButton
+        save_button.disconnect()
         save_button.clicked.connect(self.update_view)
         self.changeLinesButton.clicked.connect(self.show_lines_dialog)
         self.set_header_widget()
@@ -138,6 +140,7 @@ class UpdateDiet(_DietChanges):
     def update_diet(self):
         """ The data in the view is released into the diet """
 
+        self.update_view()
         self.diet_view.update_diet()
 
     def update_view(self):
@@ -267,13 +270,14 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
         if not range_selected:
             return
         row = range_selected.topRow()
-        if self.diet_view.lines_views[row].food_name != self.FoodNameEdit.text():
+        if (self.diet_view.lines_views[row].food_name !=
+                self.FoodNameEdit.text()):
             self.diet_view.lines_views[row].food_name = self.FoodNameEdit.text()
         self.dietLineTable.selectedItems()[0].setText(
             self.FoodNameEdit.text())
 
 
-class DietListWidget(QWidget):
+class DietListWidget():
     """ This widget maintains a tab for diet headers.
 
     The widget is at the patient level, it will show all diets a patient
@@ -288,6 +292,67 @@ class DietListWidget(QWidget):
         for diet in patient_view.patient.diets:
             diet_view = DietView.create_from_diet(diet)
             update_diet = UpdateDiet(diet_view)
+            contents = mainwindow.centralWidget().scrollAreaWidgetContents
+            for child in contents.children():
+                if child.objectName() == "noDietLabel":
+                    child.hide()
+                if child.objectName() == "addDietButton":
+                    child.hide()
+            diet_tab.verticalLayout_2.addWidget(update_diet)
+        diet_tab.newItemButton_2.clicked.connect(self.add_diet)
+        mainwindow.newCurrentPatient.connect(self.change_patient_view)
+
+    def add_diet(self, diet_view=None):
+        """ Create a new diet for the list """
+
+        if diet_view:
+            self.diet_view = diet_view
+        else:
+            self.diet_view = DietView()
+        create_diet = CreateDiet(self.diet_view)
+        contents = mainwindow.centralWidget().scrollAreaWidgetContents
+        for child in contents.children():
+            if child.objectName() == "noDietLabel":
+                child.hide()
+            if child.objectName() == "addDietButton":
+                child.hide()
+        diet_tab = mainwindow.centralWidget()
+        diet_tab.verticalLayout_2.addWidget(create_diet)
+        create_diet.show()
+
+    def change_patient_view(self):
+        """ A new patient is selected in the UI
+
+        The data of the previous patient is erased from the diet widget list
+        end for the diets of the new patient appropriate widgets are
+        created.
+        """
+
+        diet_tab = mainwindow.centralWidget()
+        contents = mainwindow.centralWidget().scrollAreaWidgetContents
+        for child in reversed([child for child in contents.children()
+                              if (isinstance(child, CreateDiet)
+                              or isinstance(child, UpdateDiet))]):
+            contents.layout().removeWidget(child)
+            child.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, on=True)
+            child.close()
+        for child in contents.children():
+            if child.objectName() == "noDietLabel":
+                child.show()
+            if child.objectName() == "addDietButton":
+                child.show()
+        new_patient_view = app.current_patient_view
+        if not new_patient_view.patient:
+            return
+        for diet in new_patient_view.patient.diets:
+            diet_view = DietView.create_from_diet(diet)
+            update_diet = UpdateDiet(diet_view)
+            contents = mainwindow.centralWidget().scrollAreaWidgetContents
+            for child in contents.children():
+                if child.objectName() == "noDietLabel":
+                    child.hide()
+                if child.objectName() == "addDietButton":
+                    child.hide()
             diet_tab.verticalLayout_2.addWidget(update_diet)
 
 

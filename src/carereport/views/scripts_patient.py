@@ -271,7 +271,7 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
             if self.patientTable.item(row, 0).isSelected():
                 for patient_view in self.patient_views:
                     if patient_view.id == self.patientTable.item(row, 0).id:
-                        app.current_patient_view = patient_view
+                        mainwindow.set_new_current_patient(patient_view)
                         break
                 break
         self.accept()
@@ -279,7 +279,7 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
     def create_new_patient(self):
         """ Create a new patient_view and make this current """
 
-        QApplication.instance().current_patient_view = PatientView()
+        mainwindow.set_new_current_patient(PatientView())
         self.accept()
 
     def on_selection_changed(self):

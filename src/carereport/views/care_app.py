@@ -19,11 +19,12 @@ QApplication, it is set up in the package.
 Here we create and set up the main window of the application and fill it
 with the actions the user can take."""
 
-from PyQt6.QtCore import QLocale
+from PyQt6.QtCore import (QLocale, pyqtSignal)
 from PyQt6.QtWidgets import QMainWindow, QWidget
 from carereport import app
 from .mainwindow import Ui_MainWindow
 from .formhandle import Ui_Form
+# from .patient_views import PatientView
 
 
 class CentralForm(QWidget, Ui_Form):
@@ -39,18 +40,13 @@ class CentralForm(QWidget, Ui_Form):
 
         super().__init__()
         self.setupUi(self)
-        # if app.current_patient_view:
-        #     patient_view = app.current_patient_view
-        #     self.patientnameedit.setText(patient_view.surname,
-        #                                  ',',
-        #                                  patient_view.initials)
-        #     self.birthdateedit.setText(QDate(patient_view.birthdate.year,
-        #                                patient_view.birthdate.month,
-        #                                patient_view.birthdate.day))
+        self.diet_tab = None
 
 
 class CareAppWindow(QMainWindow, Ui_MainWindow):
     """ This is the class which creates the mainwindow for the application. """
+
+    newCurrentPatient = pyqtSignal()
 
     def __init__(self):
 
@@ -61,6 +57,20 @@ class CareAppWindow(QMainWindow, Ui_MainWindow):
         self.actionAfsluiten.triggered.connect(self.close)
         self.show()
         self.statusbar.showMessage("Carereport klaar")
+
+    def set_new_current_patient(self, new_patient_view):
+        """ Set a new patient as current including side effects.
+
+        Side effects like replacing data in the tab widget tabs that are
+        depending on the patient. In practice it will be (fast) all of
+        the tabs in the widget.
+
+        Side effects will be done by emitting the newCurrentPatient signal.
+        """
+
+        app.current_patient_view = new_patient_view
+        self.on_current_patient_change()
+        self.newCurrentPatient.emit()
 
     def on_current_patient_change(self):
         """ Set all fields/attributes in the main window
@@ -77,5 +87,11 @@ class CareAppWindow(QMainWindow, Ui_MainWindow):
         loc = QLocale()
         self.main_form.birthdateedit.setText(loc.toString(born,
                                              loc.FormatType.ShortFormat))
+        if self.main_form.diet_tab:
+            pass
+        else:
+            from .scripts_diet import DietListWidget
+            self.main_form.diet_tab = DietListWidget(app.current_patient_view)
+
 
 mainwindow = CareAppWindow()

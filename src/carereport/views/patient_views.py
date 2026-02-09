@@ -21,9 +21,9 @@ of the system and the model for a patient.
 
 from dataclasses import dataclass
 from datetime import date
-from typing import Optional
-from PyQt6.QtCore import pyqtSignal, QObject
-from carereport import (app, Patient)  # , Medication, ExaminationRequest)
+from typing import (Optional, ClassVar)
+from PyQt6.QtCore import QObject
+from carereport import app, Patient  # , Medication, ExaminationRequest)
 from .care_app import mainwindow
 from .intake_views import IntakeView
 
@@ -52,19 +52,19 @@ class BirthdateInFutureError(ValueError):
     pass
 
 
-class _ChangePatientEmitter(QObject):
-    """ Class to be able to emit current patient change signal """
-
-    newCurrentPatient = pyqtSignal()
-
-    def __init__(self):
-
-        QObject.__init__(self)
-
-    def new_patient(self):
-        """ Signal the setting of another patient as "current" """
-
-        self.newCurrentPatient.emit()
+# class ChangePatientEmitter(QObject):
+#     """ Class to be able to emit current patient change signal """
+# 
+#     newCurrentPatient = pyqtSignal()
+# 
+#     def __init__(self):
+# 
+#         QObject.__init__(self)
+# 
+#     def new_patient(self, new_patient):
+#         """ Signal the setting of another patient as "current" """
+# 
+#         self.newCurrentPatient.emit(new_patient)
 
 
 @dataclass
@@ -78,12 +78,7 @@ class PatientView():
     sex: str = " "
     current_intake: IntakeView = None
     patient: Optional[Patient] = None
-
-    def __post_init__(self):
-
-        self.change_patient_emitter = _ChangePatientEmitter()
-        self.change_patient_emitter.newCurrentPatient.connect(
-            mainwindow.on_current_patient_change)
+    # change_patient_emitter: ClassVar = ChangePatientEmitter()
 
     def to_patient(self):
         """ Create a patient in the model from this view """
@@ -138,5 +133,4 @@ class PatientView():
     def set_current_patient(self):
         """ The current patient for the application is set to this view """
 
-        app.current_patient_view = self
-        self.change_patient_emitter.new_patient()
+        mainwindow.set_new_current_patient(self)

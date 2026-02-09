@@ -51,7 +51,7 @@
    </widget>
    <widget class="QMenu" name="menuDieet">
     <property name="title">
-     <string>Dieet</string>
+     <string>D&amp;ieet</string>
     </property>
     <addaction name="actionOverzicht"/>
     <addaction name="actionBe_werk_geselecteerde"/>
@@ -104,7 +104,7 @@
   </action>
   <action name="actionOverzicht">
    <property name="text">
-    <string>Overzicht</string>
+    <string>&amp;Overzicht</string>
    </property>
   </action>
   <action name="actionBe_werk_geselecteerde">
