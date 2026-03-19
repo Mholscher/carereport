@@ -22,9 +22,9 @@ of the system and the model for a patient.
 from dataclasses import dataclass
 from datetime import date
 from typing import (Optional, ClassVar)
-from PyQt6.QtCore import QObject
-from carereport import app, Patient  # , Medication, ExaminationRequest)
-from .care_app import mainwindow
+# from PyQt6.QtCore import QObject
+from carereport import Patient  # , Medication, ExaminationRequest)
+from .care_app import (mainwindow, app)
 from .intake_views import IntakeView
 
 
@@ -54,16 +54,16 @@ class BirthdateInFutureError(ValueError):
 
 # class ChangePatientEmitter(QObject):
 #     """ Class to be able to emit current patient change signal """
-# 
+#
 #     newCurrentPatient = pyqtSignal()
-# 
+#
 #     def __init__(self):
-# 
+#
 #         QObject.__init__(self)
-# 
+#
 #     def new_patient(self, new_patient):
 #         """ Signal the setting of another patient as "current" """
-# 
+#
 #         self.newCurrentPatient.emit(new_patient)
 
 

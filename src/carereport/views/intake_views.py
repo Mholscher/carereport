@@ -23,7 +23,8 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional
 # from PyQt6.QtCore import pyqtSignal
-from carereport import (app, Intake, Medication, ExaminationRequest)
+from carereport import (Intake, Medication, ExaminationRequest)
+from carereport.views.care_app import app
 
 
 class NoCurrentPatientError(BaseException):

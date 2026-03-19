@@ -20,11 +20,19 @@ Here we create and set up the main window of the application and fill it
 with the actions the user can take."""
 
 from PyQt6.QtCore import (QLocale, pyqtSignal)
-from PyQt6.QtWidgets import QMainWindow, QWidget
-from carereport import app
+from PyQt6.QtWidgets import QMainWindow, QWidget, QApplication
+import carereport
 from .mainwindow import Ui_MainWindow
 from .formhandle import Ui_Form
-# from .patient_views import PatientView
+
+
+class CareApp(QApplication):
+
+    pass
+
+
+app = CareApp([])
+carereport.app = app
 
 
 class CentralForm(QWidget, Ui_Form):
@@ -47,6 +55,7 @@ class CareAppWindow(QMainWindow, Ui_MainWindow):
     """ This is the class which creates the mainwindow for the application. """
 
     newCurrentPatient = pyqtSignal()
+    newIntake = pyqtSignal()
 
     def __init__(self):
 
@@ -55,8 +64,14 @@ class CareAppWindow(QMainWindow, Ui_MainWindow):
         self.main_form = CentralForm()
         self.setCentralWidget(self.main_form)
         self.actionAfsluiten.triggered.connect(self.close)
+        self.actionNieuw.triggered.connect(self.intake_patient)
         self.show()
         self.statusbar.showMessage("Carereport klaar")
+
+    # def subscribe_to_intake_patient(self, change_patient_function):
+        """ Add a function that will receive the newIntake signal """
+
+        # pass
 
     def set_new_current_patient(self, new_patient_view):
         """ Set a new patient as current including side effects.
@@ -87,11 +102,24 @@ class CareAppWindow(QMainWindow, Ui_MainWindow):
         loc = QLocale()
         self.main_form.birthdateedit.setText(loc.toString(born,
                                              loc.FormatType.ShortFormat))
-        if self.main_form.diet_tab:
-            pass
-        else:
-            from .scripts_diet import DietListWidget
-            self.main_form.diet_tab = DietListWidget(app.current_patient_view)
+        # if self.main_form.diet_tab:
+        #     pass
+        # else:
+        #     from .scripts_diet import DietListWidget
+        #     self.main_form.diet_tab = DietListWidget(app.current_patient_view)
+
+    def intake_patient(self):
+        """ Start processsing an intake for a new patient """
+
+        self.newIntake.emit()
+
+    def connect_to_new_intake(self, notify_method):
+        """ A notification of creating a new intake
+
+        It connects to the newIntake signal.
+        """
+
+        self.newIntake.connect(notify_method)
 
 
 mainwindow = CareAppWindow()

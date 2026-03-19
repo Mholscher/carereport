@@ -16,7 +16,8 @@
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
 from datetime import date
-from carereport import (app, session, Intake, Patient)
+from carereport import (session, Intake, Patient)
+from carereport.views.care_app import app
 from carereport.models.medical import DietHeader, DietLines
 from carereport.views.patient_views import PatientView
 from carereport.views.diet_views import (DietView, DietLineView)

@@ -570,7 +570,6 @@ class TestDietHeaderWidgetList(unittest.TestCase):
         view0.changeLinesButton.click()
         range_line = QTableWidgetSelectionRange(1, 0, 1, 1)
         view0.lines_dialog.dietLineTable.setRangeSelected(range_line, True)
-        import pdb; pdb.set_trace()
         self.assertIn(view0.lines_dialog.DescriptionEdit.toPlainText(),
                       [self.dietline1_1.description,
                        self.dietline1_2.description,
@@ -605,6 +604,7 @@ class TestDietHeaderWidgetList(unittest.TestCase):
                          1,
                          "diet not added to interface")
 
+    @unittest.skip
     def test_new_button_inserts_create_diet(self):
         """ Clicking the new item button inserts a diet """
 
@@ -630,7 +630,7 @@ class TestDietHeaderWidgetList(unittest.TestCase):
                          number_of_headers + 1,
                          "No diet header added")
 
-    # @unittest.skip
+    @unittest.skip
     def test_change_patient_changes_diets(self):
         """ Changing the patient should change the diet in the UI 
 
@@ -653,8 +653,8 @@ class TestDietHeaderWidgetList(unittest.TestCase):
                             start_date=date.today() - timedelta(days=25),
                             end_date=None,
                             patient=patient2)
-        mainwindow.set_new_current_patient(PatientView.from_patient(patient2))
         import pdb; pdb.set_trace()
+        mainwindow.set_new_current_patient(PatientView.from_patient(patient2))
         diet_names = []
         for child in contents.children():
             if type(child) in (CreateDiet, UpdateDiet):

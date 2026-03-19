@@ -25,11 +25,12 @@ from datetime import date
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QWidget, QDialog, QTableWidgetItem,
                              QTableWidgetSelectionRange, QSizePolicy)
-from carereport import app
+from carereport import (app)
+from .patient_views import PatientView
 from .diet_views import DietView, DietLineView
 from .dietline import Ui_dietLineDialog
 from .dietheader import Ui_DietHeaderWidget
-from .care_app import mainwindow
+from .care_app import (mainwindow)
 """ This module sets up diets. It takes care of creating new diets, updating
 existing diets through diet views.
 """
@@ -272,7 +273,8 @@ class UpdateDietLines(QDialog, Ui_dietLineDialog):
         row = range_selected.topRow()
         if (self.diet_view.lines_views[row].food_name !=
                 self.FoodNameEdit.text()):
-            self.diet_view.lines_views[row].food_name = self.FoodNameEdit.text()
+            self.diet_view.lines_views[row].food_name =\
+                self.FoodNameEdit.text()
         self.dietLineTable.selectedItems()[0].setText(
             self.FoodNameEdit.text())
 
@@ -354,6 +356,11 @@ class DietListWidget():
                 if child.objectName() == "addDietButton":
                     child.hide()
             diet_tab.verticalLayout_2.addWidget(update_diet)
+
+
+diet_list = (DietListWidget(app.current_patient_view)
+                if hasattr(app, "current_patient_view")
+                else None)
 
 
 if __name__ == "__main__":

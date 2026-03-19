@@ -26,9 +26,9 @@ import sys
 from datetime import date
 from PyQt6.QtCore import QDate
 from PyQt6.QtCore import QLocale as Loc
-from PyQt6.QtWidgets import (QApplication, QDialog, QTableWidgetItem)
-from carereport import (app, session)
-from .care_app import mainwindow
+from PyQt6.QtWidgets import (QDialog, QTableWidgetItem)
+from carereport import (session)
+from .care_app import (app, mainwindow)
 from .patientdialog import Ui_inputPatient
 from .patientsearch import Ui_PatientSearchDialog
 from .patient_views import PatientView
@@ -291,15 +291,21 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
             self.patientTable.patientSelectButton.setEnabled(False)
 
 
-def NewIntake():
-    """ Create a new intake for an existing or new patient
+class NewIntake():
+    """ A new intake for an existing or new patient
 
     The data and event handlers are in the
     :py:func:`FindCreateChangePatient`
     type
     """
 
-    return FindCreateChangePatient()
+    def __init__(self):
+
+        mainwindow.connect_to_new_intake(self.find_and_create)
+
+    def find_and_create(self):
+
+        return FindCreateChangePatient()
 
 
 class FindCreateChangePatient(object):
@@ -345,7 +351,8 @@ class FindCreateChangePatient(object):
         mainwindow.find_or_create_patient = None
 
 
-mainwindow.actionNieuw.triggered.connect(FindCreateChangePatient)
+new_intake = NewIntake()
+
 
 # Code for testing purposes
 if __name__ == "__main__":

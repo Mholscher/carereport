@@ -9,7 +9,7 @@ cwcwidth==0.1.9
 docstring-to-markdown==0.15
 docutils==0.21.2
 flake8==7.1.1
-greenlet==3.0.3
+greenlet==3.3.2
 idna==3.7
 imagesize==1.4.1
 iniconfig==2.0.0
@@ -24,8 +24,8 @@ pluggy==1.5.0
 pycodestyle==2.12.1
 pyflakes==3.2.0
 Pygments==2.18.0
-PyQt6==6.7.1
-PyQt6-Qt6==6.7.3
+PyQt6==6.10.2
+PyQt6-Qt6==6.10.2
 PyQt6_sip==13.8.0
 pytest==8.2.2
 python-lsp-jsonrpc==1.1.2
@@ -43,6 +43,6 @@ sphinxcontrib-qthelp==2.0.0
 sphinxcontrib-serializinghtml==2.0.0
 SQLAlchemy==2.0.32
 typing_extensions==4.12.2
-ujson==5.10.0
+ujson==5.12.0
 urllib3==2.6.3
 wcwidth==0.2.13

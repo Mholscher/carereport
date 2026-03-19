@@ -3,8 +3,8 @@
 #    This file is part of carereport.
 
 #    carereport is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Lesser General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
+#    it under the terms of the GNU Lesser General Public License as published
+#    by the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 
 #    carereport is distributed in the hope that it will be useful,
@@ -16,13 +16,12 @@
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import datetime
-import getpass 
+import getpass
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase
 from configparser import ConfigParser
 from sqlalchemy import (String, DateTime)
 from sqlalchemy.orm import sessionmaker, mapped_column
-from PyQt6.QtWidgets import QApplication
 
 
 config = ConfigParser()
@@ -39,13 +38,10 @@ else:
 class Base(DeclarativeBase):
     """ Add mutation fields to each table """
 
-    user = mapped_column(String(25), default=getpass.getuser, 
-                               onupdate=getpass.getuser)
-    updated_at = mapped_column(DateTime, default=datetime.now, 
+    user = mapped_column(String(25), default=getpass.getuser,
+                         onupdate=getpass.getuser)
+    updated_at = mapped_column(DateTime, default=datetime.now,
                                onupdate=datetime.now)
-
-
-app = QApplication([])
 
 
 def validate_field_existance(instance, key, field, raise_on_empty):
@@ -60,4 +56,5 @@ from carereport.models.patient import Patient, Intake
 from carereport.models.medical import (Medication, ExaminationRequest,
                                        ExaminationResult, DietHeader,
                                        DietLines, Diagnose)
-# from carereport.views.patient_views import PatientView
+from carereport.views.care_app import mainwindow
+from carereport.views.scripts_patient import new_intake

@@ -1,4 +1,5 @@
 import sys
-import carereport as cr
+import carereport.views.care_app
+from carereport import app
 
-sys.exit(cr.app.exec())
+sys.exit(app.exec())

@@ -16,12 +16,12 @@
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
 from datetime import date
-from PyQt6.QtWidgets import QTableWidgetSelectionRange
+from PyQt6.QtWidgets import (QTableWidgetSelectionRange)
 from PyQt6.QtCore import QDate
-from carereport import session, app
+from carereport import session
 from carereport.models.patient import Patient
 from carereport.views.patient_views import PatientView
-from carereport.views.care_app import mainwindow
+from carereport.views.care_app import (mainwindow, app)
 from carereport.views.scripts_patient import (PatientChanges,
                                               FindCreatePatient,
                                               FindCreateChangePatient)
