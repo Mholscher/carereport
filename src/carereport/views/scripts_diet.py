@@ -303,6 +303,7 @@ class DietListWidget():
             diet_tab.verticalLayout_2.addWidget(update_diet)
         diet_tab.newItemButton_2.clicked.connect(self.add_diet)
         mainwindow.newCurrentPatient.connect(self.change_patient_view)
+        mainwindow.actionNieuw_Dieet.triggered.connect(self.add_diet)
 
     def add_diet(self, diet_view=None):
         """ Create a new diet for the list """

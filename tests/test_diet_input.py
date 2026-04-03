@@ -39,7 +39,6 @@ class TestCreateDietHeader(unittest.TestCase):
         self.full_form = mainwindow.centralWidget()
         self.diet = CreateDiet(DietView(patient=self.patient1_view))
 
-
     def tearDown(self):
 
         pass
@@ -619,6 +618,7 @@ class TestDietHeaderWidgetList(unittest.TestCase):
             if isinstance(child, UpdateDiet):
                 diet_views_found.append(child.diet_view)
         number_of_headers = len(diet_views_found)
+        import pdb; pdb.set_trace()
         form_handler.newItemButton_2.click()
         diet_views_found = []
         for child in contents.children():
@@ -632,7 +632,7 @@ class TestDietHeaderWidgetList(unittest.TestCase):
 
     @unittest.skip
     def test_change_patient_changes_diets(self):
-        """ Changing the patient should change the diet in the UI 
+        """ Changing the patient should change the diet in the UI
 
         WARNING: This test works only because of the inclusion of
         using pdb.set_trace(). Type "c" to complete the test.
@@ -645,15 +645,14 @@ class TestDietHeaderWidgetList(unittest.TestCase):
         form_handler = mainwindow.centralWidget()
         contents = form_handler.scrollAreaWidgetContents
         patient2 = Patient(surname="IJsselen",
-                          initials="P.N.",
-                          birthdate=date(1977, 9, 11),
-                          sex="F")
-        diet3 =  DietHeader(diet_name="Zonder kaas",
-                            permanent_diet=False,
-                            start_date=date.today() - timedelta(days=25),
-                            end_date=None,
-                            patient=patient2)
-        import pdb; pdb.set_trace()
+                           initials="P.N.",
+                           birthdate=date(1977, 9, 11),
+                           sex="F")
+        diet3 = DietHeader(diet_name="Zonder kaas",
+                           permanent_diet=False,
+                           start_date=date.today() - timedelta(days=25),
+                           end_date=None,
+                           patient=patient2)
         mainwindow.set_new_current_patient(PatientView.from_patient(patient2))
         diet_names = []
         for child in contents.children():
@@ -663,3 +662,43 @@ class TestDietHeaderWidgetList(unittest.TestCase):
                          "Patient 1 diet in widgets")
         self.assertIn(diet3.diet_name, diet_names,
                       "Patient 2 diet not in widgets")
+
+    @unittest.skip
+    def test_add_diet_changes_list(self):
+        """ Adding diet changes list content
+
+        WARNING: This test works only because of the inclusion of
+        using pdb.set_trace(). Type "c" to complete the test.
+
+        Remove the hash from the unittest.skip to skip the test when running
+        without user input.
+        """
+
+        diet_tab = DietListWidget(self.patient1_view)
+        mainwindow.set_new_current_patient(self.patient1_view)
+        contents = mainwindow.centralWidget().scrollAreaWidgetContents
+        diet_views_found = []
+        for child in contents.children():
+            if isinstance(child, CreateDiet):
+                diet_views_found.append(child.diet_view)
+            if isinstance(child, UpdateDiet):
+                diet_views_found.append(child.diet_view)
+        before_count = len(diet_views_found)
+        diet_new = DietHeader(diet_name="Kool dieet",
+                                permanent_diet=False,
+                                start_date=date.today() - timedelta(days=20),
+                                end_date=date.today() + timedelta(days=31),
+                                patient=self.patient1)
+        diet_new_view = DietView.create_from_diet(diet_new)
+        import pdb; pdb.set_trace()
+        diet_tab.add_diet(diet_new_view)
+        diet_views_found = []
+        for child in contents.children():
+            if isinstance(child, CreateDiet):
+                diet_views_found.append(child.diet_view)
+            if isinstance(child, UpdateDiet):
+                diet_views_found.append(child.diet_view)
+        after_count = len(diet_views_found)
+        self.assertEqual(before_count, after_count - 1,
+                         "Difference not 1 widget")
+

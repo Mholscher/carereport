@@ -56,6 +56,7 @@ class CareAppWindow(QMainWindow, Ui_MainWindow):
 
     newCurrentPatient = pyqtSignal()
     newIntake = pyqtSignal()
+    newSearch = pyqtSignal()
 
     def __init__(self):
 
@@ -65,6 +66,7 @@ class CareAppWindow(QMainWindow, Ui_MainWindow):
         self.setCentralWidget(self.main_form)
         self.actionAfsluiten.triggered.connect(self.close)
         self.actionNieuw.triggered.connect(self.intake_patient)
+        self.actionPatientZoeken.triggered.connect(self.search_for_patient)
         self.show()
         self.statusbar.showMessage("Carereport klaar")
 
@@ -112,6 +114,11 @@ class CareAppWindow(QMainWindow, Ui_MainWindow):
         """ Start processsing an intake for a new patient """
 
         self.newIntake.emit()
+
+    def search_for_patient(self):
+        """ Search for an existing patient """
+
+        self.newSearch.emit()
 
     def connect_to_new_intake(self, notify_method):
         """ A notification of creating a new intake

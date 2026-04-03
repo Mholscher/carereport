@@ -308,6 +308,23 @@ class NewIntake():
         return FindCreateChangePatient()
 
 
+class NewSearch():
+    """ Search for a patient which exists. 
+
+    A new intake allows you to search for a patient and if
+    unknown, create it. This only finds patients that previously
+    went through the intake porcess.
+    """
+
+    def __init__(self):
+
+        mainwindow.newSearch.connect(self.find_patient)
+
+    def find_patient(self):
+
+        return FindCreateChangePatient()
+
+
 class FindCreateChangePatient(object):
     """ Find or create a patient and change the data
 
@@ -352,6 +369,7 @@ class FindCreateChangePatient(object):
 
 
 new_intake = NewIntake()
+new_search = NewSearch()
 
 
 # Code for testing purposes

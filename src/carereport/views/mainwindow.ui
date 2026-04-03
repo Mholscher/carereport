@@ -27,7 +27,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>23</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Bestand">
@@ -53,6 +53,7 @@
     <property name="title">
      <string>D&amp;ieet</string>
     </property>
+    <addaction name="actionNieuw_Dieet"/>
     <addaction name="actionOverzicht"/>
     <addaction name="actionBe_werk_geselecteerde"/>
    </widget>
@@ -70,7 +71,7 @@
     <string>Ctrl+Q</string>
    </property>
    <property name="menuRole">
-    <enum>QAction::QuitRole</enum>
+    <enum>QAction::MenuRole::QuitRole</enum>
    </property>
   </action>
   <action name="action_Nieuw">
@@ -110,6 +111,11 @@
   <action name="actionBe_werk_geselecteerde">
    <property name="text">
     <string>Be&amp;werk geselecteerde</string>
+   </property>
+  </action>
+  <action name="actionNieuw_Dieet">
+   <property name="text">
+    <string>Nieuw &amp;Dieet</string>
    </property>
   </action>
  </widget>
