@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 from datetime import date, timedelta
-import unittest
+import unittest, pytest
 from PyQt6.QtCore import (Qt)
 from PyQt6.QtWidgets import QTableWidgetSelectionRange
 from carereport import (Patient, DietHeader, DietLines)
@@ -137,7 +137,38 @@ class TestCreateDietHeader(unittest.TestCase):
                          "Name in diet not set")
 
 
+@pytest.fixture
+def a_view():
+    """ Create the original view """
+
+    _full_form = mainwindow.centralWidget()
+    _view = DietView(diet_name="Brooddieet",
+                     permanent_diet=False,
+                     start_date=date.today(),
+                     end_date=date.today()+timedelta(days=15))
+    yield _view
+
+@pytest.fixture
+def an_updated_diet(a_view):
+    """ Create the changed view """
+
+    CheckState = Qt.CheckState
+    _update_diet = UpdateDiet(a_view)
+    _update_diet.permanentCheckBox.setCheckState(CheckState.Unchecked)
+    _update_diet.startDateEdit.setDate(a_view.start_date
+                                      - timedelta(days=2))
+    _update_diet.endDateEdit.setDate(a_view.end_date + timedelta(days=7))
+    _update_diet.update_view()
+    yield _update_diet
+
+
+@pytest.mark.usefixtures("a_view", "an_updated_diet")
 class TestUpdateDietHeader(unittest.TestCase):
+
+    # @pytest.fixture(autouse=True)
+    # def view_and_diet(self, a_view, an_updated_diet):
+    # 
+    #     yield a_view, an_updated_diet
 
     def setUp(self):
 
@@ -166,6 +197,7 @@ class TestUpdateDietHeader(unittest.TestCase):
                          self.view.permanent_diet,
                          "Permanent incorrect")
 
+    # def test_fill_change_view(self, view, updated_diet):
     def test_fill_change_view(self):
         """ Change some fields, update the diet view """
 
@@ -173,17 +205,25 @@ class TestUpdateDietHeader(unittest.TestCase):
         update_diet = UpdateDiet(self.view)
         update_diet.permanentCheckBox.setCheckState(CheckState.Unchecked)
         update_diet.startDateEdit.setDate(self.view.start_date
-                                          - timedelta(days=2))
+                                        - timedelta(days=2))
         update_diet.endDateEdit.setDate(self.view.end_date + timedelta(days=7))
         update_diet.update_view()
         self.assertEqual(self.view.start_date,
                          update_diet.startDateEdit.date(),
                          "Start date not changed")
+        # assert a_view.start_date == an_updated_diet.startDateEdit.date(),\
+        #     "Start date not changed"
+        # assert a_view.end_date == an_updated_diet.endDateEdit.date(),\
+        #     "End date not changed"
         self.assertEqual(self.view.end_date,
                          update_diet.endDateEdit.date(),
                          "End date not changed")
+        # assert isinstance(a_view.start_date, date),\
+        #     "Start date incorrect type"
         self.assertIsInstance(self.view.start_date, date,
                               "Start date incorrect type")
+        # assert isinstance(a_view.end_date, date),\
+        #     "End date incorrect type"
         self.assertIsInstance(self.view.end_date, date,
                               "End date incorrect type")
 
