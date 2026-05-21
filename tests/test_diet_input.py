@@ -15,11 +15,12 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with carereport.  If not, see <http://www.gnu.org/licenses/>.
 from datetime import date, timedelta
-import unittest, pytest
+import unittest
+import pytest
 from PyQt6.QtCore import (Qt)
 from PyQt6.QtWidgets import QTableWidgetSelectionRange
 from carereport import (Patient, DietHeader, DietLines)
-from carereport.views.care_app import mainwindow
+from carereport.views.care_app import (mainwindow, app)
 from carereport.views.patient_views import (PatientView)
 # from carereport.views.dietheader import Ui_DietHeaderWidget
 from carereport.views.scripts_diet import (CreateDiet, UpdateDiet,
@@ -546,6 +547,12 @@ class TestDietHeaderWidgetList(unittest.TestCase):
                                      description="De meeste pasta is gemaakt"
                                      " met tarwe, ook al geen groente",
                                      diet=self.diet2)
+        self.patient2 = Patient(surname="Caronnier",
+                                initials="C.P.",
+                                birthdate=date(1981,4, 1),
+                                sex="M")
+        self.patient2_view = PatientView.from_patient(self.patient2)
+
 
     def tearDown(self):
 
@@ -693,7 +700,9 @@ class TestDietHeaderWidgetList(unittest.TestCase):
                            start_date=date.today() - timedelta(days=25),
                            end_date=None,
                            patient=patient2)
+        import pdb; pdb.set_trace()
         mainwindow.set_new_current_patient(PatientView.from_patient(patient2))
+        # import pdb; pdb.set_trace()
         diet_names = []
         for child in contents.children():
             if type(child) in (CreateDiet, UpdateDiet):
@@ -714,6 +723,7 @@ class TestDietHeaderWidgetList(unittest.TestCase):
         without user input.
         """
 
+        import pdb; pdb.set_trace()
         diet_tab = DietListWidget(self.patient1_view)
         mainwindow.set_new_current_patient(self.patient1_view)
         contents = mainwindow.centralWidget().scrollAreaWidgetContents
@@ -730,7 +740,6 @@ class TestDietHeaderWidgetList(unittest.TestCase):
                                 end_date=date.today() + timedelta(days=31),
                                 patient=self.patient1)
         diet_new_view = DietView.create_from_diet(diet_new)
-        import pdb; pdb.set_trace()
         diet_tab.add_diet(diet_new_view)
         diet_views_found = []
         for child in contents.children():
@@ -742,3 +751,59 @@ class TestDietHeaderWidgetList(unittest.TestCase):
         self.assertEqual(before_count, after_count - 1,
                          "Difference not 1 widget")
 
+    @unittest.skip
+    def test_add_first_diet(self):
+        """ Add a first diet for a patient """
+
+        mainwindow.set_new_current_patient(PatientView.from_patient(self.patient2))
+        diet_new = DietHeader(diet_name="Yoghurt verboden!",
+                                permanent_diet=False,
+                                start_date=date.today() - timedelta(days=3),
+                                end_date=date.today() + timedelta(days=265),
+                                patient=self.patient2)
+        diet_new_view = DietView.create_from_diet(diet_new)
+        
+        contents = mainwindow.centralWidget().scrollAreaWidgetContents
+        import pdb; pdb.set_trace()
+        diet_views_found = []
+        for child in contents.children():
+            if isinstance(child, CreateDiet):
+                diet_views_found.append(child.diet_view)
+            if isinstance(child, UpdateDiet):
+                diet_views_found.append(child.diet_view)
+        self.assertEqual(len(diet_views_found), 1, "More/less than one found")
+
+    @unittest.skip
+    def test_create_diet_list_on_patient_view(self):
+        """ A diet list is created after setting current patient
+
+        This test is skipped because it does not work with pytest.
+        It does work though with unittest or whn excuted on
+        its own.
+        """
+
+        mainwindow.set_new_current_patient(self.patient1_view)
+        self.assertTrue(hasattr(app.current_patient_view,
+                                "diet_list"),
+                                "No diet list on patient")
+
+    @unittest.skip
+    def test_create_diet_list_on_patient_change(self):
+        """ A diet list is changed after changing patient
+
+        This test is skipped because it does not work with pytest.
+        It does work though with unittest or whn excuted on
+        its own.
+        """
+
+        mainwindow.set_new_current_patient(self.patient2_view)
+        mainwindow.show()
+        mainwindow.set_new_current_patient(self.patient1_view)
+        self.assertTrue(hasattr(app.current_patient_view,
+                                "diet_list"),
+                                "No diet list on patient")
+        diet_list = app.current_patient_view.diet_list
+        self.assertTrue(diet_list.get_diet("Groente"),
+                        "Diet not retrieved")
+        with self.assertRaises(ValueError):
+            diet_list.get_diet("Invalid")

@@ -79,15 +79,21 @@ class CareAppWindow(QMainWindow, Ui_MainWindow):
         """ Set a new patient as current including side effects.
 
         Side effects like replacing data in the tab widget tabs that are
-        depending on the patient. In practice it will be (fast) all of
+        depending on the patient. In practice it will be (almost) all of
         the tabs in the widget.
 
         Side effects will be done by emitting the newCurrentPatient signal.
         """
 
+        if hasattr(app, "current_patient_view"):
+            previous_patient_view = app.current_patient_view
+        else:
+            previous_patient_view = None
         app.current_patient_view = new_patient_view
         self.on_current_patient_change()
-        self.newCurrentPatient.emit()
+        carereport.new_current_patient_emitter.newCurrentPatient.emit(
+            new_patient_view)
+        # delattr(app, "previous_patient_view")
 
     def on_current_patient_change(self):
         """ Set all fields/attributes in the main window

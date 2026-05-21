@@ -25,7 +25,7 @@ of the views interfacing class, PatientView, for the interface to the model.
 import sys
 from datetime import date
 from PyQt6.QtCore import QDate
-from PyQt6.QtCore import QLocale as Loc
+from PyQt6.QtCore import (QLocale as Loc, pyqtSignal, QObject)
 from PyQt6.QtWidgets import (QDialog, QTableWidgetItem)
 from carereport import (session)
 from .care_app import (app, mainwindow)
@@ -291,6 +291,22 @@ class FindCreatePatient(QDialog, Ui_PatientSearchDialog):
             self.patientTable.patientSelectButton.setEnabled(False)
 
 
+class NewCurrentPatientEmitter(QObject):
+    """ Emit the new current patient signal
+
+    Each object which subscribes to the signal can make the required
+    changes.
+    """
+
+    newCurrentPatient = pyqtSignal(PatientView,
+                                   arguments=["new_current"])
+
+    def new_current_patient_emit(self,new_current):
+        """ Emit the newCurrentPatient signal """
+
+        self.newCurrentPatient.emit(new_current)
+
+
 class NewIntake():
     """ A new intake for an existing or new patient
 
@@ -368,9 +384,9 @@ class FindCreateChangePatient(object):
         mainwindow.find_or_create_patient = None
 
 
-new_intake = NewIntake()
-new_search = NewSearch()
-
+# new_intake = NewIntake()
+# new_search = NewSearch()
+new_current_patient_emitter = NewCurrentPatientEmitter()
 
 # Code for testing purposes
 if __name__ == "__main__":

@@ -57,4 +57,4 @@ from carereport.models.medical import (Medication, ExaminationRequest,
                                        ExaminationResult, DietHeader,
                                        DietLines, Diagnose)
 from carereport.views.care_app import mainwindow
-from carereport.views.scripts_patient import new_intake
+from carereport.views.scripts_patient import new_current_patient_emitter

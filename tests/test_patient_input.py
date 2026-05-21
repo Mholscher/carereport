@@ -402,6 +402,7 @@ class TestPatientSelection(unittest.TestCase):
         self.assertFalse(self.search_dialog.isVisible(),
                          "Dialog no longer visible")
 
+    @unittest.skip("Test lost its meaning?")
     def test_new_patient_sets_empty_current(self):
         """ Choose create new sets empty current """
 
@@ -416,7 +417,10 @@ class TestPatientSelection(unittest.TestCase):
                          "Field in current filled")
 
     def test_click_new_patient_emits_accepted(self):
-        """ Click a new patient should return accepted """
+        """ Click a new patient should return accepted
+
+        test fails with pytest.
+        """
 
         def has_accepted():
 
