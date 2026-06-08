@@ -10,7 +10,7 @@ docstring-to-markdown==0.15
 docutils==0.21.2
 flake8==7.1.1
 greenlet==3.3.2
-idna==3.7
+idna==3.15
 imagesize==1.4.1
 iniconfig==2.0.0
 jedi==0.19.1

@@ -54,7 +54,7 @@ class CentralForm(QWidget, Ui_Form):
 class CareAppWindow(QMainWindow, Ui_MainWindow):
     """ This is the class which creates the mainwindow for the application. """
 
-    newCurrentPatient = pyqtSignal()
+    # newCurrentPatient = pyqtSignal()
     newIntake = pyqtSignal()
     newSearch = pyqtSignal()
 
@@ -116,7 +116,7 @@ class CareAppWindow(QMainWindow, Ui_MainWindow):
         #     from .scripts_diet import DietListWidget
         #     self.main_form.diet_tab = DietListWidget(app.current_patient_view)
 
-    def intake_patient(self):
+    def intake_patient(self, patient_view):
         """ Start processsing an intake for a new patient """
 
         self.newIntake.emit()

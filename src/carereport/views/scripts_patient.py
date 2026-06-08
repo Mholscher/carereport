@@ -301,10 +301,19 @@ class NewCurrentPatientEmitter(QObject):
     newCurrentPatient = pyqtSignal(PatientView,
                                    arguments=["new_current"])
 
+    def __init__(self):
+
+        super().__init__()
+        mainwindow.connect_to_new_intake(self.find_and_create)
+
     def new_current_patient_emit(self,new_current):
         """ Emit the newCurrentPatient signal """
 
         self.newCurrentPatient.emit(new_current)
+
+    def find_and_create(self):
+
+        return FindCreateChangePatient()
 
 
 class NewIntake():
@@ -387,6 +396,7 @@ class FindCreateChangePatient(object):
 # new_intake = NewIntake()
 # new_search = NewSearch()
 new_current_patient_emitter = NewCurrentPatientEmitter()
+mainwindow.newCurrentPatient = new_current_patient_emitter.newCurrentPatient
 
 # Code for testing purposes
 if __name__ == "__main__":

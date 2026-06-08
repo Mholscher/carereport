@@ -22,7 +22,6 @@ enables creation and maintenance of diets and rules within a diet.
 """
 import sys
 from datetime import date
-from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QWidget, QDialog, QTableWidgetItem,
                              QTableWidgetSelectionRange, QSizePolicy)
 from carereport import (app, new_current_patient_emitter)
@@ -346,41 +345,6 @@ class DietListWidget():
         diet_tab = mainwindow.centralWidget()
         diet_tab.verticalLayout_2.addWidget(create_diet)
         create_diet.show()
-
-    # def change_patient_view(self, current_patient_view):
-    #     """ A new patient is selected in the UI
-    # 
-    #     The data of the previous patient is erased from the diet widget list
-    #     end for the diets of the new patient appropriate widgets are
-    #     created.
-    #     """
-    # 
-    #     diet_tab = mainwindow.centralWidget()
-    #     contents = mainwindow.centralWidget().scrollAreaWidgetContents
-    #     for child in reversed([child for child in contents.children()
-    #                           if (isinstance(child, CreateDiet)
-    #                           or isinstance(child, UpdateDiet))]):
-    #         contents.layout().removeWidget(child)
-    #         child.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, on=True)
-    #         child.close()
-    #     for child in contents.children():
-    #         if child.objectName() == "noDietLabel":
-    #             child.show()
-    #         if child.objectName() == "addDietButton":
-    #             child.show()
-    #     new_patient_view = app.current_patient_view
-    #     if not new_patient_view.patient:
-    #         return
-    #     for diet in new_patient_view.patient.diets:
-    #         diet_view = DietView.create_from_diet(diet)
-    #         update_diet = UpdateDiet(diet_view)
-    #         contents = mainwindow.centralWidget().scrollAreaWidgetContents
-    #         for child in contents.children():
-    #             if child.objectName() == "noDietLabel":
-    #                 child.hide()
-    #             if child.objectName() == "addDietButton":
-    #                 child.hide()
-    #         diet_tab.verticalLayout_2.addWidget(update_diet)
 
     def get_diet(self, diet_name):
         """ Return the diet with name diet_name """

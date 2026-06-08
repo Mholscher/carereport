@@ -677,7 +677,7 @@ class TestDietHeaderWidgetList(unittest.TestCase):
                          number_of_headers + 1,
                          "No diet header added")
 
-    @unittest.skip
+    @unittest.skip("Fails when not executed on its own")
     def test_change_patient_changes_diets(self):
         """ Changing the patient should change the diet in the UI
 
@@ -712,7 +712,7 @@ class TestDietHeaderWidgetList(unittest.TestCase):
         self.assertIn(diet3.diet_name, diet_names,
                       "Patient 2 diet not in widgets")
 
-    @unittest.skip
+    @unittest.skip("Fails when not executed on its own")
     def test_add_diet_changes_list(self):
         """ Adding diet changes list content
 
@@ -751,7 +751,7 @@ class TestDietHeaderWidgetList(unittest.TestCase):
         self.assertEqual(before_count, after_count - 1,
                          "Difference not 1 widget")
 
-    @unittest.skip
+    @unittest.skip("Fails when not executed on its own")
     def test_add_first_diet(self):
         """ Add a first diet for a patient """
 
@@ -762,7 +762,6 @@ class TestDietHeaderWidgetList(unittest.TestCase):
                                 end_date=date.today() + timedelta(days=265),
                                 patient=self.patient2)
         diet_new_view = DietView.create_from_diet(diet_new)
-        
         contents = mainwindow.centralWidget().scrollAreaWidgetContents
         import pdb; pdb.set_trace()
         diet_views_found = []
@@ -773,7 +772,7 @@ class TestDietHeaderWidgetList(unittest.TestCase):
                 diet_views_found.append(child.diet_view)
         self.assertEqual(len(diet_views_found), 1, "More/less than one found")
 
-    @unittest.skip
+    @unittest.skip("Fails when not executed on its own")
     def test_create_diet_list_on_patient_view(self):
         """ A diet list is created after setting current patient
 
@@ -787,7 +786,7 @@ class TestDietHeaderWidgetList(unittest.TestCase):
                                 "diet_list"),
                                 "No diet list on patient")
 
-    @unittest.skip
+    @unittest.skip("Fails when not executed on its own")
     def test_create_diet_list_on_patient_change(self):
         """ A diet list is changed after changing patient
 
